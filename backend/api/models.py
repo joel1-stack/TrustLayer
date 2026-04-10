@@ -66,7 +66,9 @@ class Escrow(django_models.Model):
     STATE_CHOICES = [('pending','Pending'),('held','Held'),('done','Done'),('refunded','Refunded')]
     deal_code = django_models.CharField(max_length=10, unique=True, editable=False, db_index=True)
     sender = django_models.ForeignKey(User, related_name='escrow_sent', on_delete=django_models.CASCADE)
+    sender_phone = django_models.CharField(max_length=15, blank=True, null=True)
     receiver = django_models.ForeignKey(User, related_name='escrow_received', on_delete=django_models.SET_NULL, null=True, blank=True)
+    receiver_phone = django_models.CharField(max_length=15, blank=True, null=True)
     amount = django_models.DecimalField(max_digits=12, decimal_places=2)
     fee = django_models.DecimalField(max_digits=10, decimal_places=2, editable=False, default=Decimal('0.00'))
     state = django_models.CharField(max_length=10, choices=STATE_CHOICES, default='pending')

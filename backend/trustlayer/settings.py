@@ -115,3 +115,8 @@ MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '174379')
 MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY', '')
 MPESA_CALLBACK_URL = os.environ.get('MPESA_CALLBACK_URL', 'https://example.com/api/payments/callback/')
 MPESA_API_KEY = os.environ.get('MPESA_API_KEY', 'devkey')
+
+# SMS Notifications
+SMS_API_URL   = os.environ.get('SMS_API_URL', '')
+SMS_API_KEY   = os.environ.get('SMS_API_KEY', '')
+SMS_SENDER_ID = os.environ.get('SMS_SENDER_ID', 'TrustLayer')

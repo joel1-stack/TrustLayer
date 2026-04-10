@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrustLayer — Create Deal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--green:#00c46a;--green-dark:#009e56;--ink:#0d1117;--surface:#f4f6f0;--card:#ffffff;--muted:#6b7280;--border:#e2e8e0;--radius:14px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:var(--card);border-radius:24px;box-shadow:0 4px 40px rgba(0,0,0,.08);width:100%;max-width:440px;overflow:hidden;}
+.card-top{background:var(--ink);padding:32px 36px 28px;color:white;}
+.badge{display:inline-block;background:var(--green);color:white;font-family:'DM Mono',monospace;font-size:11px;padding:4px 10px;border-radius:20px;margin-bottom:16px;letter-spacing:.05em;}
+.card-top h1{font-size:22px;font-weight:600;margin-bottom:6px;}
+.card-top p{font-size:14px;color:#9ca3af;}
+.card-body{padding:32px 36px;}
+.field{margin-bottom:20px;}
+label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:7px;letter-spacing:.02em;}
+input,textarea{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:15px;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fafafa;transition:border-color .2s,background .2s;}
+input:focus,textarea:focus{outline:none;border-color:var(--green);background:white;}
+textarea{resize:none;height:80px;}
+.fee-preview{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:var(--radius);padding:14px 16px;margin-bottom:24px;display:none;}
+.fee-preview.show{display:block;}
+.fee-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;color:var(--muted);}
+.fee-row:last-child{margin-bottom:0;font-weight:600;color:var(--ink);font-size:14px;border-top:1px solid #bbf7d0;padding-top:8px;margin-top:4px;}
+.fee-row span:last-child{font-family:'DM Mono',monospace;}
+.btn{width:100%;padding:15px;background:var(--green);color:white;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;transition:background .2s,transform .1s;font-family:'DM Sans',sans-serif;}
+.btn:hover{background:var(--green-dark);}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.nav{display:flex;gap:8px;justify-content:center;padding:16px 0 8px;border-top:1px solid var(--border);margin-top:8px;}
+.nav a{font-size:13px;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:8px;transition:background .15s;}
+.nav a:hover{background:var(--surface);color:var(--ink);}
+.nav a.active{color:var(--green);font-weight:600;}
+.msg{padding:14px 16px;border-radius:var(--radius);font-size:14px;margin-top:16px;display:none;}
+.msg.ok{display:block;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;}
+.msg.err{display:block;background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+.deal-code{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--green);letter-spacing:.08em;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-top">
+    <div class="badge">TRUSTLAYER NANO</div>
+    <h1>Create Escrow Deal</h1>
+    <p>Funds held securely until both parties confirm</p>
+  </div>
+  <div class="card-body">
+    <div class="field">
+      <label>Amount (KES)</label>
+      <input type="number" id="amount" placeholder="e.g. 50000" min="1" oninput="calcFee()">
+    </div>
+    <div class="field">
+      <label>Your Phone (sender)</label>
+      <input type="tel" id="senderPhone" placeholder="0712345678">
+    </div>
+    <div class="field">
+      <label>Receiver Phone</label>
+      <input type="tel" id="receiverPhone" placeholder="0712345678">
+    </div>
+    <div class="fee-preview" id="feePreview">
+      <div class="fee-row"><span>Amount</span><span id="fAmt">—</span></div>
+      <div class="fee-row"><span>Service fee (1.5%)</span><span id="fFee">—</span></div>
+      <div class="fee-row"><span>Total payable</span><span id="fTotal">—</span></div>
+    </div>
+    <div class="field">
+      <label>Description (optional)</label>
+      <textarea id="desc" placeholder="e.g. Payment for Toyota Fielder KBZ 123A"></textarea>
+    </div>
+    <button class="btn" id="btn" onclick="createDeal()">Create Deal</button>
+    <div class="msg" id="msg"></div>
+  </div>
+  <nav class="nav">
+    <a href="/create-deal/" class="active">Create</a>
+    <a href="/pay-mpesa/">Pay</a>
+    <a href="/deal-status/">Status</a>
+  </nav>
+</div>
+<script>
+const AUTH = 'Basic ' + btoa('root:Joel@2026');
+function calcFee(){
+  const amt = parseFloat(document.getElementById('amount').value)||0;
+  if(amt>0){
+    const fee=(amt*0.015).toFixed(2);
+    document.getElementById('fAmt').textContent='KES '+amt.toLocaleString();
+    document.getElementById('fFee').textContent='KES '+fee;
+    document.getElementById('fTotal').textContent='KES '+(amt+parseFloat(fee)).toLocaleString();
+    document.getElementById('feePreview').classList.add('show');
+  } else {
+    document.getElementById('feePreview').classList.remove('show');
+  }
+}
+async function createDeal(){
+  const amt=document.getElementById('amount').value;
+  const desc=document.getElementById('desc').value;
+  if(!amt||parseFloat(amt)<=0){showMsg('Please enter a valid amount.','err');return;}
+  const btn=document.getElementById('btn');
+  btn.disabled=true;btn.textContent='Creating...';
+  try{
+    const senderPhone=document.getElementById('senderPhone').value.trim();
+    const receiverPhone=document.getElementById('receiverPhone').value.trim();
+    const r=await fetch('/api/nano/deals/',{method:'POST',headers:{'Content-Type':'application/json','Authorization':AUTH},body:JSON.stringify({amount:amt,description:desc,sender_phone:senderPhone,receiver_phone:receiverPhone})});
+    const d=await r.json();
+    if(r.ok){
+      localStorage.setItem('deal_code',d.deal_code);
+      showMsg('<strong>Deal created!</strong><br>Code: <span class="deal-code">'+d.deal_code+'</span><br>Fee: KES '+d.fee+' &nbsp;|&nbsp; Total: KES '+d.total_payable+'<br><br><a href="/pay-mpesa/" style="color:#166534;font-weight:600;">→ Proceed to Pay via M-Pesa</a>','ok');
+    } else {
+      showMsg('Error: '+(d.error||JSON.stringify(d)),'err');
+    }
+  }catch(e){showMsg('Network error: '+e.message,'err');}
+  btn.disabled=false;btn.textContent='Create Deal';
+}
+function showMsg(m,t){const el=document.getElementById('msg');el.innerHTML=m;el.className='msg '+t;}
+</script>
+</body>
+</html>
