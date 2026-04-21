@@ -100,12 +100,13 @@ def _stk(phone, amount, deal_code):
     phone = _fmt_phone(phone)
     ts  = datetime.now().strftime('%Y%m%d%H%M%S')
     pwd = base64.b64encode(f'{sc}{pk}{ts}'.encode()).decode()
+    int_amount = max(1, int(Decimal(str(amount)).to_integral_value(rounding='ROUND_CEILING')))
     r = requests.post(
         f'{base}/mpesa/stkpush/v1/processrequest',
         json={
             'BusinessShortCode': sc, 'Password': pwd, 'Timestamp': ts,
             'TransactionType': 'CustomerPayBillOnline',
-            'Amount': int(amount), 'PartyA': phone, 'PartyB': sc,
+            'Amount': int_amount, 'PartyA': phone, 'PartyB': sc,
             'PhoneNumber': phone, 'CallBackURL': cb,
             'AccountReference': deal_code[:12],
             'TransactionDesc': f'Pay {deal_code}'[:13],
@@ -113,7 +114,9 @@ def _stk(phone, amount, deal_code):
         headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'},
         timeout=15,
     )
-    return r.json()
+    data = r.json()
+    logger.info(f'Daraja STK response: {data}')
+    return data
 
 
 # ── Serialiser ────────────────────────────────────────────────────────────────
@@ -185,7 +188,9 @@ def nano_pay(request):
                 e.sender_phone = _fmt_phone(phone)
             e.save(update_fields=['mpesa_checkout_id', 'sender_phone', 'updated_at'])
             return Response({'success': True, 'message': 'STK Push sent', 'deal_code': code, 'amount_charged': str(e.total_payable)})
-        return Response({'success': False, 'message': resp.get('ResponseDescription', 'Failed')}, status=400)
+        # Surface the full Daraja error so it's visible in the UI
+        error_msg = resp.get('errorMessage') or resp.get('ResponseDescription') or resp.get('ResultDesc') or str(resp)
+        return Response({'success': False, 'message': error_msg}, status=400)
     except Exception as ex:
         return Response({'error': str(ex)}, status=500)
 
