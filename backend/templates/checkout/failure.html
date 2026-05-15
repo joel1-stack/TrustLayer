@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrustLayer — Payment Failed</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0d1117;--surface:#f4f6f0;--card:#ffffff;--muted:#6b7280;--border:#e2e8e0;--radius:14px;--red:#dc2626;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:var(--card);border-radius:24px;box-shadow:0 4px 40px rgba(0,0,0,.08);width:100%;max-width:440px;overflow:hidden;text-align:center;}
+.card-top{background:var(--red);padding:40px 36px 32px;color:white;}
+.icon{width:72px;height:72px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:36px;}
+.card-top h1{font-size:24px;font-weight:700;margin-bottom:8px;}
+.card-top p{font-size:14px;opacity:.9;}
+.card-body{padding:32px 36px;}
+.error-box{background:#fef2f2;border:1.5px solid #fecaca;border-radius:var(--radius);padding:16px;margin-bottom:20px;text-align:left;}
+.error-box h4{font-size:13px;color:var(--red);margin-bottom:6px;font-weight:600;}
+.error-box p{font-size:13px;color:#7f1d1d;line-height:1.5;}
+.safe-note{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:var(--radius);padding:14px 16px;margin-bottom:24px;font-size:13px;color:#166534;text-align:left;}
+.btn{width:100%;padding:15px;background:var(--ink);color:white;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;font-family:'DM Sans',sans-serif;margin-bottom:12px;}
+.btn:hover{background:#1f2937;}
+.link{font-size:13px;color:var(--muted);text-decoration:none;}
+.footer{padding:16px 36px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-top">
+    <div class="icon">✕</div>
+    <h1>Payment Failed</h1>
+    <p>No money was deducted from your account</p>
+  </div>
+  <div class="card-body">
+    <div class="error-box">
+      <h4>What went wrong</h4>
+      <p id="errorMsg">Your payment could not be processed. This may be due to insufficient funds, incorrect PIN, or a network issue.</p>
+    </div>
+    <div class="safe-note">✓ Your M-Pesa account was not charged. You can try again safely.</div>
+    <button class="btn" onclick="retry()">Try Again</button>
+    <a href="mailto:support@trustlayer.app" class="link">Need help? Contact support →</a>
+  </div>
+  <div class="footer">Protected by TrustLayer Escrow</div>
+</div>
+<script>
+const params = new URLSearchParams(window.location.search);
+const err = params.get('error');
+if (err) document.getElementById('errorMsg').textContent = decodeURIComponent(err);
+
+function retry() {
+  const token = params.get('token');
+  if (token) window.location.href = '/pay/' + token + '/';
+  else window.history.back();
+}
+</script>
+</body>
+</html>

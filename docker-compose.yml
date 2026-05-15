@@ -79,6 +79,9 @@ services:
       - MPESA_PASSKEY=${MPESA_PASSKEY}
       - MPESA_CALLBACK_URL=${MPESA_CALLBACK_URL}
       - MPESA_API_KEY=${MPESA_API_KEY:-devkey}
+      - SMS_API_URL=${SMS_API_URL:-}
+      - SMS_API_KEY=${SMS_API_KEY:-}
+      - SMS_SENDER_ID=${SMS_SENDER_ID:-TrustLayer}
     depends_on:
       db:
         condition: service_healthy
@@ -88,12 +91,69 @@ services:
         condition: service_started
 
   # pgAdmin (Database Management)
+  # Celery Worker
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: celery_worker
+    restart: always
+    command: celery -A trustlayer worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - REDIS_HOST=redis
+      - MPESA_ENVIRONMENT=${MPESA_ENVIRONMENT}
+      - MPESA_CONSUMER_KEY=${MPESA_CONSUMER_KEY}
+      - MPESA_CONSUMER_SECRET=${MPESA_CONSUMER_SECRET}
+      - MPESA_SHORTCODE=${MPESA_SHORTCODE}
+      - MPESA_PASSKEY=${MPESA_PASSKEY}
+      - MPESA_CALLBACK_URL=${MPESA_CALLBACK_URL}
+      - SMS_API_URL=${SMS_API_URL:-}
+      - SMS_API_KEY=${SMS_API_KEY:-}
+      - SMS_SENDER_ID=${SMS_SENDER_ID:-TrustLayer}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # Celery Beat Scheduler
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: celery_beat
+    restart: always
+    command: celery -A trustlayer beat --loglevel=info
+    volumes:
+      - ./backend:/app
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - REDIS_HOST=redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@trustlayer.local
+      PGADMIN_DEFAULT_EMAIL: admin@trustlayer.com
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - "5050:80"

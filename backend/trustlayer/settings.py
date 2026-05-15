@@ -1,7 +1,6 @@
 """
-Django settings for trustlayer project.
+Django settings for TrustLayer project.
 """
-
 from pathlib import Path
 import os
 
@@ -20,7 +19,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'api',
+    # TrustLayer B2B platform
+    'apps.merchants',
+    'apps.jwtsessions',
+    'apps.escrow',
+    'apps.payments',
+    'apps.disputes',
+    'apps.webhooks',
+    'apps.notifications',
+    'apps.trust_scoring',
+    'apps.compliance',
 ]
 
 MIDDLEWARE = [
@@ -90,7 +98,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20
+    'PAGE_SIZE': 20,
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -99,24 +107,34 @@ CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': f"redis://{os.environ.get('REDIS_HOST', 'redis')}:6379/1",
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
+        'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient'},
     }
 }
 
-CELERY_BROKER_URL = f"redis://{os.environ.get('REDIS_HOST', 'redis')}:6379/0"
+CELERY_BROKER_URL    = f"redis://{os.environ.get('REDIS_HOST', 'redis')}:6379/0"
+CELERY_RESULT_BACKEND = f"redis://{os.environ.get('REDIS_HOST', 'redis')}:6379/0"
 
-# M-PESA Configuration
-MPESA_ENVIRONMENT = os.environ.get('MPESA_ENVIRONMENT', 'sandbox')
-MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY', '')
+from celery.schedules import crontab
+CELERY_BEAT_SCHEDULE = {
+    'auto-release-held-deals': {
+        'task':     'apps.escrow.tasks.auto_release_held_deals',
+        'schedule': crontab(minute='*/15'),  # every 15 minutes
+    },
+}
+
+# M-Pesa / Daraja
+MPESA_ENVIRONMENT    = os.environ.get('MPESA_ENVIRONMENT', 'sandbox')
+MPESA_CONSUMER_KEY   = os.environ.get('MPESA_CONSUMER_KEY', '')
 MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET', '')
-MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '174379')
-MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY', '')
-MPESA_CALLBACK_URL = os.environ.get('MPESA_CALLBACK_URL', 'https://example.com/api/payments/callback/')
-MPESA_API_KEY = os.environ.get('MPESA_API_KEY', 'devkey')
+MPESA_SHORTCODE      = os.environ.get('MPESA_SHORTCODE', '174379')
+MPESA_PASSKEY        = os.environ.get('MPESA_PASSKEY', '')
+MPESA_CALLBACK_URL   = os.environ.get('MPESA_CALLBACK_URL', '')
+MPESA_API_KEY        = os.environ.get('MPESA_API_KEY', 'devkey')
 
 # SMS Notifications
 SMS_API_URL   = os.environ.get('SMS_API_URL', '')
 SMS_API_KEY   = os.environ.get('SMS_API_KEY', '')
 SMS_SENDER_ID = os.environ.get('SMS_SENDER_ID', 'TrustLayer')
+
+# Admin
+TRUSTLAYER_ADMIN_TOKEN = os.environ.get('TRUSTLAYER_ADMIN_TOKEN', 'change-me-in-production')

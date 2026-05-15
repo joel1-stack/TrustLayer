@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrustLayer — Create Merchant Account</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--green:#00c46a;--green-dark:#009e56;--ink:#0d1117;--surface:#f4f6f0;--card:#fff;--muted:#6b7280;--border:#e2e8e0;--radius:14px;--red:#ef4444;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:var(--card);border-radius:24px;padding:40px;width:100%;max-width:460px;border:1px solid var(--border);box-shadow:0 4px 40px rgba(0,0,0,.06);}
+.badge{display:inline-block;background:var(--green);color:white;font-family:'DM Mono',monospace;font-size:11px;padding:4px 10px;border-radius:20px;margin-bottom:20px;letter-spacing:.05em;}
+h1{font-size:26px;font-weight:700;margin-bottom:6px;}
+.sub{font-size:14px;color:var(--muted);margin-bottom:28px;}
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+.field input{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:15px;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fafafa;transition:border-color .2s;}
+.field input:focus{outline:none;border-color:var(--green);background:white;}
+.btn{width:100%;padding:14px;background:var(--green);color:white;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;font-family:'DM Sans',sans-serif;}
+.btn:hover{background:var(--green-dark);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-outline{width:100%;padding:12px;background:transparent;border:1.5px solid var(--border);color:var(--muted);border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn-outline:hover{border-color:var(--green);color:var(--green);}
+.err{color:var(--red);font-size:13px;margin-bottom:14px;padding:10px 14px;background:#fef2f2;border-radius:8px;border:1px solid #fecaca;display:none;}
+.success-box{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:var(--radius);padding:20px;margin-top:16px;display:none;}
+.success-box.show{display:block;}
+.warn{background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:12px 14px;font-size:12px;color:#92400e;margin-bottom:14px;}
+.cred-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #bbf7d0;gap:8px;}
+.cred-row:last-child{border-bottom:none;}
+.cred-label{font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+.cred-value{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink);word-break:break-all;flex:1;text-align:right;}
+.copy-btn{background:var(--green);color:white;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;flex-shrink:0;}
+.footer{text-align:center;margin-top:20px;font-size:13px;color:var(--muted);}
+.footer a{color:var(--green);text-decoration:none;font-weight:600;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid white;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="badge">TRUSTLAYER MERCHANT</div>
+  <h1>Create Account</h1>
+  <p class="sub">Start accepting escrow payments in minutes</p>
+
+  <div id="formSection">
+    <div class="field">
+      <label>Company Name <span style="color:var(--red)">*</span></label>
+      <input type="text" id="companyName" placeholder="e.g. Acme Motors Ltd">
+    </div>
+    <div class="field">
+      <label>Business Email <span style="color:var(--red)">*</span></label>
+      <input type="email" id="email" placeholder="you@company.com">
+    </div>
+    <div class="field">
+      <label>Phone Number <span style="color:var(--red)">*</span></label>
+      <input type="tel" id="phone" placeholder="254712345678 or 0712345678">
+    </div>
+
+    <div class="err" id="registerErr"></div>
+
+    <button class="btn" id="registerBtn" onclick="registerMerchant()">Create Account →</button>
+    <button class="btn-outline" onclick="window.location.href='/dashboard/'">Already have an account? Login</button>
+  </div>
+
+  <!-- Credentials shown after registration -->
+  <div class="success-box" id="successBox">
+    <div style="font-weight:700;color:#166534;font-size:16px;margin-bottom:6px;">✅ Account Created!</div>
+    <div class="warn">⚠️ Save these credentials now. The API Secret will <strong>never be shown again</strong>.</div>
+
+    <div class="cred-row">
+      <span class="cred-label">Merchant Key</span>
+      <span class="cred-value" id="credMK">—</span>
+      <button class="copy-btn" onclick="copyCred('credMK', this)">Copy</button>
+    </div>
+    <div class="cred-row">
+      <span class="cred-label">API Key</span>
+      <span class="cred-value" id="credAK">—</span>
+      <button class="copy-btn" onclick="copyCred('credAK', this)">Copy</button>
+    </div>
+    <div class="cred-row">
+      <span class="cred-label">API Secret</span>
+      <span class="cred-value" id="credAS">—</span>
+      <button class="copy-btn" onclick="copyCred('credAS', this)">Copy</button>
+    </div>
+    <div class="cred-row">
+      <span class="cred-label">Webhook Secret</span>
+      <span class="cred-value" id="credWH">—</span>
+      <button class="copy-btn" onclick="copyCred('credWH', this)">Copy</button>
+    </div>
+
+    <button class="btn" style="margin-top:16px;" onclick="goToDashboard()">Go to Dashboard →</button>
+  </div>
+</div>
+
+<div class="footer">
+  🔒 Protected by TrustLayer · <a href="/terms/">Terms</a> · <a href="/dispute-policy/">Dispute Policy</a>
+</div>
+
+<script>
+async function registerMerchant() {
+  const company = document.getElementById('companyName').value.trim();
+  const email   = document.getElementById('email').value.trim();
+  const phone   = document.getElementById('phone').value.trim();
+
+  if (!company) { showErr('Company name is required'); return; }
+  if (!email)   { showErr('Email is required'); return; }
+  if (!phone)   { showErr('Phone number is required'); return; }
+
+  const btn = document.getElementById('registerBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Creating account...';
+  hideErr();
+
+  try {
+    const r = await fetch('/api/v1/merchants/register/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({company_name: company, email, phone})
+    });
+    const d = await r.json();
+
+    if (d.success) {
+      const creds = d.credentials;
+      // Save to localStorage for auto-login
+      localStorage.setItem('tl_api_key',      creds.api_key);
+      localStorage.setItem('tl_api_secret',   creds.api_secret);
+      localStorage.setItem('tl_merchant_key', creds.merchant_key);
+      localStorage.setItem('tl_company_name', d.merchant.company_name);
+
+      document.getElementById('credMK').textContent = creds.merchant_key;
+      document.getElementById('credAK').textContent = creds.api_key;
+      document.getElementById('credAS').textContent = creds.api_secret;
+      document.getElementById('credWH').textContent = creds.webhook_secret;
+
+      document.getElementById('formSection').style.display = 'none';
+      document.getElementById('successBox').classList.add('show');
+    } else {
+      showErr(d.error || 'Registration failed. Please try again.');
+      btn.disabled = false;
+      btn.innerHTML = 'Create Account →';
+    }
+  } catch(e) {
+    showErr('Network error. Please try again.');
+    btn.disabled = false;
+    btn.innerHTML = 'Create Account →';
+  }
+}
+
+function goToDashboard() { window.location.href = '/dashboard/'; }
+
+function copyCred(id, btn) {
+  const text = document.getElementById(id).textContent.trim();
+  // Modern clipboard API (works on HTTPS and localhost)
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.style.background = '#166534';
+      setTimeout(() => { btn.textContent = 'Copy'; btn.style.background = ''; }, 1800);
+    }).catch(() => fallbackCopy(text, btn));
+  } else {
+    fallbackCopy(text, btn);
+  }
+}
+
+function fallbackCopy(text, btn) {
+  // Fallback: create a temporary textarea and use execCommand
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand('copy');
+    btn.textContent = 'Copied!';
+    btn.style.background = '#166534';
+    setTimeout(() => { btn.textContent = 'Copy'; btn.style.background = ''; }, 1800);
+  } catch(e) {
+    btn.textContent = 'Failed';
+    setTimeout(() => btn.textContent = 'Copy', 1800);
+  }
+  document.body.removeChild(ta);
+}
+
+function showErr(msg) {
+  const el = document.getElementById('registerErr');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideErr() { document.getElementById('registerErr').style.display = 'none'; }
+</script>
+</body>
+</html>
