@@ -8,7 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-in-production')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', '0.0.0.0']
+
+# Render sets ALLOWED_HOSTS via env; fallback allows local + Docker
+_hosts = os.environ.get('ALLOWED_HOSTS', '')
+ALLOWED_HOSTS = [h.strip() for h in _hosts.split(',') if h.strip()] or ['*', 'localhost', '127.0.0.1', '0.0.0.0']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -61,16 +64,22 @@ TEMPLATES = [{
 
 WSGI_APPLICATION = 'trustlayer.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'trustlayer_db'),
-        'USER': os.environ.get('DB_USER', 'joel'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'SecurePass123!'),
-        'HOST': os.environ.get('DB_HOST', 'db'),
-        'PORT': '5432',
+# Database — supports DATABASE_URL (Render) or individual env vars (Docker)
+import dj_database_url
+_db_url = os.environ.get('DATABASE_URL', '')
+if _db_url:
+    DATABASES = {'default': dj_database_url.config(default=_db_url, conn_max_age=600)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'trustlayer_db'),
+            'USER': os.environ.get('DB_USER', 'joel'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'SecurePass123!'),
+            'HOST': os.environ.get('DB_HOST', 'db'),
+            'PORT': '5432',
+        }
     }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -103,16 +112,18 @@ REST_FRAMEWORK = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+_redis_url = f"redis://{os.environ.get('REDIS_HOST', 'redis')}:6379"
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f"redis://{os.environ.get('REDIS_HOST', 'redis')}:6379/1",
+        'LOCATION': os.environ.get('REDIS_URL', f'{_redis_url}/1'),
         'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient'},
     }
 }
 
-CELERY_BROKER_URL    = f"redis://{os.environ.get('REDIS_HOST', 'redis')}:6379/0"
-CELERY_RESULT_BACKEND = f"redis://{os.environ.get('REDIS_HOST', 'redis')}:6379/0"
+CELERY_BROKER_URL     = os.environ.get('REDIS_URL', f'{_redis_url}/0')
+CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', f'{_redis_url}/0')
 
 from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {

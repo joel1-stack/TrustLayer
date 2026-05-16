@@ -11,3 +11,4 @@ whitenoise
 gunicorn
 requests
 PyJWT>=2.8.0
+dj-database-url>=2.0
