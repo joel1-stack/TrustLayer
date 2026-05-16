@@ -11,6 +11,7 @@ class EscrowDeal(models.Model):
         ('PENDING',            'Pending'),
         ('PAYMENT_INITIATED',  'Payment Initiated'),
         ('HELD',               'Held'),
+        ('DELIVERED',          'Delivered'),
         ('RELEASED',           'Released'),
         ('REFUNDED',           'Refunded'),
         ('DISPUTED',           'Disputed'),

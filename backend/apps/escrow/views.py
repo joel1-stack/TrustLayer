@@ -126,11 +126,10 @@ def seller_deliver(request, deal_code):
         deal.status = 'DELIVERED'
         deal.save(update_fields=['status', 'updated_at'])
 
-        # Notify buyer
+        # Notify buyer that seller has delivered
         try:
             from apps.notifications.services import NotificationService
-            msg = f'TrustLayer: Seller has marked deal {deal_code} as delivered. Please confirm receipt or raise a dispute at your payment link.'
-            NotificationService.send_sms(deal.buyer_phone, msg)
+            NotificationService.notify_seller_delivered(deal)
         except Exception:
             pass
 

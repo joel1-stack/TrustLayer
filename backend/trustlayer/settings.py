@@ -132,9 +132,11 @@ MPESA_CALLBACK_URL   = os.environ.get('MPESA_CALLBACK_URL', '')
 MPESA_API_KEY        = os.environ.get('MPESA_API_KEY', 'devkey')
 
 # SMS Notifications
+SMS_PROVIDER  = os.environ.get('SMS_PROVIDER', 'generic')   # 'africastalking' or 'generic'
 SMS_API_URL   = os.environ.get('SMS_API_URL', '')
 SMS_API_KEY   = os.environ.get('SMS_API_KEY', '')
 SMS_SENDER_ID = os.environ.get('SMS_SENDER_ID', 'TrustLayer')
+SMS_USERNAME  = os.environ.get('SMS_USERNAME', 'sandbox')    # Africa's Talking username
 
 # Admin
 TRUSTLAYER_ADMIN_TOKEN = os.environ.get('TRUSTLAYER_ADMIN_TOKEN', 'change-me-in-production')

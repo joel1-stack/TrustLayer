@@ -82,6 +82,8 @@ services:
       - SMS_API_URL=${SMS_API_URL:-}
       - SMS_API_KEY=${SMS_API_KEY:-}
       - SMS_SENDER_ID=${SMS_SENDER_ID:-TrustLayer}
+      - SMS_PROVIDER=${SMS_PROVIDER:-generic}
+      - SMS_USERNAME=${SMS_USERNAME:-sandbox}
     depends_on:
       db:
         condition: service_healthy
@@ -118,6 +120,8 @@ services:
       - SMS_API_URL=${SMS_API_URL:-}
       - SMS_API_KEY=${SMS_API_KEY:-}
       - SMS_SENDER_ID=${SMS_SENDER_ID:-TrustLayer}
+      - SMS_PROVIDER=${SMS_PROVIDER:-generic}
+      - SMS_USERNAME=${SMS_USERNAME:-sandbox}
     depends_on:
       db:
         condition: service_healthy
