@@ -3,7 +3,7 @@ TrustLayer Root URL Configuration
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 
 
@@ -33,6 +33,9 @@ def merchant_dashboard(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Root → dashboard
+    path('', lambda r: redirect('/dashboard/'), name='root'),
 
     # Merchant API
     path('api/v1/merchants/', include('apps.merchants.urls')),

@@ -16,8 +16,8 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . .
 
 RUN python manage.py collectstatic --noinput || true
-RUN python manage.py migrate || true
 
 EXPOSE 8000
 
-CMD gunicorn trustlayer.wsgi:application --bind 0.0.0.0:${PORT:-8000}
+# migrate at startup (DATABASE_URL is available here, not at build time)
+CMD python manage.py migrate --noinput && gunicorn trustlayer.wsgi:application --bind 0.0.0.0:${PORT:-8000}
