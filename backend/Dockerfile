@@ -16,6 +16,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . .
 
 RUN python manage.py collectstatic --noinput || true
+RUN python manage.py migrate || true
 
 EXPOSE 8000
 
