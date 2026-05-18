@@ -1,3 +1,14 @@
-
-pytest
-pytest-django
+Django>=4.2,<5.0
+djangorestframework
+django-cors-headers
+psycopg2-binary
+redis
+django-redis
+celery
+django-celery-beat
+python-dotenv
+whitenoise
+gunicorn
+requests
+PyJWT>=2.8.0
+dj-database-url>=2.0
