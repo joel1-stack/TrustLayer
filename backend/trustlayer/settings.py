@@ -137,10 +137,16 @@ CELERY_BEAT_SCHEDULE = {
 MPESA_ENVIRONMENT    = os.environ.get('MPESA_ENVIRONMENT', 'sandbox')
 MPESA_CONSUMER_KEY   = os.environ.get('MPESA_CONSUMER_KEY', '')
 MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET', '')
-MPESA_SHORTCODE      = os.environ.get('MPESA_SHORTCODE', '174379')
-MPESA_PASSKEY        = os.environ.get('MPESA_PASSKEY', '')
-MPESA_CALLBACK_URL   = os.environ.get('MPESA_CALLBACK_URL', '')
-MPESA_API_KEY        = os.environ.get('MPESA_API_KEY', 'devkey')
+MPESA_SHORTCODE       = os.environ.get('MPESA_SHORTCODE', '174379')
+MPESA_PASSKEY         = os.environ.get('MPESA_PASSKEY', '')
+MPESA_CALLBACK_URL    = os.environ.get('MPESA_CALLBACK_URL', '')
+MPESA_API_KEY         = os.environ.get('MPESA_API_KEY', 'devkey')
+
+# M-Pesa B2C (Business-to-Customer — payout to sellers)
+MPESA_INITIATOR_NAME     = os.environ.get('MPESA_INITIATOR_NAME', 'testinitiator')
+MPESA_INITIATOR_PASSWORD = os.environ.get('MPESA_INITIATOR_PASSWORD', '')
+MPESA_B2C_RESULT_URL     = os.environ.get('MPESA_B2C_RESULT_URL', '')
+MPESA_B2C_TIMEOUT_URL    = os.environ.get('MPESA_B2C_TIMEOUT_URL', '')
 
 # SMS Notifications
 SMS_PROVIDER  = os.environ.get('SMS_PROVIDER', 'generic')   # 'africastalking' or 'generic'

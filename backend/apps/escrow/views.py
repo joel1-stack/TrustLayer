@@ -9,6 +9,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .models import EscrowDeal
 from .services import EscrowService
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def short_deal_redirect(request, deal_code):
@@ -17,7 +20,6 @@ def short_deal_redirect(request, deal_code):
         deal = EscrowDeal.objects.get(deal_code=deal_code)
         if deal.session_token:
             return redirect(f'/pay/{deal.session_token}/')
-        # Direct STK deal — redirect to deal status page
         return redirect(f'/pay/status/{deal_code}/')
     except EscrowDeal.DoesNotExist:
         return JsonResponse({'error': 'Deal not found'}, status=404)
@@ -26,9 +28,8 @@ def short_deal_redirect(request, deal_code):
 @csrf_exempt
 @require_http_methods(["GET"])
 def deals_list(request):
-    """GET /api/v1/escrow/deals/ — merchant's own deals"""
+    """GET /api/v1/deals/ — merchant's own deals"""
     from apps.merchants.permissions import APIKeyAuthentication, APISecretAuthentication
-    # Try API key first, then API secret
     result = APIKeyAuthentication().authenticate(request)
     if not result:
         result = APISecretAuthentication().authenticate(request)
@@ -40,12 +41,13 @@ def deals_list(request):
     return JsonResponse({
         'success': True,
         'deals': [{
-            'deal_code':   d.deal_code,
-            'amount':      str(d.amount),
-            'status':      d.status,
-            'buyer_phone': d.buyer_phone,
-            'description': d.description,
-            'created_at':  d.created_at.isoformat(),
+            'deal_code':      d.deal_code,
+            'amount':         str(d.amount),
+            'status':         d.status,
+            'ledger_status':  d.ledger_status,
+            'buyer_phone':    d.buyer_phone,
+            'description':    d.description,
+            'created_at':     d.created_at.isoformat(),
         } for d in deals]
     })
 
@@ -59,17 +61,21 @@ def deal_status(request, deal_code):
         return JsonResponse({
             'success': True,
             'deal': {
-                'deal_code':        deal.deal_code,
-                'status':           deal.status,
-                'amount':           str(deal.amount),
-                'description':      deal.description,
-                'buyer_phone':      deal.buyer_phone,
-                'buyer_confirmed':  deal.buyer_confirmed,
-                'seller_confirmed': deal.seller_confirmed,
-                'mpesa_receipt':    deal.mpesa_receipt,
-                'auto_release_at':  deal.auto_release_at.isoformat() if deal.auto_release_at else None,
-                'created_at':       deal.created_at.isoformat(),
-                'updated_at':       deal.updated_at.isoformat(),
+                'deal_code':         deal.deal_code,
+                'status':            deal.status,
+                'ledger_status':     deal.ledger_status,
+                'amount':            str(deal.amount),
+                'amount_released':   str(deal.amount_released),
+                'fee_charged':       str(deal.fee_charged),
+                'description':       deal.description,
+                'buyer_phone':       deal.buyer_phone,
+                'buyer_confirmed':   deal.buyer_confirmed,
+                'seller_confirmed':  deal.seller_confirmed,
+                'mpesa_receipt':     deal.mpesa_receipt,
+                'b2c_transaction_id': deal.b2c_transaction_id,
+                'auto_release_at':   deal.auto_release_at.isoformat() if deal.auto_release_at else None,
+                'created_at':        deal.created_at.isoformat(),
+                'updated_at':        deal.updated_at.isoformat(),
             },
         })
     except EscrowDeal.DoesNotExist:
@@ -82,26 +88,22 @@ def buyer_confirm(request, deal_code):
     """POST /api/v1/deals/<deal_code>/confirm/"""
     try:
         deal = EscrowService.buyer_confirm_delivery(deal_code)
+
+        # If deal is now RELEASED, trigger B2C fund release
+        if deal.status == 'RELEASED':
+            release = EscrowService.release_funds(deal_code)
+            if not release.get('success'):
+                logger.error(f"Fund release failed after buyer confirm: {release.get('error')}")
+
         from apps.notifications.services import NotificationService
         if deal.status == 'RELEASED':
             NotificationService.notify_funds_released(deal)
-        return JsonResponse({'success': True, 'status': deal.status})
-    except ValueError as e:
-        return JsonResponse({'error': str(e)}, status=400)
-    except EscrowDeal.DoesNotExist:
-        return JsonResponse({'error': 'Deal not found'}, status=404)
 
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def seller_confirm(request, deal_code):
-    """POST /api/v1/deals/<deal_code>/seller-confirm/"""
-    try:
-        deal = EscrowService.seller_confirm_delivery(deal_code)
-        from apps.notifications.services import NotificationService
-        if deal.status == 'RELEASED':
-            NotificationService.notify_funds_released(deal)
-        return JsonResponse({'success': True, 'status': deal.status})
+        return JsonResponse({
+            'success': True,
+            'status': deal.status,
+            'ledger_status': deal.ledger_status,
+        })
     except ValueError as e:
         return JsonResponse({'error': str(e)}, status=400)
     except EscrowDeal.DoesNotExist:
@@ -126,7 +128,6 @@ def seller_deliver(request, deal_code):
         deal.status = 'DELIVERED'
         deal.save(update_fields=['status', 'updated_at'])
 
-        # Notify buyer that seller has delivered
         try:
             from apps.notifications.services import NotificationService
             NotificationService.notify_seller_delivered(deal)

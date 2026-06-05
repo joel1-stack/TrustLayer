@@ -1,11 +1,14 @@
 """
 M-Pesa Daraja API Adapter
-Handles STK Push, callback processing, and status queries.
+Handles STK Push (C2B), B2C transfers, callback processing, and status queries.
 """
 import requests
 import base64
 from datetime import datetime
 from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class MpesaAdapter:
@@ -20,6 +23,10 @@ class MpesaAdapter:
         self.shortcode      = getattr(settings, 'MPESA_SHORTCODE', '174379')
         self.passkey        = getattr(settings, 'MPESA_PASSKEY', '')
         self.callback_url   = getattr(settings, 'MPESA_CALLBACK_URL', '')
+        self.initiator_name = getattr(settings, 'MPESA_INITIATOR_NAME', 'testinitiator')
+        self.initiator_password = getattr(settings, 'MPESA_INITIATOR_PASSWORD', '')
+        self.b2c_result_url = getattr(settings, 'MPESA_B2C_RESULT_URL', '')
+        self.b2c_timeout_url = getattr(settings, 'MPESA_B2C_TIMEOUT_URL', '')
 
     def _get_access_token(self) -> str:
         url = f"{self.base_url}/oauth/v1/generate?grant_type=client_credentials"
@@ -40,6 +47,14 @@ class MpesaAdapter:
         elif not phone.startswith('254'):
             phone = '254' + phone
         return phone
+
+    def _get_security_credential(self) -> str:
+        """
+        Encrypt initiator password with Safaricom's public certificate.
+        In sandbox, the password itself is often used directly after base64 encoding.
+        In production, you must encrypt with the official Safaricom public cert.
+        """
+        return base64.b64encode(self.initiator_password.encode()).decode()
 
     def stk_push(self, phone_number: str, amount: int,
                  account_reference: str, transaction_desc: str = 'TrustLayer Payment') -> dict:
@@ -80,6 +95,53 @@ class MpesaAdapter:
             }
         return {'success': False, 'error': r.text, 'status_code': r.status_code}
 
+    def b2c_transfer(self, phone: str, amount: int, occasion: str, remarks: str = '') -> dict:
+        """
+        B2C Transfer — Pay OUT from your paybill to seller's phone.
+        This is how funds are 'released' from escrow.
+        Called when a deal transitions to RELEASED.
+        """
+        token = self._get_access_token()
+        phone = self._fmt_phone(phone)
+
+        payload = {
+            'InitiatorName':      self.initiator_name,
+            'SecurityCredential': self._get_security_credential(),
+            'CommandID':          'BusinessPayment',
+            'Amount':             int(amount),
+            'PartyA':             self.shortcode,
+            'PartyB':             phone,
+            'Remarks':            (remarks or f'TrustLayer release {occasion}')[:100],
+            'QueueTimeOutURL':    self.b2c_timeout_url,
+            'ResultURL':          self.b2c_result_url,
+            'Occasion':           occasion[:100],
+        }
+
+        try:
+            r = requests.post(
+                f"{self.base_url}/mpesa/b2c/v1/paymentrequest",
+                json=payload,
+                headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'},
+                timeout=30,
+            )
+            if r.status_code == 200:
+                d = r.json()
+                success = d.get('ResponseCode') == '0'
+                logger.info(f"B2C transfer initiated: {d.get('ConversationID')} — success={success}")
+                return {
+                    'success':          success,
+                    'conversation_id':  d.get('ConversationID'),
+                    'originator_id':    d.get('OriginatorConversationID'),
+                    'response_code':    d.get('ResponseCode'),
+                    'response_desc':    d.get('ResponseDescription'),
+                    'raw':              d,
+                }
+            logger.error(f"B2C HTTP error: {r.status_code} {r.text}")
+            return {'success': False, 'error': f'HTTP {r.status_code}: {r.text[:200]}'}
+        except requests.RequestException as e:
+            logger.error(f"B2C request failed: {e}")
+            return {'success': False, 'error': str(e)}
+
     def process_callback(self, callback_data: dict) -> dict:
         stk          = callback_data.get('Body', {}).get('stkCallback', {})
         result_code  = stk.get('ResultCode')
@@ -102,6 +164,20 @@ class MpesaAdapter:
             'phone_number':        phone,
             'amount':              amount,
             'raw_payload':         callback_data,
+        }
+
+    def process_b2c_result(self, callback_data: dict) -> dict:
+        result = callback_data.get('Result', {})
+        return {
+            'success':            result.get('ResultCode') == 0,
+            'result_code':        result.get('ResultCode'),
+            'result_desc':        result.get('ResultDesc'),
+            'conversation_id':    result.get('ConversationID'),
+            'originator_id':      result.get('OriginatorConversationID'),
+            'transaction_id':     result.get('TransactionID'),
+            'receiver_phone':     str(result.get('ReceiverPartyPublicName', '')).split(' - ')[-1] if result.get('ReceiverPartyPublicName') else '',
+            'amount':             result.get('TransAmount'),
+            'raw_payload':        callback_data,
         }
 
     def query_status(self, checkout_request_id: str) -> dict:

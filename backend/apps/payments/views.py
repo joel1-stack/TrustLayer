@@ -1,5 +1,5 @@
 """
-Payment Views — M-Pesa STK Push + Daraja Callback
+Payment Views — M-Pesa STK Push + Daraja Callback + B2C Callback
 """
 import json
 from django.http import JsonResponse
@@ -9,8 +9,12 @@ from django.views.decorators.http import require_http_methods
 from apps.jwtsessions.services import JWTSessionService
 from apps.merchants.models import Merchant
 from apps.escrow.services import EscrowService
+from apps.escrow.models import EscrowDeal
 from .adapters.mpesa import mpesa
 from .models import PaymentTransaction
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
@@ -133,6 +137,76 @@ def mpesa_callback(request):
 
     except Exception:
         pass  # Always return 200 to Daraja
+
+    return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def mpesa_b2c_result(request):
+    """
+    POST /api/v1/pay/callbacks/b2c/result/ — Safaricom POSTs here after B2C transfer.
+    Handles success, insufficient funds, recipient not found, etc.
+    """
+    try:
+        data   = json.loads(request.body)
+        result = mpesa.process_b2c_result(data)
+        logger.info(f"B2C result received: conv={result.get('conversation_id')} code={result.get('result_code')}")
+
+        conversation_id = result.get('conversation_id')
+        if not conversation_id:
+            return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
+
+        deal = EscrowDeal.objects.filter(b2c_conversation_id=conversation_id).first()
+        if not deal:
+            logger.warning(f"B2C result for unknown conversation: {conversation_id}")
+            return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
+
+        if result['success']:
+            deal.ledger_status    = 'RELEASED'
+            deal.b2c_transaction_id = result.get('transaction_id', '')
+            deal.b2c_completed_at = timezone.now()
+            deal.save()
+
+            from apps.notifications.services import NotificationService
+            NotificationService.notify_funds_released(deal)
+
+            logger.info(f"B2C completed: {deal.deal_code}, TX: {result.get('transaction_id')}")
+        else:
+            deal.ledger_status    = 'STUCK'
+            deal.b2c_failure_reason = result.get('result_desc', 'B2C transfer failed')
+            deal.save()
+
+            logger.error(f"B2C FAILED: {deal.deal_code}, Reason: {deal.b2c_failure_reason}")
+
+    except Exception:
+        pass
+
+    return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def mpesa_b2c_timeout(request):
+    """
+    POST /api/v1/pay/callbacks/b2c/timeout/ — Safaricom timeout callback.
+    B2C request timed out — funds are stuck in the paybill.
+    """
+    try:
+        data = json.loads(request.body)
+        logger.warning(f"B2C timeout received: {json.dumps(data, indent=2)[:500]}")
+
+        result = data.get('Result', {})
+        conversation_id = result.get('ConversationID')
+        if conversation_id:
+            deal = EscrowDeal.objects.filter(b2c_conversation_id=conversation_id).first()
+            if deal:
+                deal.ledger_status    = 'STUCK'
+                deal.b2c_failure_reason = 'B2C request timed out — manual intervention needed'
+                deal.save()
+                logger.critical(f"B2C TIMEOUT for {deal.deal_code}: funds stuck in paybill")
+    except Exception:
+        pass
 
     return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
 

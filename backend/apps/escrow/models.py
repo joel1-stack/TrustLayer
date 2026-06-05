@@ -19,6 +19,14 @@ class EscrowDeal(models.Model):
         ('EXPIRED',            'Expired'),
     ]
 
+    LEDGER_STATUS_CHOICES = [
+        ('UNPAID',          'Buyer has not paid'),
+        ('HELD',            'Funds in paybill, not yet released'),
+        ('RELEASE_PENDING', 'B2C initiated, waiting for Safaricom'),
+        ('RELEASED',        'Funds sent to seller'),
+        ('STUCK',           'B2C failed, manual intervention needed'),
+    ]
+
     id       = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     merchant = models.ForeignKey(
         'merchants.Merchant',
@@ -57,6 +65,24 @@ class EscrowDeal(models.Model):
     disputed_at     = models.DateTimeField(null=True, blank=True)
     dispute_reason  = models.TextField(blank=True)
 
+    # Money tracking (what Safaricom holds vs what we've released)
+    amount_paid      = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    amount_released  = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    fee_charged      = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+
+    # B2C tracking
+    b2c_conversation_id = models.CharField(max_length=100, blank=True, db_index=True)
+    b2c_transaction_id  = models.CharField(max_length=100, blank=True)
+    b2c_completed_at    = models.DateTimeField(null=True, blank=True)
+    b2c_failure_reason  = models.TextField(blank=True)
+
+    # Ledger state (separate from escrow state machine)
+    ledger_status = models.CharField(
+        max_length=20,
+        choices=LEDGER_STATUS_CHOICES,
+        default='UNPAID',
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -67,8 +93,29 @@ class EscrowDeal(models.Model):
             models.Index(fields=['deal_code']),
             models.Index(fields=['buyer_phone']),
             models.Index(fields=['created_at']),
+            models.Index(fields=['b2c_conversation_id']),
+            models.Index(fields=['ledger_status']),
         ]
         ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.deal_code} — {self.status} — KES {self.amount}"
+
+
+class FeeRecord(models.Model):
+    """
+    Each released deal generates one fee record — TrustLayer's revenue.
+    """
+    id        = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    deal      = models.ForeignKey(EscrowDeal, on_delete=models.CASCADE, related_name='fees')
+    amount    = models.DecimalField(max_digits=15, decimal_places=2)
+    rate      = models.DecimalField(max_digits=5, decimal_places=2, default=1.50)
+    currency  = models.CharField(max_length=3, default='KES')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'fee_records'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Fee {self.amount} KES — deal {self.deal.deal_code}"
