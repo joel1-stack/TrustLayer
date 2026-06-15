@@ -29,6 +29,11 @@ def initiate_payment(request):
         if not token or not phone:
             return JsonResponse({'error': 'session_token and phone required'}, status=400)
 
+        # Resolve short_code to JWT if needed
+        resolved = JWTSessionService.resolve_short_code(token)
+        if resolved:
+            token = resolved
+
         try:
             result = JWTSessionService.validate_token(token)
         except ValueError as e:

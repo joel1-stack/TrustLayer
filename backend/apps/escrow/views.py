@@ -118,7 +118,8 @@ def seller_deliver(request, deal_code):
 
         try:
             from apps.notifications.services import NotificationService
-            NotificationService.notify_seller_delivered(deal)
+            confirm_url = f"{request.scheme}://{request.get_host()}/api/v1/deals/{deal.deal_code}/confirm/"
+            NotificationService.notify_seller_delivered(deal, confirm_url=confirm_url)
         except Exception:
             pass
 

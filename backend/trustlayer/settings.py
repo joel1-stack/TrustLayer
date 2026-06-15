@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     # TrustLayer B2B platform
+    'apps.portal',
     'apps.merchants',
     'apps.jwtsessions',
     'apps.escrow',
@@ -44,6 +45,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'trustlayer.middleware.NgrokMiddleware',
 ]
 
 ROOT_URLCONF = 'trustlayer.urls'

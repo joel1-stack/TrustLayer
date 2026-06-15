@@ -9,6 +9,7 @@ class MerchantRegisterSerializer(serializers.Serializer):
     company_name = serializers.CharField(max_length=255)
     email        = serializers.EmailField()
     phone        = serializers.CharField(max_length=20)
+    password     = serializers.CharField(min_length=6, required=False, allow_blank=True)
 
     def validate_phone(self, value):
         phone = value.strip().replace(' ', '')

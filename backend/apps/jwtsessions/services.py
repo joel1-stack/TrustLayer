@@ -24,6 +24,13 @@ class JWTSessionService:
     DEFAULT_EXPIRY_MINUTES = 15
 
     @classmethod
+    def _generate_short_code(cls):
+        while True:
+            code = secrets.token_hex(4)  # 8-char hex string
+            if not MerchantSession.objects.filter(short_code=code).exists():
+                return code
+
+    @classmethod
     def create_session(cls, merchant, amount, description, customer_phone,
                        customer_email='', success_url='', failure_url='',
                        ip_address=None):
@@ -76,8 +83,11 @@ class JWTSessionService:
         # Sign with merchant's hashed secret (not a global key)
         token = jwt.encode(payload, merchant.api_secret_hash, algorithm=cls.ALGORITHM)
 
+        short_code = cls._generate_short_code()
+
         session = MerchantSession.objects.create(
             merchant=merchant,
+            short_code=short_code,
             session_token=token,
             amount=amount,
             currency='KES',
@@ -93,10 +103,20 @@ class JWTSessionService:
 
         return {
             'session_token':      token,
-            'checkout_url':       f'https://trustlayer.app/pay/{token}',
+            'short_code':         short_code,
+            'checkout_url':       f'/pay/{short_code}/',
             'expires_at':         expires_at.isoformat(),
             'expires_in_seconds': cls.DEFAULT_EXPIRY_MINUTES * 60,
         }
+
+    @classmethod
+    def resolve_short_code(cls, short_code):
+        """Look up a session by its short code and return the JWT token."""
+        try:
+            session = MerchantSession.objects.get(short_code=short_code)
+            return session.session_token
+        except MerchantSession.DoesNotExist:
+            return None
 
     @classmethod
     def validate_token(cls, token):

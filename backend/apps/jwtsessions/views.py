@@ -42,14 +42,25 @@ def create_session(request):
             ip_address=request.META.get('REMOTE_ADDR'),
         )
 
-        token      = session['session_token']
-        local_url  = f"/pay/{token}/"
+        # Send SMS to buyer with payment link
+        try:
+            from apps.notifications.sms import send_sms
+            base_url = f"{request.scheme}://{request.get_host()}"
+            link = f"{base_url}{session['checkout_url']}"
+            send_sms(
+                customer_phone,
+                f"TrustLayer: Pay KES {amount} for '{description}'. "
+                f"Click to pay securely: {link}"
+            )
+        except Exception:
+            pass  # SMS is best-effort
 
         return JsonResponse({
             'success': True,
             'session': {
-                'token':        token,
-                'checkout_url': local_url,
+                'token':        session['session_token'],
+                'short_code':   session['short_code'],
+                'checkout_url': session['checkout_url'],
                 'expires_at':   session['expires_at'],
                 'expires_in':   session['expires_in_seconds'],
             },
@@ -66,7 +77,11 @@ def create_session(request):
 @csrf_exempt
 @require_http_methods(["GET"])
 def validate_session(request, token):
-    """GET /api/v1/sessions/validate/<token>/"""
+    """GET /api/v1/sessions/validate/<token>/ — token can be JWT or short_code"""
+    # Resolve short_code to JWT if needed
+    resolved = JWTSessionService.resolve_short_code(token)
+    if resolved:
+        token = resolved
     try:
         result  = JWTSessionService.validate_token(token)
         payload = result['payload']
@@ -102,7 +117,10 @@ def validate_session(request, token):
 @csrf_exempt
 @require_http_methods(["POST"])
 def consume_session(request, token):
-    """POST /api/v1/sessions/consume/<token>/"""
+    """POST /api/v1/sessions/consume/<token>/ — token can be JWT or short_code"""
+    resolved = JWTSessionService.resolve_short_code(token)
+    if resolved:
+        token = resolved
     try:
         JWTSessionService.consume_token(token)
         return JsonResponse({'success': True, 'message': 'Token consumed'})

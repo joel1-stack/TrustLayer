@@ -1,37 +1,38 @@
 """
-TrustLayer Root URL Configuration — API protocol only.
-No HTML pages served beyond legal templates.
+TrustLayer Root URL Configuration — API protocol + Merchant Portal.
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
 from django.shortcuts import render
 
 
+def portal_dashboard(request):
+    return render(request, 'portal/dashboard.html')
+
+
+def portal_pay(request, token):
+    return render(request, 'portal/pay.html', {'token': token})
+
+
 urlpatterns = [
+    path('', include('apps.portal.urls')),
+
+    path('portal/dashboard/', portal_dashboard, name='portal-dashboard'),
+    path('pay/<path:token>/', portal_pay, name='portal-pay'),
+
     path('admin/', admin.site.urls),
 
-    # Merchant API
-    path('api/v1/merchants/', include('apps.merchants.urls')),
+    # API v1
+    path('api/v1/merchants/',  include('apps.merchants.urls')),
+    path('api/v1/sessions/',   include('apps.jwtsessions.urls')),
+    path('api/v1/pay/',        include('apps.payments.urls')),
+    path('api/v1/deals/',      include('apps.escrow.urls')),
+    path('api/v1/disputes/',   include('apps.disputes.urls')),
+    path('api/v1/webhooks/',   include('apps.webhooks.urls')),
+    path('api/v1/trust/',      include('apps.trust_scoring.urls')),
 
-    # Session API
-    path('api/v1/sessions/',  include('apps.jwtsessions.urls')),
-
-    # Payment API (STK Push + Daraja callback + B2C)
-    path('api/v1/pay/',       include('apps.payments.urls')),
-
-    # Escrow API (deal lifecycle)
-    path('api/v1/deals/',     include('apps.escrow.urls')),
-
-    # Disputes API
-    path('api/v1/disputes/',  include('apps.disputes.urls')),
-
-    # Webhooks API
-    path('api/v1/webhooks/',  include('apps.webhooks.urls')),
-
-    # Trust Scoring API
-    path('api/v1/trust/',     include('apps.trust_scoring.urls')),
-
-    # Legal pages (regulatory requirement)
+    # Legal pages
     path('terms/',          lambda r: render(r, 'legal/terms.html'),          name='terms'),
     path('dispute-policy/', lambda r: render(r, 'legal/dispute_policy.html'), name='dispute-policy'),
 ]

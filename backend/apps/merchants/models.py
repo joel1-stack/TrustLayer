@@ -1,6 +1,8 @@
 from django.db import models
 import uuid
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password, check_password
+
 
 class Merchant(models.Model):
     # Identity
@@ -8,6 +10,15 @@ class Merchant(models.Model):
     company_name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20)
+    password = models.CharField(max_length=255, blank=True)
+
+    def set_password(self, raw):
+        self.password = make_password(raw)
+
+    def check_password(self, raw):
+        if not self.password:
+            return False
+        return check_password(raw, self.password)
     
     # API Keys (the security foundation)
     merchant_key = models.CharField(max_length=255, unique=True)  # PUBLIC

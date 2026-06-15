@@ -10,10 +10,11 @@ logger = logging.getLogger(__name__)
 class NotificationService:
 
     TEMPLATES = {
-        'payment_received': 'TrustLayer: Payment of KES {amount} received for deal {deal_code}. Funds held in escrow until delivery confirmed.',
-        'funds_released':   'TrustLayer: KES {amount} released for deal {deal_code}. Funds sent to your account.',
-        'dispute_opened':   'TrustLayer: Dispute opened for deal {deal_code}. Admin will review within 48 hours.',
-        'seller_delivered': 'TrustLayer: Seller marked deal {deal_code} as delivered. Please confirm receipt or raise a dispute at your payment link.',
+        'payment_received': 'TrustLayer: KES {amount} received for "{description}" ({deal_code}). Deliver the item to get paid.',
+        'payment_held_buyer': 'TrustLayer: KES {amount} held safely for "{description}" ({deal_code}). Funds released after you confirm delivery.',
+        'funds_released':   'TrustLayer: Buyer confirmed delivery for {deal_code}. KES {amount} released to your M-Pesa.',
+        'dispute_opened':   'TrustLayer: Dispute opened for {deal_code}. Admin will review within 48 hours.',
+        'seller_delivered': 'TrustLayer: Seller marked {deal_code} as delivered. Confirm delivery to release KES {amount}: {confirm_url}',
     }
 
     @classmethod
@@ -47,14 +48,18 @@ class NotificationService:
 
     @classmethod
     def notify_payment_received(cls, deal):
-        msg = cls.TEMPLATES['payment_received'].format(deal_code=deal.deal_code, amount=deal.amount)
-        # Notify merchant (seller)
+        # Notify merchant (seller) — payment received, deliver item
         if deal.merchant.phone:
+            msg = cls.TEMPLATES['payment_received'].format(
+                deal_code=deal.deal_code, amount=deal.amount, description=deal.description
+            )
             cls.send_sms(deal.merchant.phone, msg)
-        # Notify buyer
+        # Notify buyer — payment held safely
         if deal.buyer_phone:
-            buyer_msg = f'TrustLayer: Your payment of KES {deal.amount} for deal {deal.deal_code} is secured in escrow. Funds release after delivery confirmation.'
-            cls.send_sms(deal.buyer_phone, buyer_msg)
+            msg = cls.TEMPLATES['payment_held_buyer'].format(
+                deal_code=deal.deal_code, amount=deal.amount, description=deal.description
+            )
+            cls.send_sms(deal.buyer_phone, msg)
         # Webhook
         if deal.merchant.webhook_url:
             cls.send_webhook(deal.merchant.webhook_url, {
@@ -65,19 +70,20 @@ class NotificationService:
             })
 
     @classmethod
-    def notify_seller_delivered(cls, deal):
-        msg = cls.TEMPLATES['seller_delivered'].format(deal_code=deal.deal_code)
+    def notify_seller_delivered(cls, deal, confirm_url=''):
+        msg = cls.TEMPLATES['seller_delivered'].format(
+            deal_code=deal.deal_code, amount=deal.amount, confirm_url=confirm_url
+        )
         if deal.buyer_phone:
             cls.send_sms(deal.buyer_phone, msg)
 
     @classmethod
     def notify_funds_released(cls, deal):
-        msg = cls.TEMPLATES['funds_released'].format(deal_code=deal.deal_code, amount=deal.amount)
         if deal.merchant.phone:
+            msg = cls.TEMPLATES['funds_released'].format(deal_code=deal.deal_code, amount=deal.amount)
             cls.send_sms(deal.merchant.phone, msg)
         if deal.buyer_phone:
-            buyer_msg = f'TrustLayer: Deal {deal.deal_code} complete. Thank you for using TrustLayer.'
-            cls.send_sms(deal.buyer_phone, buyer_msg)
+            cls.send_sms(deal.buyer_phone, f'TrustLayer: Deal {deal.deal_code} complete. Thank you for using TrustLayer.')
         if deal.merchant.webhook_url:
             cls.send_webhook(deal.merchant.webhook_url, {
                 'event': 'funds.released',

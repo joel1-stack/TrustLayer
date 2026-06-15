@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrustLayer — Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
+.nav{background:#161b22;border-bottom:1px solid #30363d;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.nav h2{font-size:16px;font-weight:700}
+.nav span{color:#8b949e;font-size:13px}
+.container{max-width:800px;margin:0 auto;padding:32px 24px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;margin-bottom:20px}
+.card h3{font-size:15px;font-weight:600;margin-bottom:16px;color:#c9d1d9}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;color:#8b949e;margin-bottom:4px}
+.form-group input{width:100%;padding:10px 12px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:14px;outline:none}
+.form-group input:focus{border-color:#58a6ff}
+.btn{background:#238636;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+.btn:hover{background:#2ea043}
+.btn-sm{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:4px 12px;border-radius:6px;font-size:12px;cursor:pointer}
+.btn-sm:hover{background:#30363d}
+.link-card{background:#1a2332;border:1px solid #1f6feb;border-radius:8px;padding:16px;margin-top:12px}
+.link-card code{font-size:14px;color:#58a6ff;word-break:break-all}
+.empty{color:#8b949e;font-size:14px;text-align:center;padding:32px 0}
+.deal-item{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.deal-item .status{padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.status-pending{background:#3d2e00;color:#d29922}
+.status-held{background:#1a3d1f;color:#7ee787}
+.status-released{background:#1a3d1f;color:#7ee787}
+.status-disputed{background:#3d1f1f;color:#ff7b72}
+.status-refunded{background:#3d1f1f;color:#ff7b72}
+.deal-item .amount{font-size:14px;font-weight:600}
+.deal-item .deal-code{font-size:12px;color:#8b949e}
+.deal-item .date{font-size:11px;color:#8b949e}
+.error{background:#3d1f1f;border:1px solid #da3633;color:#ff7b72;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
+.cred-banner{background:#1a2332;border:1px solid #1f6feb;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:none;font-size:12px}
+.cred-banner strong{color:#58a6ff}
+.cred-banner code{font-size:11px;background:#0d1117;padding:2px 6px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="nav">
+<div><h2>&#x1f6e1;&#xfe0f; TrustLayer</h2></div>
+<a href="/" style="color:#8b949e;font-size:13px;text-decoration:none">&#x2190; Home</a>
+</div>
+<div class="container">
+
+<div id="error-box" class="error"></div>
+
+<div id="cred-banner" class="cred-banner"></div>
+
+<div class="card" id="creds-card">
+<h3>&#x1f512; Enter your credentials</h3>
+<p style="font-size:12px;color:#8b949e;margin-bottom:12px">Paste your API Key and API Secret from registration.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<input type="text" id="manual-key" placeholder="API Key" style="flex:1;min-width:120px;padding:10px 12px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:13px;outline:none">
+<input type="text" id="manual-secret" placeholder="API Secret" style="flex:1;min-width:120px;padding:10px 12px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:13px;outline:none">
+<button class="btn-sm" onclick="setManualCreds()">Apply</button>
+</div>
+</div>
+
+<div class="card">
+<h3>&#x1f4b3; Create a payment link</h3>
+<div class="form-group">
+<label>Amount (KES)</label>
+<input type="number" id="amount" placeholder="e.g. 5000" min="1">
+</div>
+<div class="form-group">
+<label>Description</label>
+<input type="text" id="description" placeholder="What is this payment for?">
+</div>
+<div class="form-group">
+<label>Buyer phone</label>
+<input type="tel" id="customer-phone" placeholder="2547XXXXXXXX">
+</div>
+<button class="btn" onclick="createLink()">Generate payment link</button>
+<div id="link-result" class="link-card" style="display:none">
+<p style="font-size:12px;color:#8b949e;margin-bottom:6px">Send this link to your buyer:</p>
+<code id="payment-link"></code>
+<button class="btn-sm" style="margin-top:8px" onclick="copyLink()">Copy link</button>
+</div>
+</div>
+
+<div class="card">
+<h3>&#x1f4cb; Your deals</h3>
+<div id="deals-list">
+<div class="empty">No deals yet.</div>
+</div>
+</div>
+
+</div>
+
+<script>
+var apiKey = new URLSearchParams(window.location.search).get('key') || '';
+var apiSecret = new URLSearchParams(window.location.search).get('secret') || '';
+
+if (apiKey && apiSecret) {
+document.getElementById('creds-card').style.display = 'none';
+var banner = document.getElementById('cred-banner');
+banner.innerHTML = '<strong>&#x2705; Authenticated</strong> &mdash; API Key: <code>' + apiKey + '</code> &nbsp;|&nbsp; Secret: <code>' + apiSecret + '</code>';
+banner.style.display = 'block';
+} else if (apiKey) {
+var banner = document.getElementById('cred-banner');
+banner.innerHTML = '<strong>&#x26a0;&#xfe0f; Limited access</strong> &mdash; You need both API Key <em>and</em> API Secret to create payment links. <a href="/" style="color:#58a6ff">Register or sign in</a>.';
+banner.style.display = 'block';
+}
+
+function setManualCreds() {
+var k = document.getElementById('manual-key').value.trim();
+var s = document.getElementById('manual-secret').value.trim();
+if (k && s) { apiKey = k; apiSecret = s; loadDeals(); }
+}
+
+function showError(msg) {
+var el = document.getElementById('error-box');
+el.textContent = msg;
+el.style.display = 'block';
+}
+
+function hideError() {
+document.getElementById('error-box').style.display = 'none';
+}
+
+async function createLink() {
+if (!apiSecret) return showError('API Secret required. Go back to the registration page.');
+var amount = document.getElementById('amount').value;
+var desc = document.getElementById('description').value;
+var phone = document.getElementById('customer-phone').value;
+if (!amount || !desc) return showError('Amount and description required');
+if (!phone) return showError('Enter buyer phone number');
+
+hideError();
+try {
+var res = await fetch('/api/v1/sessions/create/', {
+method: 'POST',
+headers: {'Content-Type': 'application/json', 'X-API-Secret': apiSecret},
+body: JSON.stringify({amount: parseInt(amount), description: desc, customer_phone: phone})
+});
+var data = await res.json();
+if (!res.ok) return showError(data.error || 'Failed to create session');
+var link = window.location.origin + data.session.checkout_url;
+document.getElementById('payment-link').textContent = link;
+document.getElementById('link-result').style.display = 'block';
+loadDeals();
+} catch(e) {
+showError('Network error');
+}
+}
+
+function copyLink() {
+navigator.clipboard.writeText(document.getElementById('payment-link').textContent);
+}
+
+async function loadDeals() {
+if (!apiKey) return;
+try {
+var res = await fetch('/api/v1/deals/', {
+headers: {'Authorization': 'Bearer ' + apiKey}
+});
+var data = await res.json();
+if (!res.ok || !data.success) return;
+var deals = data.deals || [];
+var list = document.getElementById('deals-list');
+if (deals.length === 0) {
+list.innerHTML = '<div class="empty">No deals yet.</div>';
+return;
+}
+list.innerHTML = deals.map(function(d) {
+var statusClass = 'status-' + d.status.toLowerCase();
+return '<div class="deal-item"><div><div class="deal-code">' + d.deal_code + '</div><div class="date">' + (d.created_at || '').substring(0, 10) + '</div></div><div style="text-align:right"><div class="amount">KES ' + parseFloat(d.amount || 0).toLocaleString() + '</div><span class="status ' + statusClass + '">' + d.status + '</span></div></div>';
+}).join('');
+} catch(e) {}
+}
+
+if (apiKey) loadDeals();
+</script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+import secrets
 from django.utils import timezone
 
 class MerchantSession(models.Model):
@@ -9,6 +10,9 @@ class MerchantSession(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     merchant = models.ForeignKey('merchants.Merchant', on_delete=models.CASCADE, related_name='jwt_sessions')
+    
+    # Short code for payment links (8 chars, unique)
+    short_code = models.CharField(max_length=12, unique=True, null=True, blank=True)
     
     # The JWT token (encrypted at rest)
     session_token = models.TextField()
@@ -37,6 +41,7 @@ class MerchantSession(models.Model):
         db_table = 'merchant_sessions'
         indexes = [
             models.Index(fields=['session_token']),
+            models.Index(fields=['short_code']),
             models.Index(fields=['merchant', 'used']),
             models.Index(fields=['expires_at']),
         ]
