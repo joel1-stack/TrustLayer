@@ -1,60 +1,40 @@
-version: "3.9"
-
 services:
   # PostgreSQL Database
-  db:
+  postgres_db:
     image: postgres:16-alpine
-    container_name: postgres_db
-    restart: always
+    container_name: trustlayer_db
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER:-trustlayer}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-TrustLayer2026!}
+      POSTGRES_DB: ${DB_NAME:-trustlayer}
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-trustlayer} -d ${DB_NAME:-trustlayer}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # Redis Cache/Queue
-  redis:
+  # Redis Cache & Message Broker
+  redis_cache:
     image: redis:7-alpine
-    container_name: redis_cache
-    restart: always
+    container_name: trustlayer_redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
+      - redisdata:/data
 
-  # OpenLDAP Server
-  ldap:
-    image: osixia/openldap:1.5.0
-    container_name: openldap
-    restart: always
-    environment:
-      LDAP_ORGANISATION: "TrustLayer Inc"
-      LDAP_DOMAIN: "trustlayer.local"
-      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
-      LDAP_BASE_DN: "dc=trustlayer,dc=local"
-    ports:
-      - "389:389"
-      - "636:636"
-    volumes:
-      - ldap_data:/var/lib/ldap
-      - ldap_config:/etc/ldap/slapd.d
-
-  # Django Application
-  web:
+  # Django API Server
+  django_api:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: django_app
-    restart: always
+    container_name: trustlayer_api
+    restart: unless-stopped
     command: >
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
@@ -62,110 +42,50 @@ services:
       - ./backend:/app
     ports:
       - "8000:8000"
-    environment:
-      - DEBUG=True
-      - SECRET_KEY=${SECRET_KEY}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MPESA_ENVIRONMENT=${MPESA_ENVIRONMENT}
-      - MPESA_CONSUMER_KEY=${MPESA_CONSUMER_KEY}
-      - MPESA_CONSUMER_SECRET=${MPESA_CONSUMER_SECRET}
-      - MPESA_SHORTCODE=${MPESA_SHORTCODE}
-      - MPESA_PASSKEY=${MPESA_PASSKEY}
-      - MPESA_CALLBACK_URL=${MPESA_CALLBACK_URL}
-      - MPESA_API_KEY=${MPESA_API_KEY:-devkey}
-      - SMS_API_URL=${SMS_API_URL:-}
-      - SMS_API_KEY=${SMS_API_KEY:-}
-      - SMS_SENDER_ID=${SMS_SENDER_ID:-TrustLayer}
-      - SMS_PROVIDER=${SMS_PROVIDER:-generic}
-      - SMS_USERNAME=${SMS_USERNAME:-sandbox}
+    env_file:
+      - .env
     depends_on:
-      db:
+      postgres_db:
         condition: service_healthy
-      redis:
-        condition: service_started
-      ldap:
+      redis_cache:
         condition: service_started
 
-  # pgAdmin (Database Management)
-  # Celery Worker
+  # Celery Worker (processes background tasks)
   celery_worker:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: celery_worker
-    restart: always
+    container_name: trustlayer_worker
+    restart: unless-stopped
     command: celery -A trustlayer worker --loglevel=info
     volumes:
       - ./backend:/app
-    environment:
-      - DEBUG=True
-      - SECRET_KEY=${SECRET_KEY}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=db
-      - REDIS_HOST=redis
-      - MPESA_ENVIRONMENT=${MPESA_ENVIRONMENT}
-      - MPESA_CONSUMER_KEY=${MPESA_CONSUMER_KEY}
-      - MPESA_CONSUMER_SECRET=${MPESA_CONSUMER_SECRET}
-      - MPESA_SHORTCODE=${MPESA_SHORTCODE}
-      - MPESA_PASSKEY=${MPESA_PASSKEY}
-      - MPESA_CALLBACK_URL=${MPESA_CALLBACK_URL}
-      - SMS_API_URL=${SMS_API_URL:-}
-      - SMS_API_KEY=${SMS_API_KEY:-}
-      - SMS_SENDER_ID=${SMS_SENDER_ID:-TrustLayer}
-      - SMS_PROVIDER=${SMS_PROVIDER:-generic}
-      - SMS_USERNAME=${SMS_USERNAME:-sandbox}
+    env_file:
+      - .env
     depends_on:
-      db:
+      postgres_db:
         condition: service_healthy
-      redis:
+      redis_cache:
         condition: service_started
 
-  # Celery Beat Scheduler
+  # Celery Beat (scheduled tasks — auto-release, etc.)
   celery_beat:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: celery_beat
-    restart: always
+    container_name: trustlayer_beat
+    restart: unless-stopped
     command: celery -A trustlayer beat --loglevel=info
     volumes:
       - ./backend:/app
-    environment:
-      - DEBUG=True
-      - SECRET_KEY=${SECRET_KEY}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=db
-      - REDIS_HOST=redis
+    env_file:
+      - .env
     depends_on:
-      db:
+      postgres_db:
         condition: service_healthy
-      redis:
+      redis_cache:
         condition: service_started
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@trustlayer.com
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-    ports:
-      - "5050:80"
-    depends_on:
-      - db
-
 volumes:
-  postgres_data:
-  redis_data:
-  ldap_data:
-  ldap_config:
+  pgdata:
+  redisdata:

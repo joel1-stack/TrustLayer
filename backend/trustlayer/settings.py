@@ -112,7 +112,7 @@ REST_FRAMEWORK = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-_redis_url = f"redis://{os.environ.get('REDIS_HOST', 'redis')}:6379"
+_redis_url = f"redis://{os.environ.get('REDIS_HOST', 'redis_cache')}:{os.environ.get('REDIS_PORT', '6379')}"
 
 CACHES = {
     'default': {
@@ -122,8 +122,8 @@ CACHES = {
     }
 }
 
-CELERY_BROKER_URL     = os.environ.get('REDIS_URL', f'{_redis_url}/0')
-CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', f'{_redis_url}/0')
+CELERY_BROKER_URL     = os.environ.get('CELERY_BROKER_URL') or os.environ.get('REDIS_URL', f'{_redis_url}/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND') or os.environ.get('REDIS_URL', f'{_redis_url}/0')
 
 from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
