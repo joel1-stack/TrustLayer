@@ -1,3 +1,13 @@
 .env
 __pycache__/
 *.pyc
+
+celerybeat-schedule
+celerybeat-schedule
+debug.log
+__pycache__/
+*.pyc
+media/
+scripts/
+config/
+utils/

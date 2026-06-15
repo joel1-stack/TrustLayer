@@ -3,7 +3,6 @@ Escrow Views — Deal status, confirm delivery, release funds.
 """
 import json
 from django.http import JsonResponse
-from django.shortcuts import redirect
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -12,17 +11,6 @@ from .services import EscrowService
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-def short_deal_redirect(request, deal_code):
-    """GET /d/<deal_code>/ — short URL redirect to payment page"""
-    try:
-        deal = EscrowDeal.objects.get(deal_code=deal_code)
-        if deal.session_token:
-            return redirect(f'/pay/{deal.session_token}/')
-        return redirect(f'/pay/status/{deal_code}/')
-    except EscrowDeal.DoesNotExist:
-        return JsonResponse({'error': 'Deal not found'}, status=404)
 
 
 @csrf_exempt
