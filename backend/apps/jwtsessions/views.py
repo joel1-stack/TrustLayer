@@ -2,6 +2,7 @@
 JWT Session Views
 """
 import json
+import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -45,12 +46,18 @@ def create_session(request):
         # Send SMS to buyer with payment link
         try:
             from apps.notifications.sms import send_sms
-            base_url = f"{request.scheme}://{request.get_host()}"
+            base_url = os.environ.get('TRUSTLAYER_BASE_URL', '').rstrip('/')
+            if not base_url:
+                base_url = f"https://{request.get_host()}"
             link = f"{base_url}{session['checkout_url']}"
+            merchant_name = merchant.company_name
             send_sms(
                 customer_phone,
-                f"TrustLayer: Pay KES {amount} for '{description}'. "
-                f"Click to pay securely: {link}"
+                f"Secured by TrustLayer\n"
+                f"{merchant_name} requests KES {amount} for '{description}'.\n"
+                f"Your money is held securely until you confirm delivery.\n"
+                f"Click to pay securely: {link}\n"
+                f"TrustLayer \u2014 Safe payments. Real trust."
             )
         except Exception:
             pass  # SMS is best-effort
