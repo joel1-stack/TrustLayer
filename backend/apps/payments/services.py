@@ -62,7 +62,7 @@ class PaymentService:
     @classmethod
     def initiate(cls, deal, phone):
         mpesa  = MPesaService()
-        result = mpesa.stk_push(phone, deal.amount + deal.fee, deal.deal_code, f"TrustLayer {deal.deal_code}")
+        result = mpesa.stk_push(phone, deal.amount + deal.fee, 'TRUSTLAYER', f"TrustLayer {deal.deal_code}")
         tx = PaymentTransaction.objects.create(
             merchant=deal.merchant, provider='mpesa',
             provider_tx_id=result.get('CheckoutRequestID', ''),

@@ -60,11 +60,11 @@ def initiate_payment(request):
             session_token=token,
         )
 
-        # Fire STK Push
+        # Fire STK Push — buyer sees "TRUSTLAYER" on M-Pesa screen
         stk = mpesa.stk_push(
             phone_number=phone,
             amount=int(float(payload['amount'])),
-            account_reference=deal.deal_code,
+            account_reference='TRUSTLAYER',
             transaction_desc=(payload.get('description', 'TrustLayer Payment'))[:13],
         )
 
@@ -254,7 +254,7 @@ def direct_stk_push(request):
         stk = mpesa.stk_push(
             phone_number=phone,
             amount=int(float(amount)),
-            account_reference=deal.deal_code,
+            account_reference='TRUSTLAYER',
             transaction_desc=description[:13],
         )
 

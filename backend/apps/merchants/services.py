@@ -19,7 +19,8 @@ class MerchantService:
     WEBHOOK_SECRET_PREFIX = "whs_live_"
 
     @classmethod
-    def generate_merchant(cls, company_name, email, phone, password=''):
+    def generate_merchant(cls, company_name, email, phone, password='',
+                          payout_method='phone', payout_account=''):
         """
         Create a new merchant with full key pair.
         Returns dict with merchant object + plaintext keys (shown ONCE).
@@ -41,6 +42,8 @@ class MerchantService:
             api_key_hash=api_key_hash,
             api_secret_hash=api_secret_hash,
             webhook_secret=webhook_secret_hash,
+            payout_method=payout_method,
+            payout_account=payout_account or phone,
         )
         if password:
             merchant.set_password(password)

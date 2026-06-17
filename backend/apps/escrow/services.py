@@ -100,10 +100,35 @@ class EscrowService:
         # Calculate net amount after fee
         net_amount = deal.amount - deal.fee_amount
 
-        # Initiate B2C transfer to merchant's phone
+        merchant = deal.merchant
+        payout_method = merchant.payout_method
+        payout_account = merchant.payout_account or merchant.phone
+
+        if payout_method in ('till', 'bank'):
+            deal.ledger_status = 'RELEASED'
+            deal.amount_released = net_amount
+            deal.fee_charged = deal.fee_amount
+            deal.released_at = timezone.now()
+            deal.save()
+
+            FeeRecord.objects.create(
+                deal=deal,
+                amount=deal.fee_amount,
+                rate=Decimal(str(cls.FEE_PERCENTAGE)),
+            )
+
+            logger.info(f"{payout_method.upper()} payout for {deal_code}: net={net_amount}, account={payout_account} — manual processing needed")
+            return {
+                'success': True,
+                'message': f'{payout_method} payout logged for manual processing',
+                'net_amount': str(net_amount),
+                'fee': str(deal.fee_amount),
+            }
+
+        # Initiate B2C transfer to merchant's payout account
         from apps.payments.adapters.mpesa import mpesa
         result = mpesa.b2c_transfer(
-            phone=deal.merchant.phone,
+            phone=payout_account,
             amount=int(net_amount),
             occasion=deal.deal_code,
             remarks=f"TrustLayer release {deal.deal_code}",

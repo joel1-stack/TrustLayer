@@ -23,6 +23,8 @@ def register_ajax(request):
         result = MerchantService.generate_merchant(
             v['company_name'], v['email'], v['phone'],
             password=v.get('password', ''),
+            payout_method=v.get('payout_method', 'phone'),
+            payout_account=v.get('payout_account', ''),
         )
         m = result['merchant']
         creds = result['plaintext_keys']

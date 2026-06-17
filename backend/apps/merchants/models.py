@@ -47,6 +47,18 @@ class Merchant(models.Model):
         default='pending'
     )
     
+    # Payout
+    PAYOUT_METHOD_CHOICES = [
+        ('phone', 'Phone (M-Pesa B2C)'),
+        ('pochi', 'Pochi la Biashara'),
+        ('till', 'Till Number (Coming Soon)'),
+        ('bank', 'Bank Transfer (Coming Soon)'),
+    ]
+    payout_method = models.CharField(max_length=20, choices=PAYOUT_METHOD_CHOICES, default='phone')
+    payout_account = models.CharField(max_length=100, blank=True, help_text='Phone number for B2C, till number, or bank account')
+    payout_bank_name = models.CharField(max_length=100, blank=True, help_text='Bank name (required if method=bank)')
+    payout_account_name = models.CharField(max_length=100, blank=True, help_text='Account holder name (required if method=bank)')
+
     # KYC
     kyc_submitted_at = models.DateTimeField(null=True, blank=True)
     kyc_documents = models.JSONField(default=dict, blank=True)
