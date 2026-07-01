@@ -13,31 +13,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .nav-right{display:flex;gap:12px;align-items:center}
 .nav-right .btn-outline{background:transparent;border:1px solid #2563eb;color:#2563eb;padding:8px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
 .nav-right .btn-outline:hover{background:#eff6ff}
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;padding:100px 24px 60px}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:flex-start;position:relative;overflow:hidden;padding:100px 24px 60px}
 .hero-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:url('https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1400&q=80') center/cover no-repeat;z-index:0}
-.hero-bg::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.92) 40%,rgba(255,255,255,.7) 100%)}
-.hero-content{position:relative;z-index:1;max-width:700px;text-align:left;padding:0 24px}
+.hero-content{position:relative;z-index:1;max-width:640px;text-align:left;padding:0 24px}
 .hero .shield{font-size:56px;margin-bottom:12px}
-.hero h1{font-size:48px;font-weight:800;color:#0f172a;line-height:1.1;margin-bottom:16px}
-.hero h1 span{color:#2563eb}
-.hero p{font-size:17px;color:#475569;line-height:1.7;max-width:500px;margin:0 0 32px}
+.hero h1{font-size:48px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:16px;text-shadow:0 2px 24px rgba(0,0,0,.35)}
+.hero h1 span{color:#60a5fa}
+.hero p{font-size:17px;color:rgba(255,255,255,.9);line-height:1.7;max-width:480px;margin:0 0 32px;text-shadow:0 1px 12px rgba(0,0,0,.25)}
 .hero .btns{display:flex;gap:12px}
-.hero .btn-primary{background:#2563eb;color:#fff;padding:14px 36px;border-radius:10px;font-size:16px;font-weight:600;border:none;cursor:pointer;transition:.2s}
+.hero .btn-primary{background:#2563eb;color:#fff;padding:14px 36px;border-radius:10px;font-size:16px;font-weight:600;border:none;cursor:pointer;transition:.2s;box-shadow:0 4px 20px rgba(0,0,0,.2)}
 .hero .btn-primary:hover{background:#1d4ed8;transform:translateY(-2px)}
-.hero .btn-secondary{background:#fff;color:#1e293b;padding:14px 36px;border-radius:10px;font-size:16px;font-weight:600;border:1px solid #e2e8f0;cursor:pointer;transition:.2s}
-.hero .btn-secondary:hover{background:#f8fafc;border-color:#cbd5e1}
-.hero .badge{display:inline-block;background:#f0fdf4;color:#059669;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid #bbf7d0;margin-bottom:20px}
-.features{padding:60px 24px 80px;overflow:hidden;background:#f8fafc}
-.features h2{text-align:center;font-size:26px;font-weight:700;color:#0f172a;margin-bottom:48px}
-.marquee-track{display:flex;gap:24px;animation:marquee 36s linear infinite;width:max-content;padding-bottom:12px}
+.hero .btn-secondary{background:rgba(255,255,255,.15);backdrop-filter:blur(6px);color:#fff;padding:14px 36px;border-radius:10px;font-size:16px;font-weight:600;border:1px solid rgba(255,255,255,.3);cursor:pointer;transition:.2s}
+.hero .btn-secondary:hover{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.5)}
+.hero .badge{display:inline-block;background:rgba(5,150,105,.2);color:#6ee7b7;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid rgba(5,150,105,.4);margin-bottom:20px;backdrop-filter:blur(4px)}
+.features{padding:80px 24px 100px;overflow:hidden;background:#f8fafc}
+.features h2{text-align:center;font-size:28px;font-weight:700;color:#0f172a;margin-bottom:16px}
+.features .sub{text-align:center;color:#64748b;font-size:15px;margin-bottom:52px}
+.marquee-track{display:flex;gap:24px;animation:marquee 40s linear infinite;width:max-content;padding-bottom:16px}
 .marquee-track:hover{animation-play-state:paused}
 @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.f-card{width:300px;min-height:380px;border-radius:16px;overflow:hidden;flex-shrink:0;position:relative;transition:.3s;border:1px solid #e2e8f0;box-shadow:0 4px 16px rgba(0,0,0,.06);cursor:pointer;background:#fff}
-.f-card:hover{transform:translateY(-8px) scale(1.02);border-color:#93c5fd;box-shadow:0 12px 40px rgba(37,99,235,.12)}
-.f-card-img{width:100%;height:100%;position:absolute;top:0;left:0;object-fit:cover}
-.f-card-gradient{position:absolute;bottom:0;left:0;width:100%;padding:80px 20px 20px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
-.f-card h3{color:#fff;font-size:18px;font-weight:800;letter-spacing:.3px;text-shadow:0 2px 8px rgba(0,0,0,.3)}
-.f-card .accent{width:36px;height:3px;border-radius:2px;margin-top:8px}
+.f-card{width:320px;min-height:400px;border-radius:16px;overflow:hidden;flex-shrink:0;position:relative;transition:.4s cubic-bezier(.22,1,.36,1);border:1px solid #e2e8f0;box-shadow:0 4px 16px rgba(0,0,0,.06);cursor:pointer;background:#fff}
+.f-card:hover{transform:translateY(-8px) scale(1.02);border-color:#93c5fd;box-shadow:0 20px 60px rgba(37,99,235,.15)}
+.f-card-img{width:100%;height:100%;position:absolute;top:0;left:0;object-fit:cover;transition:.8s}
+.f-card:hover .f-card-img{transform:scale(1.08)}
+.f-card-shadow{position:absolute;bottom:0;left:0;width:100%;padding:100px 20px 20px;background:linear-gradient(transparent,rgba(0,0,0,.85))}
+.f-card h3{color:#fff;font-size:18px;font-weight:800;letter-spacing:.3px}
+.f-card .meta{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:12px;color:rgba(255,255,255,.7)}
+.f-card .meta span{display:flex;align-items:center;gap:4px}
+.f-card .accent{width:0;height:3px;border-radius:2px;margin-top:10px;transition:width .6s cubic-bezier(.22,1,.36,1)}
+.f-card:hover .accent{width:48px}
+.f-card .scan{position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);animation:scan 3s ease-in-out infinite;pointer-events:none}
+@keyframes scan{0%{left:-60%}50%{left:120%}100%{left:120%}}
+.f-card:hover .scan{animation-duration:.8s}
 .footer{text-align:center;padding:24px;font-size:12px;color:#94a3b8;border-top:1px solid #f1f5f9;background:#fff}
 
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,.5);z-index:100;align-items:center;justify-content:center}
@@ -90,16 +97,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 <section class="features">
 <h2>Built for every organisation type</h2>
+<p class="sub">Collect, split, and settle across insurance, events, franchises, schools, clinics &amp; more</p>
 <div style="overflow:hidden">
 <div class="marquee-track">
-<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80" alt="QR payment"><div class="f-card-gradient"><h3>QR &amp; Payment Links</h3><div class="accent" style="background:#3b82f6"></div></div></div>
-<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80" alt="Revenue charts"><div class="f-card-gradient"><h3>Revenue Splitting</h3><div class="accent" style="background:#8b5cf6"></div></div></div>
-<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?w=600&q=80" alt="Bank building"><div class="f-card-gradient"><h3>Bank &amp; M-Pesa Settlement</h3><div class="accent" style="background:#10b981"></div></div></div>
-<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=600&q=80" alt="Security"><div class="f-card-gradient"><h3>Secure Ledger</h3><div class="accent" style="background:#f59e0b"></div></div></div>
-<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80" alt="QR payment"><div class="f-card-gradient"><h3>QR &amp; Payment Links</h3><div class="accent" style="background:#3b82f6"></div></div></div>
-<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80" alt="Revenue charts"><div class="f-card-gradient"><h3>Revenue Splitting</h3><div class="accent" style="background:#8b5cf6"></div></div></div>
-<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?w=600&q=80" alt="Bank building"><div class="f-card-gradient"><h3>Bank &amp; M-Pesa Settlement</h3><div class="accent" style="background:#10b981"></div></div></div>
-<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=600&q=80" alt="Security"><div class="f-card-gradient"><h3>Secure Ledger</h3><div class="accent" style="background:#f59e0b"></div></div></div>
+<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80" alt="QR payment"><div class="scan"></div><div class="f-card-shadow"><h3>QR &amp; Payment Links</h3><div class="meta"><span>&#x1f44d; 2.4k</span><span>&#x1f441; 12.8k</span></div><div class="accent" style="background:#3b82f6"></div></div></div>
+<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80" alt="Revenue charts"><div class="scan"></div><div class="f-card-shadow"><h3>Revenue Splitting</h3><div class="meta"><span>&#x1f44d; 3.1k</span><span>&#x1f441; 9.6k</span></div><div class="accent" style="background:#8b5cf6"></div></div></div>
+<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?w=600&q=80" alt="Bank building"><div class="scan"></div><div class="f-card-shadow"><h3>Bank &amp; M-Pesa Settlement</h3><div class="meta"><span>&#x1f44d; 1.8k</span><span>&#x1f441; 6.2k</span></div><div class="accent" style="background:#10b981"></div></div></div>
+<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=600&q=80" alt="Security"><div class="scan"></div><div class="f-card-shadow"><h3>Secure Ledger</h3><div class="meta"><span>&#x1f44d; 4.2k</span><span>&#x1f441; 15.3k</span></div><div class="accent" style="background:#f59e0b"></div></div></div>
+<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80" alt="QR payment"><div class="scan"></div><div class="f-card-shadow"><h3>QR &amp; Payment Links</h3><div class="meta"><span>&#x1f44d; 2.4k</span><span>&#x1f441; 12.8k</span></div><div class="accent" style="background:#3b82f6"></div></div></div>
+<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80" alt="Revenue charts"><div class="scan"></div><div class="f-card-shadow"><h3>Revenue Splitting</h3><div class="meta"><span>&#x1f44d; 3.1k</span><span>&#x1f441; 9.6k</span></div><div class="accent" style="background:#8b5cf6"></div></div></div>
+<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?w=600&q=80" alt="Bank building"><div class="scan"></div><div class="f-card-shadow"><h3>Bank &amp; M-Pesa Settlement</h3><div class="meta"><span>&#x1f44d; 1.8k</span><span>&#x1f441; 6.2k</span></div><div class="accent" style="background:#10b981"></div></div></div>
+<div class="f-card"><img class="f-card-img" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=600&q=80" alt="Security"><div class="scan"></div><div class="f-card-shadow"><h3>Secure Ledger</h3><div class="meta"><span>&#x1f44d; 4.2k</span><span>&#x1f441; 15.3k</span></div><div class="accent" style="background:#f59e0b"></div></div></div>
 </div>
 </div>
 </section>
