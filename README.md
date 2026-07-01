@@ -32,14 +32,17 @@ Money is held until the buyer confirms delivery — then it's released to the se
 
 ---
 
-### Quick start
+### Quick start (live)
+
+Open **[https://miranda-stockish-spacially.ngrok-free.dev](https://miranda-stockish-spacially.ngrok-free.dev)** → register your business → dashboard loads with live stats.  
+All API endpoints below work from that base URL.
+
+To run locally:
 
 ```bash
-cp .env.example .env        # configure your keys
-docker compose up -d        # starts API + DB + Redis + workers
+cp .env.example .env
+docker compose up -d
 ```
-
-Open **http://localhost:8000** → register your business → dashboard loads with live stats.
 
 ---
 
