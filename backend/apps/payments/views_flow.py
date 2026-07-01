@@ -8,6 +8,8 @@ IntaSend Webhook + Full A-Z Flow Views
 """
 import json
 import uuid
+import hmac
+import hashlib
 import logging
 from decimal import Decimal
 from django.http import JsonResponse
@@ -35,6 +37,17 @@ def intasend_callback(request):
 
         if state != 'completed':
             return JsonResponse({'status': 'ignored'})
+
+        received_sig = request.META.get('HTTP_X_INTASEND_SIGNATURE', '')
+        if received_sig:
+            expected = hmac.new(
+                settings.INTASEND_SECRET_KEY.encode(),
+                request.body,
+                hashlib.sha256,
+            ).hexdigest()
+            if not hmac.compare_digest(expected, received_sig):
+                logger.warning("IntaSend callback: invalid HMAC signature")
+                return JsonResponse({'error': 'Invalid signature'}, status=401)
 
         phone = data.get('phone_number', '')
         amount = Decimal(str(data.get('amount', 0)))
