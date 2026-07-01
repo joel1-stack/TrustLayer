@@ -6,56 +6,57 @@
 <title>TrustLayer — Dashboard</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
-.topbar{background:#161b22;border-bottom:1px solid #30363d;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-.topbar h2{font-size:15px;font-weight:700}
-.topbar span{color:#8b949e;font-size:12px}
-.container{max-width:900px;margin:0 auto;padding:20px}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
-.stat-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px}
-.stat-card .label{font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px}
-.stat-card .value{font-size:22px;font-weight:700;margin-top:4px}
-.stat-card .sub{font-size:11px;color:#8b949e;margin-top:2px}
-.blue{color:#58a6ff}.green{color:#3fb950}.orange{color:#d29922}.red{color:#f85149}.purple{color:#bc8cff}
-.card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;margin-bottom:16px}
-.card h3{font-size:14px;font-weight:600;margin-bottom:14px;color:#c9d1d9}
-.form-group{margin-bottom:12px}
-.form-group label{display:block;font-size:11px;color:#8b949e;margin-bottom:4px}
-.form-group input,.form-group select{width:100%;padding:10px 12px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:14px;outline:none}
-.form-group input:focus,.form-group select:focus{border-color:#58a6ff}
-.btn{background:#238636;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
-.btn:hover{background:#2ea043}
-.btn-sm{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer}
-.btn-sm:hover{background:#30363d}
-.btn-outline{background:transparent;color:#58a6ff;border:1px solid #58a6ff;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
-.btn-outline:hover{background:#1f2330}
-.deal-item{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.topbar h2{font-size:16px;font-weight:800;color:#0f172a}
+.topbar span{color:#64748b;font-size:12px}
+.container{max-width:900px;margin:0 auto;padding:24px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.stat-card .label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.stat-card .value{font-size:24px;font-weight:700;margin-top:4px}
+.stat-card .sub{font-size:11px;color:#94a3b8;margin-top:2px}
+.blue{color:#2563eb}.green{color:#059669}.orange{color:#d97706}.red{color:#dc2626}.purple{color:#7c3aed}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card h3{font-size:15px;font-weight:700;margin-bottom:16px;color:#0f172a}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;color:#475569;margin-bottom:4px;font-weight:600}
+.form-group input,.form-group select{width:100%;padding:10px 12px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;color:#1e293b;font-size:14px;outline:none;transition:.2s}
+.form-group input:focus,.form-group select:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.btn{background:#2563eb;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
+.btn:hover{background:#1d4ed8}
+.btn-sm{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;transition:.2s}
+.btn-sm:hover{background:#e2e8f0}
+.btn-outline{background:transparent;color:#2563eb;border:1px solid #2563eb;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-outline:hover{background:#eff6ff}
+.deal-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
 .deal-item .info{flex:1}
-.deal-item .code{font-size:12px;color:#8b949e}
-.deal-item .desc{font-size:13px;color:#e6edf3;margin-top:2px}
-.deal-item .amount{font-size:15px;font-weight:600;text-align:right}
-.deal-item .status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:8px}
-.s-pending{background:#3d2e00;color:#d29922}
-.s-payment_initiated{background:#3d2e00;color:#d29922}
-.s-held{background:#1a3d1f;color:#7ee787}
-.s-delivered{background:#1a3d1f;color:#7ee787}
-.s-released{background:#1a3d1f;color:#7ee787}
-.s-disputed{background:#3d1f1f;color:#ff7b72}
-.s-cancelled{background:#3d1f1f;color:#ff7b72}
-.empty{color:#8b949e;font-size:13px;text-align:center;padding:24px 0}
-.error{background:#3d1f1f;border:1px solid #da3633;color:#ff7b72;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
-.success-msg{background:#1a3d1f;border:1px solid #3fb950;color:#7ee787;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
-.qr-box{text-align:center;padding:24px;background:#0d1117;border:1px solid #30363d;border-radius:10px;margin-top:12px;display:none}
+.deal-item .code{font-size:12px;color:#64748b}
+.deal-item .desc{font-size:13px;color:#1e293b;margin-top:2px}
+.deal-item .amount{font-size:15px;font-weight:700;text-align:right}
+.deal-item .status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;margin-left:8px}
+.s-pending{background:#fffbeb;color:#d97706;border:1px solid #fde68a}
+.s-payment_initiated{background:#fffbeb;color:#d97706;border:1px solid #fde68a}
+.s-held{background:#f0fdf4;color:#059669;border:1px solid #bbf7d0}
+.s-delivered{background:#f0fdf4;color:#059669;border:1px solid #bbf7d0}
+.s-released{background:#f0fdf4;color:#059669;border:1px solid #bbf7d0}
+.s-disputed{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.s-cancelled{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.empty{color:#94a3b8;font-size:13px;text-align:center;padding:24px 0}
+.error{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
+.success-msg{background:#f0fdf4;border:1px solid #86efac;color:#059669;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
+.qr-box{text-align:center;padding:24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-top:12px;display:none}
 .qr-box canvas{margin:0 auto;display:block}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid #30363d;border-top-color:#58a6ff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+a{text-decoration:none}
 </style>
 </head>
 <body>
 
 <div class="topbar">
 <div><h2>&#x1f6e1;&#xfe0f; TrustLayer</h2></div>
-<div><span id="business-name">Dashboard</span> &nbsp; <a href="/portal/cashier/" style="color:#58a6ff;font-size:12px;text-decoration:none">POS</a> &nbsp; <a href="/portal/onboard/" style="color:#d29922;font-size:12px;text-decoration:none">Settings</a> &nbsp; <a href="/" style="color:#8b949e;font-size:12px;text-decoration:none">Logout</a></div>
+<div><span id="business-name">Dashboard</span> &nbsp; <a href="/portal/cashier/" style="color:#2563eb;font-size:12px;font-weight:600">POS</a> &nbsp; <a href="/portal/onboard/" style="color:#d97706;font-size:12px;font-weight:600">Settings</a> &nbsp; <a href="/" style="color:#94a3b8;font-size:12px">Logout</a></div>
 </div>
 
 <div class="container">
@@ -63,7 +64,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div id="error-box" class="error"></div>
 <div id="success-box" class="success-msg"></div>
 
-<!-- Stats Grid -->
 <div class="stats-grid" id="stats-grid">
 <div class="stat-card"><div class="label">Today's Revenue</div><div class="value blue" id="stat-revenue">—</div></div>
 <div class="stat-card"><div class="label">Pending Settlement</div><div class="value orange" id="stat-pending">—</div></div>
@@ -71,15 +71,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="stat-card"><div class="label">Platform Fees</div><div class="value purple" id="stat-fees">—</div></div>
 </div>
 
-<!-- Quick Actions -->
 <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
 <button class="btn" onclick="showTab('pos')">&#x1f4b3; New Payment</button>
 <button class="btn-outline" onclick="showTab('deals')">&#x1f4cb; Transactions</button>
 <button class="btn-outline" onclick="showTab('wallet')">&#x1f4b0; Withdraw</button>
-<a href="/portal/cashier/" style="text-decoration:none"><button class="btn-outline">&#x1f4b3; POS (Cashier)</button></a>
+<a href="/portal/cashier/"><button class="btn-outline">&#x1f4b3; POS (Cashier)</button></a>
 </div>
 
-<!-- POS / Cashier Tab -->
 <div id="tab-pos" class="card">
 <h3>&#x1f4b3; Collect Payment (M-Pesa STK Push)</h3>
 <div class="form-group">
@@ -98,13 +96,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div id="pay-status" style="margin-top:12px"></div>
 </div>
 
-<!-- Deals Tab -->
 <div id="tab-deals" class="card" style="display:none">
 <h3>&#x1f4cb; Recent Transactions</h3>
 <div id="deals-list"><div class="empty">Loading...</div></div>
 </div>
 
-<!-- Wallet / Withdraw Tab -->
 <div id="tab-wallet" class="card" style="display:none">
 <h3>&#x1f4b0; Withdraw to M-Pesa</h3>
 <div class="stats-grid" style="margin-bottom:12px">
@@ -138,7 +134,6 @@ $('tab-'+t).style.display='block';
 hideError();
 }
 
-// ── Load Stats ──
 async function loadStats() {
 try {
 var res = await fetch('/api/stats/', {headers:{'ngrok-skip-browser-warning':'true'}});
@@ -153,7 +148,6 @@ $('wallet-balance').textContent = 'KES ' + Number(s.wallet_balance||0).toLocaleS
 } catch(e) {}
 }
 
-// ── Load Deals ──
 async function loadDeals() {
 try {
 var res = await fetch('/api/proxy/deals/', {headers:{'ngrok-skip-browser-warning':'true'}});
@@ -168,7 +162,6 @@ return '<div class="deal-item"><div class="info"><div class="code">' + dl.deal_c
 } catch(e) { $('deals-list').innerHTML = '<div class="empty">Failed to load transactions.</div>'; }
 }
 
-// ── Collect Payment ──
 async function collectPayment() {
 hideError();
 var phone = $('customer-phone').value.trim();
@@ -191,14 +184,13 @@ body:JSON.stringify({phone:phone,amount:parseInt(amount),description:desc})
 });
 var d = await res.json();
 if (d.error) return showError(d.error);
-$('pay-status').innerHTML = '<span style="color:#3fb950">&#x2705; STK Push sent to ' + phone + '.</span><br><span style="color:#8b949e;font-size:12px">Ask customer to check phone and enter PIN.</span>';
+$('pay-status').innerHTML = '<span style="color:#059669">&#x2705; STK Push sent to ' + phone + '.</span><br><span style="color:#64748b;font-size:12px">Ask customer to check phone and enter PIN.</span>';
 showSuccess('Payment request sent!');
 loadDeals();
 } catch(e) { showError('Failed to send payment request.'); }
 finally { btn.disabled = false; btn.innerHTML = '&#x1f4f1; Send STK Push'; }
 }
 
-// ── Withdraw ──
 async function withdrawFunds() {
 hideError();
 var amount = $('withdraw-amount').value;
@@ -226,12 +218,9 @@ loadStats();
 finally { btn.disabled = false; btn.innerHTML = '&#x1f4b8; Withdraw'; }
 }
 
-// ── Init ──
 loadStats();
 loadDeals();
-// Auto-refresh stats every 30s
 setInterval(loadStats, 30000);
-// Auto-refresh deals every 15s
 setInterval(loadDeals, 15000);
 </script>
 </body>
