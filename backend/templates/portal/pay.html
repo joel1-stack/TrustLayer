@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TrustLayer — Secure Payment</title>
+<title>TrustLayer — Premium Payment</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh;display:flex;align-items:center;justify-content:center}
@@ -52,8 +52,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="badge" id="status-badge">Secured by TrustLayer</div>
 
 <div class="screen active" id="screen-pay">
-<h1 class="title">Complete your payment</h1>
-<p class="sub">Your money is held securely until you confirm delivery</p>
+<h1 class="title">Pay your premium</h1>
+<p class="sub">Your payment is collected securely by your insurance organisation</p>
 <div class="amount-box">
 <div class="label">Amount</div>
 <div class="value" id="display-amount">--</div>
@@ -66,7 +66,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </div>
 <div class="checkbox-row" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;text-align:left">
 <input type="checkbox" id="agree-checkbox" style="margin-top:3px;accent-color:#2563eb;width:16px;height:16px;flex-shrink:0">
-<label for="agree-checkbox" style="font-size:12px;color:#64748b;line-height:1.4;cursor:pointer">I agree to the <a href="/terms/" target="_blank" style="color:#2563eb">Terms of Service</a> and <a href="/dispute-policy/" target="_blank" style="color:#2563eb">Dispute Policy</a>. I understand this payment is held in escrow until I confirm delivery.</label>
+<label for="agree-checkbox" style="font-size:12px;color:#64748b;line-height:1.4;cursor:pointer">I agree to the <a href="/terms/" target="_blank" style="color:#2563eb">Terms of Service</a>. I understand this is a premium payment to my insurance provider.</label>
 </div>
 <button class="btn btn-primary" id="pay-btn" onclick="pay()" disabled>&#x1f511; Pay Securely</button>
 <div class="spinner" id="pay-spinner"></div>
@@ -82,62 +82,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 <div class="screen" id="screen-held">
 <div style="font-size:56px;margin-bottom:12px">&#x2705;</div>
-<h2>Payment Secured!</h2>
-<p style="color:#64748b;font-size:14px;margin-bottom:16px">Your money is held safely by TrustLayer.</p>
+<h2>Premium Collected!</h2>
+<p style="color:#64748b;font-size:14px;margin-bottom:16px">Your payment has been collected by TrustLayer.</p>
 
 <div class="held-note">
-<strong>&#x1f6e1;&#xfe0f; KES <span id="held-amount"></span> held for "<span id="held-desc"></span>"</strong><br><br>
-Your money is safe. It will NOT be released until you confirm delivery.<br><br>
-<strong>Did you receive what you ordered?</strong>
+<strong>&#x1f6e1;&#xfe0f; KES <span id="held-amount"></span> collected for "<span id="held-desc"></span>"</strong><br><br>
+Your premium is securely held and will be settled to your insurance organisation.<br><br>
+<strong>Thank you for your payment.</strong>
 </div>
 
-<button class="btn btn-primary" onclick="confirmDelivery()">&#x2705; Yes, confirm delivery</button>
-<button class="btn btn-danger" onclick="showDispute()">&#x26a0;&#xfe0f; No, raise a dispute</button>
 <p id="deal-code-holder" style="color:#2563eb;font-size:12px;margin-top:12px;font-weight:600"></p>
-</div>
-
-<div class="screen" id="screen-dispute">
-<h2 style="font-size:18px;margin-bottom:16px">&#x26a0;&#xfe0f; Raise a Dispute</h2>
-<p style="color:#64748b;font-size:13px;margin-bottom:16px">Your money is STILL HELD. It will not be released until this is resolved.</p>
-<div id="dispute-error" class="error"></div>
-<div class="form-group">
-<label>What went wrong?</label>
-<button class="dispute-reason-btn" onclick="selectReason(this, &quot;I didn't receive the item&quot;)">I didn't receive the item</button>
-<button class="dispute-reason-btn" onclick="selectReason(this, 'I received the wrong item')">I received the wrong item</button>
-<button class="dispute-reason-btn" onclick="selectReason(this, 'Item was damaged or defective')">Item was damaged / defective</button>
-<button class="dispute-reason-btn" onclick="selectReason(this, 'Other issue')">Other issue</button>
-</div>
-<div class="form-group">
-<label>Describe the problem</label>
-<textarea id="dispute-desc" placeholder="Tell us what happened..."></textarea>
-</div>
-<div class="form-group">
-<label>What would you accept?</label>
-<select id="dispute-resolution">
-<option value="full_refund">Full refund — I want my money back</option>
-<option value="partial_refund">Partial refund — I'll keep the item with a discount</option>
-<option value="replacement">Replacement — Send me a new item</option>
-</select>
-</div>
-<button class="btn btn-danger" onclick="submitDispute()">&#x1f4e9; Submit Dispute</button>
-<button class="btn btn-outline" onclick="backToHeld()">&#x2190; Back</button>
-<div class="spinner" id="dispute-spinner"></div>
 </div>
 
 <div class="screen" id="screen-confirmed">
 <div style="font-size:56px;margin-bottom:12px">&#x1f389;</div>
-<h2 style="color:#059669">Delivery Confirmed!</h2>
-<p style="color:#64748b;font-size:14px;margin-top:8px">KES <span id="released-amount"></span> released to the seller.</p>
-<p style="color:#64748b;font-size:13px">Deal: <span id="confirmed-deal-code"></span> &mdash; COMPLETE</p>
-<p style="color:#64748b;font-size:13px;margin-top:8px">Thank you for using TrustLayer.</p>
-</div>
-
-<div class="screen" id="screen-dispute-submitted">
-<div style="font-size:56px;margin-bottom:12px">&#x1f6e1;&#xfe0f;</div>
-<h2>Dispute Raised</h2>
-<p style="color:#64748b;font-size:14px;margin-top:8px">KES <span id="dispute-amount"></span> is STILL HELD. Your money is safe.</p>
-<p style="color:#64748b;font-size:13px;margin-top:4px">The seller has 48 hours to respond. If no response, your refund will be processed automatically.</p>
-<p style="color:#2563eb;font-size:13px;margin-top:12px;font-weight:600">Deal: <span id="dispute-deal-code"></span></p>
+<h2 style="color:#059669">Premium Collected!</h2>
+<p style="color:#64748b;font-size:14px;margin-top:8px">KES <span id="released-amount"></span> collected successfully.</p>
+<p style="color:#64748b;font-size:13px;margin-top:8px">Thank you for choosing TrustLayer.</p>
 </div>
 
 </div>
@@ -151,7 +112,6 @@ var token = '{{ token }}';
 var dealCode = null;
 var dealAmount = 0;
 var dealDesc = '';
-var selectedReason = '';
 
 function showScreen(id) {
 document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
@@ -164,13 +124,13 @@ var res = await fetch('/api/v1/sessions/validate/' + token + '/');
 var data = await res.json();
 if (!data.valid) throw new Error('Invalid session');
 dealAmount = data.session.amount || 0;
-dealDesc = data.session.description || 'Payment';
+dealDesc = data.session.description || 'Premium Payment';
 document.getElementById('display-amount').textContent = 'KES ' + dealAmount.toLocaleString();
 document.getElementById('display-desc').textContent = dealDesc;
 
 if (data.session.deal_code && data.session.deal_status !== 'PENDING') {
 dealCode = data.session.deal_code;
-showHeldScreen();
+showCollectedScreen();
 }
 } catch(e) {
 document.getElementById('display-desc').textContent = 'Invalid or expired payment link';
@@ -207,18 +167,18 @@ return;
 }
 dealCode = data.deal_code;
 showScreen('screen-waiting');
-pollDealStatus();
+pollPaymentStatus();
 } catch(e) {
 errorBox.textContent = 'Network error. Try again.';
 errorBox.style.display = 'block';
 } finally {
 btn.disabled = false;
 spinner.style.display = 'none';
-btn.textContent = 'Pay Securely';
+btn.textContent = 'Pay Premium';
 }
 }
 
-function pollDealStatus() {
+function pollPaymentStatus() {
 var attempts = 0;
 var maxAttempts = 30;
 var interval = setInterval(async function() {
@@ -228,7 +188,7 @@ var res = await fetch('/api/v1/deals/' + dealCode + '/');
 var data = await res.json();
 if (data.success && data.deal && data.deal.status === 'HELD') {
 clearInterval(interval);
-showHeldScreen();
+showCollectedScreen();
 }
 } catch(e) {}
 if (attempts >= maxAttempts) {
@@ -240,78 +200,12 @@ document.getElementById('error-box').style.display = 'block';
 }, 2000);
 }
 
-function showHeldScreen() {
+function showCollectedScreen() {
 document.getElementById('held-amount').textContent = dealAmount.toLocaleString();
 document.getElementById('held-desc').textContent = dealDesc;
-document.getElementById('deal-code-holder').textContent = 'Deal: ' + dealCode;
-document.getElementById('status-badge').textContent = 'Money held safely';
+document.getElementById('deal-code-holder').textContent = 'Ref: ' + dealCode;
+document.getElementById('status-badge').textContent = 'Premium collected';
 showScreen('screen-held');
-}
-
-async function confirmDelivery() {
-try {
-var res = await fetch('/api/v1/deals/' + dealCode + '/confirm/', {
-method: 'POST',
-headers: {'Content-Type': 'application/json'},
-body: JSON.stringify({})
-});
-var data = await res.json();
-if (!res.ok) return alert(data.error || 'Confirmation failed');
-document.getElementById('released-amount').textContent = dealAmount.toLocaleString();
-document.getElementById('confirmed-deal-code').textContent = dealCode;
-showScreen('screen-confirmed');
-} catch(e) {
-alert('Network error');
-}
-}
-
-function showDispute() {
-document.getElementById('dispute-error').style.display = 'none';
-selectedReason = '';
-document.querySelectorAll('.dispute-reason-btn').forEach(function(b) { b.classList.remove('selected'); });
-showScreen('screen-dispute');
-}
-
-function selectReason(el, reason) {
-document.querySelectorAll('.dispute-reason-btn').forEach(function(b) { b.classList.remove('selected'); });
-el.classList.add('selected');
-selectedReason = reason;
-}
-
-function backToHeld() { showHeldScreen(); }
-
-async function submitDispute() {
-if (!selectedReason) {
-document.getElementById('dispute-error').textContent = 'Please select a reason';
-document.getElementById('dispute-error').style.display = 'block';
-return;
-}
-var desc = document.getElementById('dispute-desc').value.trim();
-var resolution = document.getElementById('dispute-resolution').value;
-var spinner = document.getElementById('dispute-spinner');
-spinner.style.display = 'block';
-
-try {
-var res = await fetch('/api/v1/deals/' + dealCode + '/dispute/', {
-method: 'POST',
-headers: {'Content-Type': 'application/json'},
-body: JSON.stringify({reason: selectedReason, description: desc, requested_resolution: resolution})
-});
-var data = await res.json();
-if (!res.ok) {
-document.getElementById('dispute-error').textContent = data.error || 'Failed to submit dispute';
-document.getElementById('dispute-error').style.display = 'block';
-return;
-}
-document.getElementById('dispute-amount').textContent = dealAmount.toLocaleString();
-document.getElementById('dispute-deal-code').textContent = dealCode;
-showScreen('screen-dispute-submitted');
-} catch(e) {
-document.getElementById('dispute-error').textContent = 'Network error';
-document.getElementById('dispute-error').style.display = 'block';
-} finally {
-spinner.style.display = 'none';
-}
 }
 
 loadSession();

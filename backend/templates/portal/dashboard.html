@@ -73,13 +73,13 @@ a{text-decoration:none}
 
 <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
 <button class="btn" onclick="showTab('pos')">&#x1f4b3; New Payment</button>
-<button class="btn-outline" onclick="showTab('deals')">&#x1f4cb; Transactions</button>
+<button class="btn-outline" onclick="showTab('transactions')">&#x1f4cb; Transactions</button>
 <button class="btn-outline" onclick="showTab('wallet')">&#x1f4b0; Withdraw</button>
 <a href="/portal/cashier/"><button class="btn-outline">&#x1f4b3; POS (Cashier)</button></a>
 </div>
 
 <div id="tab-pos" class="card">
-<h3>&#x1f4b3; Collect Payment (M-Pesa STK Push)</h3>
+<h3>&#x1f4b3; Collect Premium (M-Pesa STK Push)</h3>
 <div class="form-group">
 <label>Customer phone</label>
 <input type="tel" id="customer-phone" placeholder="0712345678">
@@ -90,13 +90,13 @@ a{text-decoration:none}
 </div>
 <div class="form-group">
 <label>Description (optional)</label>
-<input type="text" id="pay-desc" placeholder="e.g. Wash & Fold">
+<input type="text" id="pay-desc" placeholder="e.g. Premium Payment">
 </div>
 <button class="btn" id="pay-btn" onclick="collectPayment()">&#x1f4f1; Send STK Push</button>
 <div id="pay-status" style="margin-top:12px"></div>
 </div>
 
-<div id="tab-deals" class="card" style="display:none">
+<div id="tab-transactions" class="card" style="display:none">
 <h3>&#x1f4cb; Recent Transactions</h3>
 <div id="deals-list"><div class="empty">Loading...</div></div>
 </div>
