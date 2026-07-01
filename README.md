@@ -58,6 +58,18 @@ Every business starts here:
 | `GET /api/proxy/deals/` | Your transactions (session auth) |
 | `POST /api/proxy/collect/` | Send STK Push (session auth) |
 | `POST /api/proxy/withdraw/` | Withdraw to M‑Pesa (session auth) |
+| `POST /api/proxy/create-session/` | Create payment session → returns short code for QR (session auth) |
+
+---
+
+### Cashier POS (in‑store payments)
+
+| Page | What it does |
+|---|---|
+| `GET /portal/cashier/` | Cashier POS: enter phone + amount → generates QR |
+| QR → `/pay/<code>/` | Customer scans → pays via M-Pesa → confirms delivery |
+
+Flow: **Cashier enters amount → session created → QR generated → customer scans → pays via M-Pesa → money held in escrow → customer confirms delivery → funds released.**
 
 ---
 
