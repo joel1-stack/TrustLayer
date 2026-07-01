@@ -10,6 +10,9 @@ from django.shortcuts import render
 def portal_dashboard(request):
     return render(request, 'portal/dashboard.html')
 
+def portal_cashier(request):
+    return render(request, 'portal/cashier.html')
+
 
 def portal_pay(request, token):
     return render(request, 'portal/pay.html', {'token': token})
@@ -19,6 +22,7 @@ urlpatterns = [
     path('', include('apps.portal.urls')),
 
     path('portal/dashboard/', portal_dashboard, name='portal-dashboard'),
+    path('portal/cashier/',   portal_cashier,   name='portal-cashier'),
     path('pay/<path:token>/', portal_pay, name='portal-pay'),
 
     path('admin/', admin.site.urls),

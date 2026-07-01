@@ -10,4 +10,5 @@ urlpatterns = [
     path('api/proxy/deals/', dashboard_views.portal_deals, name='portal-proxy-deals'),
     path('api/proxy/collect/', dashboard_views.portal_collect, name='portal-proxy-collect'),
     path('api/proxy/withdraw/', dashboard_views.portal_withdraw, name='portal-proxy-withdraw'),
+    path('api/proxy/create-session/', dashboard_views.portal_create_session, name='portal-proxy-create-session'),
 ]

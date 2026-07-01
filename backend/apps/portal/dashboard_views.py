@@ -144,6 +144,56 @@ def portal_collect(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+def portal_create_session(request):
+    """
+    Create a JWT payment session (checkout link) for QR code generation.
+    Session-authenticated.
+    """
+    merchant = _get_merchant(request)
+    if not merchant:
+        return JsonResponse({'error': 'Auth required'}, status=401)
+
+    from apps.jwtsessions.services import JWTSessionService
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    phone = data.get('phone', '').replace(' ', '').lstrip('+')
+    amount = data.get('amount', 0)
+    description = data.get('description', 'Payment')
+
+    if not phone or not amount:
+        return JsonResponse({'error': 'Phone and amount required'}, status=400)
+
+    if phone.startswith('0'):
+        phone = '254' + phone[1:]
+    elif not phone.startswith('254'):
+        phone = '254' + phone
+
+    try:
+        result = JWTSessionService.create_session(
+            merchant=merchant,
+            amount=float(amount),
+            description=description,
+            customer_phone=phone,
+        )
+        return JsonResponse({
+            'status': 'ok',
+            'short_code': result['short_code'],
+            'checkout_url': result['checkout_url'],
+            'expires_in_seconds': result['expires_in_seconds'],
+        })
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception as e:
+        logger.exception("portal_create_session failed")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
 def portal_withdraw(request):
     merchant = _get_merchant(request)
     if not merchant:
