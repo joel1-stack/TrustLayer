@@ -134,19 +134,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <label>Password</label>
 <input type="password" id="reg-password" placeholder="At least 6 characters" minlength="6">
 </div>
-<div class="form-group">
-<label>How do you want to receive payouts?</label>
-<select id="reg-payout-method" style="width:100%;padding:10px 12px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;color:#1e293b;font-size:14px;outline:none" onchange="togglePayoutAccount()">
-<option value="phone">Phone (M-Pesa B2C)</option>
-<option value="pochi">Pochi la Biashara</option>
-<option value="till" disabled>Till Number (Coming Soon)</option>
-<option value="bank" disabled>Bank Transfer (Coming Soon)</option>
-</select>
-</div>
-<div class="form-group" id="payout-account-group">
-<label>Payout phone number</label>
-<input type="tel" id="reg-payout-account" placeholder="2547XXXXXXXX (leave blank to use phone above)">
-</div>
 <button type="submit" class="btn" id="reg-btn">Create your account</button>
 <div id="reg-spinner" class="spinner" style="margin-top:12px"></div>
 </form>
@@ -181,19 +168,7 @@ document.getElementById('auth-modal').classList.remove('open');
 }
 document.getElementById('auth-modal').onclick = function(e) {
 if (e.target === this) closeModal();
-};
-
-function togglePayoutAccount() {
-var method = document.getElementById('reg-payout-method').value;
-var group = document.getElementById('payout-account-group');
-var input = document.getElementById('reg-payout-account');
-if (method === 'phone' || method === 'pochi') {
-group.style.display = 'block';
-input.placeholder = method === 'phone' ? '2547XXXXXXXX (leave blank to use phone above)' : 'Pochi phone number 2547XXXXXXXX';
-} else { group.style.display = 'none'; }
-}
-
-function switchTab(tab) {
+};function switchTab(tab) {
 document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
 document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active'); });
 document.getElementById('tab-' + tab).classList.add('active');
@@ -225,8 +200,6 @@ company_name: document.getElementById('reg-name').value,
 email: document.getElementById('reg-email').value,
 phone: document.getElementById('reg-phone').value,
 password: document.getElementById('reg-password').value,
-payout_method: document.getElementById('reg-payout-method').value,
-payout_account: document.getElementById('reg-payout-account').value,
 })
 });
 var text = await res.text();

@@ -234,6 +234,13 @@ def portal_update_business(request):
             setattr(biz, field, data[field])
     biz.save()
 
+    # Also update merchant-level payout settings
+    if 'payout_method' in data:
+        merchant.payout_method = data['payout_method']
+    if 'payout_account' in data:
+        merchant.payout_account = data['payout_account']
+    merchant.save()
+
     return JsonResponse({'status': 'ok', 'message': 'Business updated'})
 
 

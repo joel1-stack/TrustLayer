@@ -126,6 +126,19 @@ a{text-decoration:none}
 </select>
 </div>
 <div class="form-group">
+<label>How do you want to receive payouts?</label>
+<select id="payout-method" style="width:100%;padding:12px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;color:#1e293b;font-size:14px;outline:none" onchange="togglePayoutField()">
+<option value="phone">Phone (M-Pesa B2C)</option>
+<option value="pochi">Pochi la Biashara</option>
+<option value="till" disabled>Till Number (Coming Soon)</option>
+<option value="bank" disabled>Bank Transfer (Coming Soon)</option>
+</select>
+</div>
+<div class="form-group" id="payout-phone-group">
+<label>Payout phone number</label>
+<input type="tel" id="payout-phone" placeholder="2547XXXXXXXX (leave blank to use business phone)">
+</div>
+<div class="form-group">
 <label>Cashier PIN (6 digits)</label>
 <input type="text" id="cashier-pin" placeholder="e.g. 1234" maxlength="6" inputmode="numeric">
 <p style="font-size:11px;color:#64748b;margin-top:4px">Your cashiers enter this PIN to access the POS</p>
@@ -153,6 +166,16 @@ a{text-decoration:none}
 function $(id) { return document.getElementById(id); }
 function showError(m) { var e=$('error-box'); e.textContent=m; e.style.display='block'; }
 function hideError() { $('error-box').style.display='none'; }
+function togglePayoutField() {
+var v = $('payout-method').value;
+var g = $('payout-phone-group');
+g.style.display = (v === 'phone' || v === 'pochi') ? 'block' : 'none';
+}
+document.addEventListener('DOMContentLoaded', togglePayoutField);
+var v = $('payout-method').value;
+var g = $('payout-phone-group');
+g.style.display = (v === 'phone' || v === 'pochi') ? 'block' : 'none';
+}
 
 function nextStep(current) {
 hideError();
@@ -190,6 +213,8 @@ bank_name: $('bank-name').value,
 bank_account: $('bank-account').value,
 bank_account_name: $('bank-name-holder').value,
 settlement_preference: $('settlement-pref').value,
+payout_method: $('payout-method').value,
+payout_account: $('payout-phone').value.replace(/[^0-9]/g,''),
 cashier_pin: pin,
 })
 });
