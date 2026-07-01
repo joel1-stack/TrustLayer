@@ -28,6 +28,8 @@ urlpatterns = [
     path('api/v1/sessions/',   include('apps.jwtsessions.urls')),
     path('api/v1/pay/',        include('apps.payments.urls')),
     path('api/v1/deals/',      include('apps.escrow.urls')),
+    path('api/v1/ledger/',     include('apps.ledger.urls')),
+    path('api/v1/settle/',     include('apps.settlements.urls')),
     path('api/v1/disputes/',   include('apps.disputes.urls')),
     path('api/v1/webhooks/',   include('apps.webhooks.urls')),
     path('api/v1/trust/',      include('apps.trust_scoring.urls')),

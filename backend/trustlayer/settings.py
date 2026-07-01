@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.trust_scoring',
     'apps.compliance',
+    'apps.ledger',
+    'apps.settlements',
 ]
 
 MIDDLEWARE = [
@@ -149,6 +151,12 @@ MPESA_INITIATOR_NAME     = os.environ.get('MPESA_INITIATOR_NAME', 'testinitiator
 MPESA_INITIATOR_PASSWORD = os.environ.get('MPESA_INITIATOR_PASSWORD', '')
 MPESA_B2C_RESULT_URL     = os.environ.get('MPESA_B2C_RESULT_URL', '')
 MPESA_B2C_TIMEOUT_URL    = os.environ.get('MPESA_B2C_TIMEOUT_URL', '')
+
+# IntaSend (Collect + Payout — live wallet)
+INTASEND_PUBLIC_KEY   = os.environ.get('INTASEND_PUBLIC_KEY', '')
+INTASEND_SECRET_KEY   = os.environ.get('INTASEND_SECRET_KEY', '')
+INTASEND_BASE_URL     = os.environ.get('INTASEND_BASE_URL', 'https://payment.intasend.com/api/v1')
+INTASEND_CALLBACK_URL = os.environ.get('INTASEND_CALLBACK_URL', '')
 
 # SMS Notifications
 SMS_PROVIDER  = os.environ.get('SMS_PROVIDER', 'generic')   # 'africastalking' or 'generic'

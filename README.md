@@ -4,161 +4,167 @@
 
 M-Pesa moves money. TrustLayer controls *when* it moves.
 
-## The Problem
-
-| Issue | Reality |
-|---|---|
-| Buyer pays → seller disappears | No enforcement |
-| Disputes take months | Courts are too slow |
-| Marketplaces take no responsibility | Zero protection |
-
-## The Solution
+## The 6 Modules
 
 ```
-PENDING → HELD → DELIVERED → RELEASED
-    ↓         ↓
-REFUNDED   DISPUTED → RESOLVED
+┌──────────────────────────────────────────────────────┐
+│                   TRUSTLAYER ENGINE                   │
+├──────────┬────────┬────────┬────────┬────────┬───────┤
+│ IDENTITY │PAYMENTS│ LEDGER  │SETTLE  │ TRUST  │ OBSERV│
+│          │        │        │ MENT   │        │ ABILITY│
+├──────────┼────────┼────────┼────────┼────────┼───────┤
+│ Portal   │IntaSend│ Double │ Payout │ Escrow │ Stats │
+│ Register │ M-Pesa │-Entry  │ Queue  │ State  │ Dash- │
+│ Login    │ STK    │ Accnts │ B2C    │ Mach.  │ board │
+│ Roles    │ Card   │ Journl │ Bank   │ Disp-  │       │
+│          │        │ Wallet │ Transf │ ute    │       │
+└──────────┴────────┴────────┴────────┴────────┴───────┘
 ```
 
-Funds are held conditionally until delivery is confirmed or disputes are resolved.
+Every customer payment flows through all 6 modules automatically:
 
-- 48h dispute SLA
-- Escrow-based payment flow
-- Bad-faith dispute penalties
+```
+Customer pays KES 1,000
+  → IntaSend / M-Pesa collects
+  → Webhook fires → Ledger records (DEBIT/CREDIT)
+  → Escrow holds funds
+  → Buyer confirms delivery
+  → Split engine fires (95% merchant, 5% platform)
+  → Settlement queues B2C payout
+  → Merchant receives money
+  → Dashboard updates instantly
+```
 
-## API Protocol — SMS-first, API-only
+## Flow (End-to-End)
 
-TrustLayer is a **pure API protocol** with no website, dashboard, or checkout page. The primary interface is SMS; browser is a fallback. Integrate via REST API endpoints.
+```
+PENDING  →  HELD  →  DELIVERED  →  RELEASED  →  SETTLED
+    ↓          ↓
+ REFUNDED   DISPUTED  →  RESOLVED
+```
 
-### API Endpoints
+## API Endpoints
 
-#### Merchants
+### Module 1: Identity (Portal + Merchants)
 | Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/v1/merchants/register/` | Register a merchant |
-| POST | `/api/v1/merchants/login/` | Authenticate a merchant |
+|--------|----------|-------------|
+| GET | `/` | Portal landing page |
+| POST | `/register/` | Register merchant (with payout fields) |
+| POST | `/login/` | Login with email + password |
+| GET | `/portal/dashboard/` | Merchant dashboard |
 | GET/PUT | `/api/v1/merchants/profile/` | Get/update profile |
-| POST | `/api/v1/merchants/keys/regenerate/` | Regenerate API keys |
 
-#### Sessions (JWT)
+### Module 2: Payments (IntaSend + M-Pesa)
 | Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/v1/sessions/create/` | Create a session |
-| GET | `/api/v1/sessions/validate/<token>/` | Validate a session |
-| DELETE | `/api/v1/sessions/consume/<token>/` | Consume a session |
-
-#### Payments (M-Pesa)
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/v1/pay/initiate/` | Initiate STK Push |
-| POST | `/api/v1/pay/direct-stk/` | Direct STK Push |
-| POST | `/api/v1/pay/callbacks/mpesa/` | C2B callback (Safaricom) |
+|--------|----------|-------------|
+| GET | `/api/v1/pay/flow/wallet/` | IntaSend wallet balance |
+| POST | `/api/v1/pay/flow/collect/` | Send STK Push to buyer |
+| POST | `/api/v1/pay/flow/payout/` | Send B2C payout to merchant |
+| POST | `/api/v1/pay/flow/full/` | Full A-Z flow (collect → hold → payout) |
+| POST | `/api/v1/pay/webhooks/intasend/` | IntaSend callback webhook |
+| POST | `/api/v1/pay/initiate/` | Initiate M-Pesa STK Push |
+| POST | `/api/v1/pay/callbacks/mpesa/` | M-Pesa C2B callback |
 | POST | `/api/v1/pay/callbacks/b2c/result/` | B2C result callback |
-| POST | `/api/v1/pay/callbacks/b2c/timeout/` | B2C timeout callback |
 
-#### Escrow Deals
+### Module 3: Ledger (Double-Entry)
 | Method | Endpoint | Description |
-|---|---|---|
+|--------|----------|-------------|
+| GET | `/api/v1/ledger/stats/` | Dashboard stats (float, fees, escrow) |
+| GET | `/api/v1/ledger/wallet/<phone>/` | Wallet balance for phone |
+
+### Module 4: Settlement (Payouts)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/settle/queue/` | Queue a payout |
+| POST | `/api/v1/settle/process/` | Process a queued payout |
+
+### Module 5: Trust (Escrow + Disputes)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | GET/POST | `/api/v1/deals/` | List / create deals |
 | GET | `/api/v1/deals/<code>/` | Deal status |
 | POST | `/api/v1/deals/<code>/confirm/` | Buyer confirms delivery |
 | POST | `/api/v1/deals/<code>/seller-deliver/` | Seller marks delivered |
 | POST | `/api/v1/deals/<code>/dispute/` | Raise a dispute |
-
-#### Disputes
-| Method | Endpoint | Description |
-|---|---|---|
 | POST | `/api/v1/disputes/open/` | Open a dispute |
-| POST | `/api/v1/disputes/evidence/` | Submit evidence |
-| GET | `/api/v1/disputes/status/<id>/` | Dispute status |
 | POST | `/api/v1/disputes/admin/resolve/` | Admin resolve |
 
-#### Webhooks
+### Module 6: Observability (Dashboard)
 | Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/v1/webhooks/register/` | Register webhook |
-| GET | `/api/v1/webhooks/list/` | List webhooks |
-| DELETE | `/api/v1/webhooks/delete/<id>/` | Delete webhook |
-| GET | `/api/v1/webhooks/logs/<id>/` | Delivery logs |
-
-#### Trust Scoring
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/v1/trust/my-score/` | My trust score |
-| GET | `/api/v1/trust/merchant/<key>/` | Public trust score |
+|--------|----------|-------------|
+| GET | `/api/v1/ledger/stats/` | Platform-wide stats |
+| GET | `/api/v1/ledger/wallet/<phone>/` | Wallet lookup |
 
 ## Tech Stack
 
-- Python 3.12 + Django / DRF
-- PostgreSQL 16 (Alpine)
-- Redis 7 (Alpine) — cache & Celery broker
-- Celery — async tasks & scheduled jobs
-- Docker Compose — 5 services
-- M-Pesa Daraja API (C2B STK Push + B2C payout)
+| Component | Technology |
+|-----------|------------|
+| Language | Python 3.12 |
+| Framework | Django 5.x + DRF |
+| Database | PostgreSQL 16 (Alpine) |
+| Cache | Redis 7 (Alpine) |
+| Async Tasks | Celery |
+| Container | Docker Compose (5 services) |
+| Payments IN | M-Pesa Daraja (STK Push) + IntaSend |
+| Payments OUT | IntaSend B2C Payouts |
+| SMS | Africa's Talking |
+| Tunnel | ngrok |
 
 ## Quick Start
 
-### Prerequisites
-
-- Docker & Docker Compose
-
-### Setup
-
 ```bash
-# 1. Clone and enter the project
+# 1. Clone
 git clone <repo-url>
 cd trustlayer
 
-# 2. Environment variables
+# 2. Environment
 cp .env.example .env
-# Edit .env with your M-Pesa sandbox credentials
+# Fill in M-Pesa and IntaSend credentials
 
 # 3. Build and launch
 docker compose up -d --build
 
-# 4. Create admin user
+# 4. Create admin
 docker compose exec django_api python manage.py createsuperuser
 
 # 5. Verify
-curl http://localhost:8000/api/v1/merchants/register/
+curl http://localhost:8000/
 ```
 
-### Services
+## Database Schema
 
-| Service | Container | Port | Role |
-|---|---|---|---|
-| `postgres_db` | `trustlayer_db` | 5432 | Primary database |
-| `redis_cache` | `trustlayer_redis` | 6379 | Cache & message broker |
-| `django_api` | `trustlayer_api` | 8000 | API server |
-| `celery_worker` | `trustlayer_worker` | — | Async task worker |
-| `celery_beat` | `trustlayer_beat` | — | Scheduled tasks |
+```
+merchants
+  ├── escrow_deals         (escrow state machine)
+  ├── payment_transactions (M-Pesa/IntaSend records)
+  ├── ledger_accounts      (double-entry accounts)
+  ├── ledger_transactions  (financial events)
+  ├── ledger_journal_entries (DEBIT/CREDIT pairs)
+  ├── ledger_wallets       (per-user balances)
+  ├── settlement_payouts   (B2C payout queue)
+  ├── settlement_bank_accounts (merchant bank details)
+  ├── fee_records          (platform revenue)
+  └── disputes             (dispute resolution)
+```
 
-### M-Pesa Sandbox Testing
-
-1. Start ngrok: `ngrok http 8000`
-2. Update `.env`:
-   ```
-   MPESA_CALLBACK_URL=https://<ngrok-id>.ngrok.io/api/v1/pay/callbacks/mpesa/
-   MPESA_B2C_RESULT_URL=https://<ngrok-id>.ngrok.io/api/v1/pay/callbacks/b2c/result/
-   MPESA_B2C_TIMEOUT_URL=https://<ngrok-id>.ngrok.io/api/v1/pay/callbacks/b2c/timeout/
-   ```
-3. Restart API: `docker compose restart django_api`
-
-## Domain Architecture
+## Architecture
 
 ```
 backend/
 ├── apps/
-│   ├── merchants/      # Registration, auth, API keys
-│   ├── payments/       # M-Pesa STK Push + B2C
-│   ├── escrow/         # Deal lifecycle (state machine)
-│   ├── disputes/       # Dispute resolution
-│   ├── webhooks/       # Merchant webhook delivery
-│   ├── notifications/  # SMS (Africa's Talking)
-│   ├── trust_scoring/  # Trust scoring system
-│   └── compliance/     # KYC / compliance
-├── trustlayer/         # Django project config
-├── templates/legal/    # Terms & dispute policy
+│   ├── portal/          # Merchant portal (HTML + JS)
+│   ├── merchants/       # Registration, auth, API keys
+│   ├── payments/        # IntaSend + M-Pesa adapters
+│   │   └── adapters/    # mpesa.py, intasend.py
+│   ├── ledger/          # Double-entry accounting
+│   ├── settlements/     # Payout queue + processing
+│   ├── escrow/          # Deal lifecycle (state machine)
+│   ├── disputes/        # Dispute resolution
+│   ├── webhooks/        # Merchant webhook delivery
+│   ├── notifications/   # SMS (Africa's Talking)
+│   └── trust_scoring/   # Trust scoring system
+├── trustlayer/          # Django project config
+├── templates/           # HTML templates
 └── Dockerfile
 ```
 
