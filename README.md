@@ -32,13 +32,11 @@ Money is held until the buyer confirms delivery — then it's released to the se
 
 ---
 
-### Quick start (live)
+### Quick start
 
-Open **[https://miranda-stockish-spacially.ngrok-free.dev](https://miranda-stockish-spacially.ngrok-free.dev)** → register your business → dashboard loads with live stats.  
-All API endpoints below work from that base URL.
+**Live:** [https://miranda-stockish-spacially.ngrok-free.dev](https://miranda-stockish-spacially.ngrok-free.dev) — register your business, dashboard loads with live stats.
 
-To run locally:
-
+**Local:**
 ```bash
 cp .env.example .env
 docker compose up -d
@@ -46,20 +44,74 @@ docker compose up -d
 
 ---
 
-### API endpoints
+### Portal (business owner)
+
+Every business starts here:
 
 | Endpoint | What it does |
 |---|---|
-| `POST /register/` | Create merchant account (returns API key) |
-| `POST /login/` | Sign in (session‑based dashboard) |
+| `GET /` | Landing page (register / sign in) |
+| `POST /register/` | Create merchant account → get API keys |
+| `POST /login/` | Sign in (session‑based) |
+| `GET /portal/dashboard/` | Business dashboard with live stats |
 | `GET /api/stats/` | Revenue, pending, settled, fees |
-| `POST /api/v1/pay/flow/collect/` | STK Push to customer phone |
-| `POST /api/v1/deals/` | Create an escrow deal |
-| `GET /api/v1/deals/` | List your deals |
-| `POST /api/v1/settle/queue/` | Withdraw to M‑Pesa |
-| `POST /api/v1/webhooks/mpesa/` | M‑Pesa callback receiver |
+| `GET /api/proxy/deals/` | Your transactions (session auth) |
+| `POST /api/proxy/collect/` | Send STK Push (session auth) |
+| `POST /api/proxy/withdraw/` | Withdraw to M‑Pesa (session auth) |
 
-Dashboard proxies (`/api/proxy/*`) are available when logged in via the portal — no API key needed.
+---
+
+### API — Payment & Escrow
+
+```http
+Authorization: Bearer <api_key>
+```
+
+| Method | Endpoint | What it does |
+|---|---|---|
+| **POST** | `/api/v1/pay/initiate/` | Create deal + send STK Push |
+| **POST** | `/api/v1/pay/direct-stk/` | Fire STK Push directly (no checkout link) |
+| **POST** | `/api/v1/pay/flow/collect/` | Collect payment (IntaSend flow) |
+| **POST** | `/api/v1/pay/flow/payout/` | Send payout (IntaSend flow) |
+| **GET** | `/api/v1/pay/flow/wallet/` | Check wallet balance (IntaSend) |
+| **POST** | `/api/v1/pay/flow/full/` | Full collect → hold → release flow |
+| **GET** | `/api/v1/deals/` | List your deals |
+| **GET** | `/api/v1/deals/<code>/` | Deal status |
+| **POST** | `/api/v1/deals/<code>/confirm/` | Buyer confirms delivery |
+| **POST** | `/api/v1/deals/<code>/seller-deliver/` | Seller marks delivered |
+| **POST** | `/api/v1/deals/<code>/dispute/` | Raise a dispute |
+| **POST** | `/api/v1/pay/callbacks/mpesa/` | M‑Pesa STK callback receiver |
+| **POST** | `/api/v1/pay/callbacks/b2c/result/` | M‑Pesa B2C result receiver |
+
+---
+
+### API — Merchant & Ledger
+
+| Method | Endpoint | What it does |
+|---|---|---|
+| **POST** | `/api/v1/merchants/register/` | Create merchant (API) |
+| **POST** | `/api/v1/merchants/login/` | Auth (returns session token) |
+| **GET** | `/api/v1/merchants/profile/` | Your merchant profile |
+| **POST** | `/api/v1/merchants/keys/regenerate/` | Rotate API keys |
+| **GET** | `/api/v1/ledger/stats/` | Ledger summary |
+| **GET** | `/api/v1/ledger/wallet/<phone>/` | Wallet balance |
+| **POST** | `/api/v1/settle/queue/` | Queue a withdrawal |
+| **POST** | `/api/v1/settle/process/` | Trigger settlement |
+
+---
+
+### API — Webhooks & Trust
+
+| Method | Endpoint | What it does |
+|---|---|---|
+| **POST** | `/api/v1/webhooks/register/` | Register a webhook URL |
+| **GET** | `/api/v1/webhooks/list/` | Your webhooks |
+| **POST** | `/api/v1/webhooks/delete/<id>/` | Delete a webhook |
+| **GET** | `/api/v1/trust/my-score/` | Your trust score |
+| **GET** | `/api/v1/trust/merchant/<key>/` | Public trust score |
+| **POST** | `/api/v1/disputes/open/` | Open a dispute |
+| **POST** | `/api/v1/disputes/evidence/` | Submit evidence |
+| **GET** | `/api/v1/disputes/status/<id>/` | Dispute status |
 
 ---
 
