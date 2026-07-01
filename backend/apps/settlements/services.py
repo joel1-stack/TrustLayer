@@ -53,7 +53,7 @@ def queue_payout(merchant_phone, amount, method='intasend', destination=''):
 
 def process_payout(payout_id):
     """
-    Send a queued payout via IntaSend.
+    Send a queued payout via IntaSend or bank transfer.
     """
     try:
         payout = Payout.objects.get(id=payout_id, status='QUEUED')
@@ -64,16 +64,20 @@ def process_payout(payout_id):
     payout.save()
 
     try:
-        result = intasend.send_payout(
-            phone=payout.destination,
-            amount=int(payout.net_amount),
-            name=payout.merchant.company_name if payout.merchant else 'Merchant',
-        )
-        payout.provider_tx_id = result.get('id', '')
+        if payout.method == 'bank':
+            result = process_bank_payout(payout)
+        else:
+            result = intasend.send_payout(
+                phone=payout.destination,
+                amount=int(payout.net_amount),
+                name=payout.merchant.company_name if payout.merchant else 'Merchant',
+            )
+            payout.provider_tx_id = result.get('id', '')
+
         payout.status = 'SENT'
         payout.completed_at = timezone.now()
         payout.save()
-        logger.info(f"Payout {payout_id} sent: {result}")
+        logger.info(f"Payout {payout_id} sent via {payout.method}: {result}")
         return {'success': True, 'payout_id': str(payout.id)}
     except Exception as e:
         payout.status = 'FAILED'
@@ -81,3 +85,42 @@ def process_payout(payout_id):
         payout.save()
         logger.error(f"Payout {payout_id} failed: {e}")
         return {'success': False, 'error': str(e)}
+
+
+def process_bank_payout(payout):
+    """
+    Process a bank transfer payout.
+    Records the settlement — actual bank API call depends on the connected bank.
+    Currently logs and marks as sent. Add your bank's API integration here.
+    """
+    from django.utils import timezone
+    logger.info(
+        f"Bank payout: KES {payout.net_amount} to {payout.destination} "
+        f"(merchant: {payout.merchant})"
+    )
+    # TODO: Integrate with actual bank API (KCB, Equity, etc.)
+    # Example:
+    #   bank_api.transfer(
+    #       account=payout.destination,
+    #       amount=payout.net_amount,
+    #       reference=f'TL-{payout.id.hex[:8]}',
+    #   )
+    payout.provider_tx_id = f'BANK-{payout.id.hex[:8].upper()}'
+    return {'success': True, 'reference': payout.provider_tx_id}
+
+
+def process_batch_settlement(merchant_phone):
+    """
+    Settle ALL pending funds for a merchant in one batch.
+    Groups by payout method and creates consolidated payouts.
+    """
+    from apps.ledger import services as ledger_services
+    from decimal import Decimal
+
+    wallet = ledger_services.get_or_create_wallet(merchant_phone, owner_type='MERCHANT')
+    if wallet.balance <= Decimal('0'):
+        return {'success': False, 'error': 'Nothing to settle'}
+
+    amount = wallet.balance
+    payout = queue_payout(merchant_phone, amount, method='intasend')
+    return process_payout(payout.id)

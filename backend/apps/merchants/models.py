@@ -115,10 +115,22 @@ class MerchantAPIKey(models.Model):
 class Organization(models.Model):
     """
     Top-level entity. A company that owns one or more businesses.
-    E.g. "Joel's Laundry Services Ltd"
+    Can be an insurance company, event organizer, school, franchise, clinic, etc.
     """
+    ORG_TYPES = [
+        ('insurance', 'Insurance Company'),
+        ('event', 'Event Organiser'),
+        ('franchise', 'Franchise'),
+        ('school', 'School / Education'),
+        ('clinic', 'Clinic / Hospital'),
+        ('laundry', 'Laundry / Cleaning'),
+        ('retail', 'Retail / Shop'),
+        ('other', 'Other'),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
+    org_type = models.CharField(max_length=20, choices=ORG_TYPES, default='other')
     owner = models.ForeignKey(Merchant, on_delete=models.CASCADE, related_name='organizations')
     kra_pin = models.CharField(max_length=20, blank=True, help_text='KRA PIN for tax compliance')
     is_verified = models.BooleanField(default=False)
@@ -130,7 +142,39 @@ class Organization(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.name} ({'verified' if self.is_verified else 'pending'})"
+        return f"{self.name} ({self.get_org_type_display()})"
+
+
+class SplitRule(models.Model):
+    """
+    Defines how payments are split between parties.
+    E.g. 80% to merchant, 5% platform fee, 15% to partner.
+    Applied automatically when a payment comes in.
+    """
+    SPLIT_TYPES = [
+        ('percentage', 'Percentage'),
+        ('fixed', 'Fixed Amount'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='split_rules')
+    name = models.CharField(max_length=255, help_text='E.g. "Platform fee", "Partner share"')
+    split_type = models.CharField(max_length=20, choices=SPLIT_TYPES, default='percentage')
+    value = models.DecimalField(max_digits=8, decimal_places=2, help_text='Percentage (e.g. 5.00) or fixed amount (KES)')
+    destination_account = models.CharField(max_length=255, blank=True, help_text='Where this split goes (wallet phone, bank ref, or "platform")')
+    is_active = models.BooleanField(default=True)
+    priority = models.IntegerField(default=0, help_text='Higher priority processed first')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'split_rules'
+        ordering = ['-priority']
+
+    def __str__(self):
+        if self.split_type == 'percentage':
+            return f"{self.name}: {self.value}% of payment"
+        return f"{self.name}: KES {self.value} per payment"
 
 
 class Business(models.Model):
