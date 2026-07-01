@@ -14,6 +14,7 @@ from apps.escrow.models import EscrowDeal
 from apps.escrow.services import EscrowService
 from apps.ledger.models import Account
 from apps.ledger import services as ledger_services
+from apps.merchants.models import Organization, Business
 
 logger = logging.getLogger(__name__)
 
@@ -140,6 +141,100 @@ def portal_collect(request):
     except Exception as e:
         logger.exception("portal_collect failed")
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def cashier_pin_login(request):
+    """POST /api/proxy/cashier-login/ — cashier logs in with business PIN."""
+    from apps.merchants.models import Business
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    pin = data.get('pin', '').strip()
+    if not pin:
+        return JsonResponse({'error': 'PIN required'}, status=400)
+
+    biz = Business.objects.filter(cashier_pin=pin).first()
+    if not biz:
+        return JsonResponse({'error': 'Invalid PIN'}, status=401)
+
+    from datetime import timedelta
+    from django.utils import timezone
+    from apps.merchants.models import CashierSession
+    session = CashierSession.objects.create(
+        business=biz,
+        pin_entered=pin,
+        expires_at=timezone.now() + timedelta(hours=12),
+    )
+    return JsonResponse({
+        'status': 'ok',
+        'session_id': str(session.id),
+        'business': {
+            'id': str(biz.id),
+            'name': biz.name,
+            'organization': biz.organization.name,
+        },
+    })
+
+
+@require_http_methods(["GET"])
+def portal_org_businesses(request):
+    """GET /api/proxy/businesses/ — list businesses for the merchant's org."""
+    merchant = _get_merchant(request)
+    if not merchant:
+        return JsonResponse({'error': 'Auth required'}, status=401)
+
+    orgs = Organization.objects.filter(owner=merchant)
+    data = []
+    for org in orgs:
+        for biz in org.businesses.all():
+            data.append({
+                'id': str(biz.id),
+                'name': biz.name,
+                'phone': biz.phone,
+                'is_verified': biz.is_verified,
+                'kra_pin': biz.kra_pin or '',
+                'bank_name': biz.bank_name or '',
+                'bank_account': biz.bank_account or '',
+                'settlement_preference': biz.settlement_preference,
+                'cashier_pin': biz.cashier_pin or '',
+                'organization': org.name,
+            })
+    return JsonResponse({'businesses': data})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def portal_update_business(request):
+    """POST /api/proxy/businesses/update/ — update business settings."""
+    merchant = _get_merchant(request)
+    if not merchant:
+        return JsonResponse({'error': 'Auth required'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    biz_id = data.get('id', '')
+    if not biz_id:
+        return JsonResponse({'error': 'Business ID required'}, status=400)
+
+    biz = Business.objects.filter(id=biz_id, organization__owner=merchant).first()
+    if not biz:
+        return JsonResponse({'error': 'Business not found'}, status=404)
+
+    for field in ['name', 'phone', 'kra_pin', 'bank_name', 'bank_account',
+                  'bank_account_name', 'settlement_preference', 'cashier_pin',
+                  'business_reg_number']:
+        if field in data:
+            setattr(biz, field, data[field])
+    biz.save()
+
+    return JsonResponse({'status': 'ok', 'message': 'Business updated'})
 
 
 @csrf_exempt

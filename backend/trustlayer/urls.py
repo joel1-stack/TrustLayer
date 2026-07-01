@@ -13,6 +13,9 @@ def portal_dashboard(request):
 def portal_cashier(request):
     return render(request, 'portal/cashier.html')
 
+def portal_onboard(request):
+    return render(request, 'portal/onboard.html')
+
 
 def portal_pay(request, token):
     return render(request, 'portal/pay.html', {'token': token})
@@ -23,6 +26,7 @@ urlpatterns = [
 
     path('portal/dashboard/', portal_dashboard, name='portal-dashboard'),
     path('portal/cashier/',   portal_cashier,   name='portal-cashier'),
+    path('portal/onboard/',   portal_onboard,   name='portal-onboard'),
     path('pay/<path:token>/', portal_pay, name='portal-pay'),
 
     path('admin/', admin.site.urls),

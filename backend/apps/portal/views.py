@@ -35,6 +35,21 @@ def register_ajax(request):
         request.session['merchant_id'] = str(m.id)
         request.session['merchant_key'] = m.merchant_key
 
+        # Auto-create Organization and Business for the merchant
+        from apps.merchants.models import Organization, Business
+        org, _ = Organization.objects.get_or_create(
+            owner=m,
+            defaults={'name': m.company_name}
+        )
+        if not Business.objects.filter(organization=org).exists():
+            Business.objects.create(
+                organization=org,
+                name=m.company_name,
+                phone=m.phone,
+                cashier_pin='0000',
+            )
+        request.session['org_id'] = str(org.id)
+
         return JsonResponse({
             'success': True,
             'merchant': {
@@ -78,6 +93,11 @@ def login_ajax(request):
 
         request.session['merchant_id'] = str(merchant.id)
         request.session['merchant_key'] = merchant.merchant_key
+
+        from apps.merchants.models import Organization
+        org = Organization.objects.filter(owner=merchant).first()
+        if org:
+            request.session['org_id'] = str(org.id)
 
         return JsonResponse({
             'success': True,
