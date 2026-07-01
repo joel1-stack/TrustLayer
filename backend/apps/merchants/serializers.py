@@ -14,7 +14,7 @@ class MerchantRegisterSerializer(serializers.Serializer):
     payout_account  = serializers.CharField(max_length=100, required=False, allow_blank=True)
 
     def validate_phone(self, value):
-        phone = value.strip().replace(' ', '')
+        phone = value.strip().replace(' ', '').lstrip('+')
         if phone.startswith('07') or phone.startswith('01'):
             phone = '254' + phone[1:]
         elif not phone.startswith('254'):

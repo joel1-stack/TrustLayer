@@ -28,6 +28,13 @@ def register_ajax(request):
         )
         m = result['merchant']
         creds = result['plaintext_keys']
+
+        from django.core.cache import cache
+        cache.set(f'portal_apikey_{m.id}', creds['api_key'], timeout=86400 * 30)
+
+        request.session['merchant_id'] = str(m.id)
+        request.session['merchant_key'] = m.merchant_key
+
         return JsonResponse({
             'success': True,
             'merchant': {
@@ -68,6 +75,9 @@ def login_ajax(request):
 
         if not merchant.check_password(password):
             return JsonResponse({'error': 'Invalid email or password'}, status=401)
+
+        request.session['merchant_id'] = str(merchant.id)
+        request.session['merchant_key'] = merchant.merchant_key
 
         return JsonResponse({
             'success': True,

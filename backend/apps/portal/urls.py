@@ -1,9 +1,13 @@
 from django.urls import path
 from django.shortcuts import render
-from . import views
+from . import views, dashboard_views
 
 urlpatterns = [
     path('', views.index, name='portal-index'),
     path('register/', views.register_ajax, name='portal-register-ajax'),
     path('login/', views.login_ajax, name='portal-login-ajax'),
+    path('api/stats/', dashboard_views.business_stats, name='portal-stats'),
+    path('api/proxy/deals/', dashboard_views.portal_deals, name='portal-proxy-deals'),
+    path('api/proxy/collect/', dashboard_views.portal_collect, name='portal-proxy-collect'),
+    path('api/proxy/withdraw/', dashboard_views.portal_withdraw, name='portal-proxy-withdraw'),
 ]
