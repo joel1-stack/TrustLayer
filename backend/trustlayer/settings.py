@@ -1,6 +1,7 @@
 """
 Django settings for TrustLayer project.
 """
+from decimal import Decimal
 from pathlib import Path
 import os
 
@@ -162,3 +163,7 @@ SMS_USERNAME  = os.environ.get('SMS_USERNAME', 'sandbox')    # Africa's Talking 
 
 # Admin
 TRUSTLAYER_ADMIN_TOKEN = os.environ.get('TRUSTLAYER_ADMIN_TOKEN', 'change-me-in-production')
+
+# TrustLayer Platform Fee — auto-injected into every agreement as a split rule
+TRUSTLAYER_PLATFORM_FEE_PERCENT = Decimal(os.environ.get('TRUSTLAYER_PLATFORM_FEE', '5.00'))
+TRUSTLAYER_PLATFORM_PHONE = os.environ.get('TRUSTLAYER_PLATFORM_PHONE', '+254715641339')

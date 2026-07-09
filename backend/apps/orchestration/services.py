@@ -85,12 +85,24 @@ class Orchestrator:
         # Notify developer
         NotificationService.on_payment_collected(agreement, amount)
 
-        # Auto-move to WAITING (awaiting conditions)
-        StateMachine.transition(
-            agreement, 'WAITING',
-            triggered_by='orchestrator',
-            reason='Payment collected, awaiting conditions',
-        )
+        # Check if there are required conditions
+        has_conditions = agreement.conditions.filter(required=True).exists()
+
+        if has_conditions:
+            # Escrow flow: wait for conditions
+            StateMachine.transition(
+                agreement, 'WAITING',
+                triggered_by='orchestrator',
+                reason='Payment collected, awaiting conditions',
+            )
+        else:
+            # Immediate split: no waiting, go straight to READY
+            StateMachine.transition(
+                agreement, 'READY',
+                triggered_by='orchestrator',
+                reason='Immediate split — no conditions required',
+            )
+            NotificationService.on_agreement_ready(agreement)
 
         return entry
 

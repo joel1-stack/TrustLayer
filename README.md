@@ -5,141 +5,94 @@
 <h1 align="center">TrustLayer</h1>
 
 <p align="center">
-  <b>Conditional‑release escrow for African commerce.</b><br>
-  Hold funds. Confirm delivery. Release on trust.
+  <b>Trust orchestration platform for African commerce.</b><br>
+  6 interoperable engines — Agreement, State Machine, Condition, Ledger, Settlement, Notification.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.12-2ea043?logo=python">
   <img src="https://img.shields.io/badge/django-4.2-0c4b33?logo=django">
   <img src="https://img.shields.io/badge/celery-✅-3fb950">
+  <img src="https://img.shields.io/badge/IntaSend-integrated-0066cc">
   <img src="https://img.shields.io/badge/M--Pesa-integrated-00a859">
+  <img src="https://img.shields.io/badge/Stripe-integrated-6772e5">
 </p>
 
 ---
 
-### What it does
+## Architecture
 
-TrustLayer lets businesses accept customer payments into **conditional escrow**.  
-Money is held until the buyer confirms delivery — then it's released to the seller.
+```
+                          ┌─────────────────────────────────────┐
+                          │        Orchestration Engine         │
+                          │  (conducts the full agreement flow) │
+                          └───┬─────┬─────┬─────┬─────┬─────┬───┘
+                              │     │     │     │     │     │
+              ┌───────────────┼─────┼─────┼─────┼─────┼─────┼───────────────┐
+              │   Agreement   │State│Cond.│Ledger│Settl.│Notif.│              │
+              │    Engine     │Mach.│Engine│Engine│Engine│Engine│              │
+              │  (creates +   │     │      │      │      │      │              │
+              │   manages     │     │      │      │      │      │              │
+              │  agreements)  │     │      │      │      │      │              │
+              └───────┬───────┘     │      │      │      │      │              │
+                      │             │      │      │      │      │              │
+         ┌────────────┴──────────────────────────────────────┴──────────────┐
+         │              Payment Provider Adapters (pluggable)               │
+         │    IntaSend    │    M-Pesa (Daraja)    │    Stripe    │    ...    │
+         └──────────────────────────────────────────────────────────────────┘
+```
 
-| Problem | TrustLayer |
-|---|---|
-| Customers pay, goods never arrive | Funds held in escrow |
-| Seller delivers, buyer ghosts | Auto‑release after confirmation |
-| Chargebacks, disputes, refunds | Built‑in dispute workflow |
-| Bank integrations for Africa | M‑Pesa STK Push & B2C out‑of‑box |
+**Two webhook directions:**
+1. **TrustLayer → Developer**: Outgoing `POST` to `agreement.developer_webhook_url` for lifecycle events
+2. **Provider → TrustLayer**: Incoming `POST` to `/webhooks/{intasend,mpesa,stripe}/`
 
 ---
 
-### Quick start
+## Engines & API Endpoints
 
-**Live:** [https://miranda-stockish-spacially.ngrok-free.dev](https://miranda-stockish-spacially.ngrok-free.dev) — register your business, dashboard loads with live stats.
+| Engine | Endpoints |
+|---|---|
+| **Agreement** | `POST /api/agreements/` — create, `GET /api/agreements/<id>/` — read, `POST /api/agreements/<id>/party/` — add party |
+| **Condition** | `POST /api/conditions/` — add condition, `POST /api/conditions/<id>/met/` — mark met |
+| **Ledger** | `GET /api/ledger/<agreement_id>/` — entries, `GET /api/ledger/balance/<party_id>/` — balance |
+| **Settlement** | `POST /api/settlements/<agreement_id>/trigger/` — trigger settlement |
+| **Notification** | `GET /api/notifications/<agreement_id>/` — list events |
+| **Payments** | `POST /api/payments/link/` — generate payment link |
+| **Webhooks** | `POST /webhooks/intasend/`, `/webhooks/mpesa/`, `/webhooks/stripe/` |
 
-**Local:**
+---
+
+## Agreement Flow
+
+```
+CREATED → PAYMENT_PENDING → COLLECTED → WAITING → READY → SETTLING → SETTLED
+                                                              ↘ REFUNDED
+                                                    CANCELLED at any point
+```
+
+**Immediate split** (no conditions): `CREATED → PAYMENT_PENDING → COLLECTED → READY → SETTLING → SETTLED`
+
+---
+
+## Platform Fee
+
+Every agreement auto-includes a 5% platform fee to `+254715641339` (IntaSend payout). Configurable via env vars:
+- `TRUSTLAYER_PLATFORM_FEE_PERCENT=5.00`
+- `TRUSTLAYER_PLATFORM_PHONE=+254715641339`
+
+---
+
+## Quick Start
+
 ```bash
 cp .env.example .env
 docker compose up -d
+docker exec trustlayer_api python manage.py migrate
 ```
 
----
+## Live
 
-### Portal (business owner)
-
-Every business starts here:
-
-| Endpoint | What it does |
-|---|---|
-| `GET /` | Landing page (register / sign in) |
-| `POST /register/` | Create merchant account → get API keys |
-| `POST /login/` | Sign in (session‑based) |
-| `GET /portal/dashboard/` | Business dashboard with live stats |
-| `GET /api/stats/` | Revenue, pending, settled, fees |
-| `GET /api/proxy/deals/` | Your transactions (session auth) |
-| `POST /api/proxy/collect/` | Send STK Push (session auth) |
-| `POST /api/proxy/withdraw/` | Withdraw to M‑Pesa (session auth) |
-| `POST /api/proxy/create-session/` | Create payment session → returns short code for QR (session auth) |
-
----
-
-### Cashier POS (in‑store payments)
-
-| Page | What it does |
-|---|---|
-| `GET /portal/cashier/` | Cashier POS: enter phone + amount → generates QR |
-| QR → `/pay/<code>/` | Customer scans → pays via M-Pesa → confirms delivery |
-
-Flow: **Cashier enters amount → session created → QR generated → customer scans → pays via M-Pesa → money held in escrow → customer confirms delivery → funds released.**
-
----
-
-### API — Payment & Escrow
-
-```http
-Authorization: Bearer <api_key>
-```
-
-| Method | Endpoint | What it does |
-|---|---|---|
-| **POST** | `/api/v1/pay/initiate/` | Create deal + send STK Push |
-| **POST** | `/api/v1/pay/direct-stk/` | Fire STK Push directly (no checkout link) |
-| **POST** | `/api/v1/pay/flow/collect/` | Collect payment (IntaSend flow) |
-| **POST** | `/api/v1/pay/flow/payout/` | Send payout (IntaSend flow) |
-| **GET** | `/api/v1/pay/flow/wallet/` | Check wallet balance (IntaSend) |
-| **POST** | `/api/v1/pay/flow/full/` | Full collect → hold → release flow |
-| **GET** | `/api/v1/deals/` | List your deals |
-| **GET** | `/api/v1/deals/<code>/` | Deal status |
-| **POST** | `/api/v1/deals/<code>/confirm/` | Buyer confirms delivery |
-| **POST** | `/api/v1/deals/<code>/seller-deliver/` | Seller marks delivered |
-| **POST** | `/api/v1/deals/<code>/dispute/` | Raise a dispute |
-| **POST** | `/api/v1/pay/callbacks/mpesa/` | M‑Pesa STK callback receiver |
-| **POST** | `/api/v1/pay/callbacks/b2c/result/` | M‑Pesa B2C result receiver |
-
----
-
-### API — Merchant & Ledger
-
-| Method | Endpoint | What it does |
-|---|---|---|
-| **POST** | `/api/v1/merchants/register/` | Create merchant (API) |
-| **POST** | `/api/v1/merchants/login/` | Auth (returns session token) |
-| **GET** | `/api/v1/merchants/profile/` | Your merchant profile |
-| **POST** | `/api/v1/merchants/keys/regenerate/` | Rotate API keys |
-| **GET** | `/api/v1/ledger/stats/` | Ledger summary |
-| **GET** | `/api/v1/ledger/wallet/<phone>/` | Wallet balance |
-| **POST** | `/api/v1/settle/queue/` | Queue a withdrawal |
-| **POST** | `/api/v1/settle/process/` | Trigger settlement |
-
----
-
-### API — Webhooks & Trust
-
-| Method | Endpoint | What it does |
-|---|---|---|
-| **POST** | `/api/v1/webhooks/register/` | Register a webhook URL |
-| **GET** | `/api/v1/webhooks/list/` | Your webhooks |
-| **POST** | `/api/v1/webhooks/delete/<id>/` | Delete a webhook |
-| **GET** | `/api/v1/trust/my-score/` | Your trust score |
-| **GET** | `/api/v1/trust/merchant/<key>/` | Public trust score |
-| **POST** | `/api/v1/disputes/open/` | Open a dispute |
-| **POST** | `/api/v1/disputes/evidence/` | Submit evidence |
-| **GET** | `/api/v1/disputes/status/<id>/` | Dispute status |
-
----
-
-### Architecture
-
-```
-         ┌──────────┐      ┌──────────────┐
-Customer │  M‑Pesa  │◄────►│  TrustLayer   │
-  phone  │  STK/B2C │      │  API + Celery │
-         └──────────┘      └──────┬───────┘
-                                  │
-                         ┌────────▼────────┐
-                         │  PostgreSQL      │
-                         │  + Redis (cache) │
-                         └─────────────────┘
-```
+`https://miranda-stockish-spacially.ngrok-free.dev` — all API calls must include header `ngrok-skip-browser-warning: true`.
 
 ---
 

@@ -1,5 +1,7 @@
 from decimal import Decimal
+from django.conf import settings
 from .models import Agreement, AgreementParty
+
 
 class AgreementService:
 
@@ -13,6 +15,15 @@ class AgreementService:
             creator_type=creator_type,
             description=description,
             metadata=metadata or {},
+        )
+        # Auto-inject platform party with configured fee + phone
+        AgreementService.add_party(
+            agreement,
+            role='PLATFORM',
+            identifier=settings.TRUSTLAYER_PLATFORM_PHONE,
+            name='TrustLayer Platform',
+            split_percentage=settings.TRUSTLAYER_PLATFORM_FEE_PERCENT,
+            payout_method='intasend',
         )
         return agreement
 
@@ -52,7 +63,6 @@ class AgreementService:
             else:
                 remainder_recipient = p
 
-        # Assign remainder to the party without a split (default: PAYEE)
         if remainder_recipient:
             remainder = agreement.amount - assigned_amount
             if remainder > 0:
