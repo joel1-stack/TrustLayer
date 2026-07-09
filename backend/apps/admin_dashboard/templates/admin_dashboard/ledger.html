@@ -1,0 +1,42 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}Global Ledger{% endblock %}
+{% block content %}
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="label">Total Credits</div><div class="value">{{ total_credits|currency }}</div></div>
+  <div class="stat-card"><div class="label">Total Debits</div><div class="value">{{ total_debits|currency }}</div></div>
+  <div class="stat-card"><div class="label">Net</div><div class="value">{{ net|currency }}</div></div>
+  <div class="stat-card"><div class="label">Total Entries</div><div class="value">{{ total_entries }}</div></div>
+</div>
+
+<form method="get" class="search-box">
+  <input type="text" name="search" class="search-input" placeholder="Search by agreement, reference, description..." value="{{ search }}">
+  <select name="type" class="form-select" style="width:auto;">
+    <option value="">All Types</option>
+    <option value="CREDIT" {% if type_filter == 'CREDIT' %}selected{% endif %}>Credits</option>
+    <option value="DEBIT" {% if type_filter == 'DEBIT' %}selected{% endif %}>Debits</option>
+  </select>
+  <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+</form>
+
+<div class="table-container">
+  <div class="table-header"><h3>Ledger Entries</h3></div>
+  <table>
+    <thead><tr><th>Agreement</th><th>Type</th><th>Amount</th><th>Description</th><th>Reference</th><th>Party</th><th>Time</th></tr></thead>
+    <tbody>
+      {% for e in entries %}
+      <tr>
+        <td style="font-family:monospace;font-size:11px;">{{ e.agreement.agreement_id|truncatechars:12 }}</td>
+        <td><span class="status-badge" style="background:{% if e.entry_type == 'CREDIT' %}var(--green){% else %}var(--red){% endif %};color:#000;padding:2px 6px;border-radius:4px;font-size:10px;">{{ e.entry_type }}</span></td>
+        <td>{{ e.amount|currency }}</td>
+        <td style="font-size:12px;">{{ e.description|truncatechars:40 }}</td>
+        <td style="font-size:11px;font-family:monospace;">{{ e.reference|truncatechars:16 }}</td>
+        <td>{{ e.party.name|default:"—"|truncatechars:16 }}</td>
+        <td style="font-size:11px;">{{ e.created_at|date:"Y-m-d H:i:s" }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">No entries</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

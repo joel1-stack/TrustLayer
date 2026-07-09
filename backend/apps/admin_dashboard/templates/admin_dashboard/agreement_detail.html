@@ -1,0 +1,96 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}{{ agreement.agreement_id }}{% endblock %}
+{% block content %}
+
+<div style="margin-bottom:16px;">
+  <a href="/admin/agreements/" class="btn btn-sm btn-ghost">&larr; Back to Agreements</a>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Overview</h3>
+    <div class="row"><span class="key">Status</span><span class="val">{{ agreement.status|status_badge|safe }}</span></div>
+    <div class="row"><span class="key">Amount</span><span class="val">{{ agreement.amount|currency }}</span></div>
+    <div class="row"><span class="key">Currency</span><span class="val">{{ agreement.currency }}</span></div>
+    <div class="row"><span class="key">Title</span><span class="val">{{ agreement.title }}</span></div>
+    <div class="row"><span class="key">Industry</span><span class="val">{{ agreement.metadata.industry|default:"—" }}</span></div>
+    <div class="row"><span class="key">Created</span><span class="val">{{ agreement.created_at|date:"Y-m-d H:i:s" }}</span></div>
+    <div class="row"><span class="key">Updated</span><span class="val">{{ agreement.updated_at|date:"Y-m-d H:i:s" }}</span></div>
+    {% if agreement.payment_url %}
+    <div class="row"><span class="key">Payment URL</span><span class="val" style="font-size:11px;">{{ agreement.payment_url|truncatechars:50 }}</span></div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Parties</h3>
+    {% for p in parties %}
+    <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+      <div><strong>{{ p.role }}</strong> — {{ p.name }}</div>
+      <div style="font-size:12px;color:var(--text-muted);">{{ p.identifier|mask_phone }} &middot; {{ p.payout_method }}</div>
+      {% if p.split_percentage %}<div style="font-size:12px;color:var(--accent);">{{ p.split_percentage }}% split</div>{% endif %}
+    </div>
+    {% empty %}<p style="color:var(--text-muted);">No parties</p>{% endfor %}
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>State History</h3>
+    <div class="timeline">
+      {% for t in transitions %}
+      <div class="timeline-item">
+        <div class="time">{{ t.created_at|date:"H:i:s" }}</div>
+        <div class="event">{{ t.from_status }} &rarr; {{ t.to_status }}</div>
+        <div class="actor">{{ t.triggered_by }} &middot; {{ t.reason|truncatechars:40 }}</div>
+      </div>
+      {% empty %}<p style="color:var(--text-muted);">No transitions</p>{% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Conditions</h3>
+    {% for c in conditions %}
+    <div class="row">
+      <span class="key">
+        {% if c.status == 'MET' %}&#10003;{% else %}&#9711;{% endif %}
+        {{ c.condition_type }}
+      </span>
+      <span class="val">
+        <span class="status-badge" style="background:{% if c.status == 'MET' %}var(--green){% else %}var(--orange){% endif %};color:#000;padding:2px 8px;border-radius:10px;font-size:10px;">{{ c.status }}</span>
+      </span>
+    </div>
+    {% empty %}<p style="color:var(--text-muted);">No conditions</p>{% endfor %}
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Ledger Entries</h3>
+    <table style="width:100%;">
+      <thead><tr><th>Type</th><th>Amount</th><th>Description</th><th>Time</th></tr></thead>
+      <tbody>
+        {% for e in ledger %}
+        <tr>
+          <td><span class="status-badge" style="background:{% if e.entry_type == 'CREDIT' %}var(--green){% else %}var(--red){% endif %};color:#000;padding:2px 6px;border-radius:4px;font-size:10px;">{{ e.entry_type }}</span></td>
+          <td>{{ e.amount|currency }}</td>
+          <td style="font-size:12px;">{{ e.description|truncatechars:30 }}</td>
+          <td style="font-size:11px;">{{ e.created_at|date:"H:i:s" }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="4" style="color:var(--text-muted);">No entries</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Settlements</h3>
+    {% for s in settlements %}
+    <div class="row">
+      <span class="key">{{ s.party.name|default:"—" }}</span>
+      <span class="val">{{ s.amount|currency }} &middot; {{ s.status|status_badge|safe }}</span>
+    </div>
+    {% empty %}<p style="color:var(--text-muted);">No settlements yet</p>{% endfor %}
+  </div>
+</div>
+
+{% endblock %}

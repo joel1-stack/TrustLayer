@@ -1,0 +1,56 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}Settlement Engine{% endblock %}
+{% block content %}
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="label">Queued</div><div class="value">{{ queued }}</div></div>
+  <div class="stat-card"><div class="label">Processing</div><div class="value">{{ processing }}</div></div>
+  <div class="stat-card"><div class="label">Completed</div><div class="value">{{ completed }}</div></div>
+  <div class="stat-card"><div class="label">Failed</div><div class="value" style="color:var(--red);">{{ failed }}</div></div>
+  <div class="stat-card"><div class="label">Retrying</div><div class="value" style="color:var(--orange);">{{ retrying }}</div></div>
+  <div class="stat-card"><div class="label">Total Paid</div><div class="value">{{ total_paid|currency }}</div></div>
+</div>
+
+<div class="pill-group">
+  <a href="/admin/settlements/" class="pill {% if not current_status %}active{% endif %}">All</a>
+  <a href="/admin/settlements/?status=PENDING" class="pill {% if current_status == 'PENDING' %}active{% endif %}">Pending</a>
+  <a href="/admin/settlements/?status=PROCESSING" class="pill {% if current_status == 'PROCESSING' %}active{% endif %}">Processing</a>
+  <a href="/admin/settlements/?status=COMPLETED" class="pill {% if current_status == 'COMPLETED' %}active{% endif %}">Completed</a>
+  <a href="/admin/settlements/?status=FAILED" class="pill {% if current_status == 'FAILED' %}active{% endif %}">Failed</a>
+  <a href="/admin/settlements/?status=RETRYING" class="pill {% if current_status == 'RETRYING' %}active{% endif %}">Retrying</a>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3>Settlements</h3></div>
+  <table>
+    <thead><tr><th>ID</th><th>Agreement</th><th>Party</th><th>Amount</th><th>Status</th><th>Provider</th><th>Created</th></tr></thead>
+    <tbody>
+      {% for s in settlements %}
+      <tr>
+        <td style="font-family:monospace;font-size:11px;">{{ s.settlement_id|truncatechars:12 }}</td>
+        <td style="font-family:monospace;font-size:11px;">{{ s.agreement.agreement_id|truncatechars:12 }}</td>
+        <td>{{ s.party.name|default:"—"|truncatechars:20 }}</td>
+        <td>{{ s.amount|currency }}</td>
+        <td>{{ s.status|status_badge|safe }}</td>
+        <td>{{ s.provider }}</td>
+        <td style="font-size:11px;">{{ s.created_at|age_from_now }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">No settlements</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if recent_failed %}
+<div class="card">
+  <h3>Failed Settlements</h3>
+  {% for s in recent_failed %}
+  <div class="row">
+    <span class="key">{{ s.agreement.agreement_id }} &rarr; {{ s.party.name }}</span>
+    <span class="val" style="color:var(--red);">{{ s.amount|currency }} &middot; {{ s.last_error|truncatechars:60 }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

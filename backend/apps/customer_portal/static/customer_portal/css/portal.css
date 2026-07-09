@@ -1,0 +1,36 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0f1117;
+  --card: #1a1d29;
+  --border: #2a2e3e;
+  --text: #e8eaed;
+  --text2: #9aa0b0;
+  --text3: #5f6577;
+  --accent: #4f8cff;
+  --green: #34d399;
+  --red: #f87171;
+  --orange: #fb923c;
+  font-family: 'Inter', sans-serif;
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); font-size: 14px; }
+.portal-layout { display: flex; min-height: 100vh; }
+.sidebar { width: 240px; background: #151821; border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; height: 100vh; padding: 20px 0; }
+.sidebar h2 { padding: 0 24px 20px; font-size: 16px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.sidebar a { display: block; padding: 10px 24px; color: var(--text2); text-decoration: none; font-size: 13px; }
+.sidebar a:hover, .sidebar a.active { background: var(--card); color: var(--accent); }
+.main { margin-left: 240px; flex: 1; padding: 32px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+.topbar h1 { font-size: 22px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
+.stat .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); }
+.stat .val { font-size: 24px; font-weight: 700; margin-top: 4px; }
+.table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.table-wrap .hdr { padding: 14px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 10px 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); border-bottom: 1px solid var(--border); }
+td { padding: 10px 20px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text2); }
+tr:hover td { background: rgba(79,140,255,0.05); }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+.card h3 { font-size: 15px; margin-bottom: 12px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }

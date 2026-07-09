@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <title>TrustLayer Control Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'admin_dashboard/css/admin.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  {% if request.session.admin_authenticated %}
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>TrustLayer</h1>
+        <span>Control Center</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Core</div>
+        <a href="/admin/dashboard/" class="nav-item {% if active_section == 'dashboard' %}active{% endif %}">
+          <span class="icon">&#9679;</span> Overview
+        </a>
+        <a href="/admin/agreements/" class="nav-item {% if active_section == 'agreements' %}active{% endif %}">
+          <span class="icon">&#9776;</span> Agreements
+        </a>
+        <a href="/admin/ledger/" class="nav-item {% if active_section == 'ledger' %}active{% endif %}">
+          <span class="icon">&#36;</span> Ledger
+        </a>
+        <a href="/admin/settlements/" class="nav-item {% if active_section == 'settlements' %}active{% endif %}">
+          <span class="icon">&#8644;</span> Settlements
+        </a>
+
+        <div class="sidebar-section">Management</div>
+        <a href="/admin/customers/" class="nav-item {% if active_section == 'customers' %}active{% endif %}">
+          <span class="icon">&#9679;</span> Customers
+        </a>
+        <a href="/admin/notifications/" class="nav-item {% if active_section == 'notifications' %}active{% endif %}">
+          <span class="icon">&#9993;</span> Notifications
+        </a>
+        <a href="/admin/analytics/" class="nav-item {% if active_section == 'analytics' %}active{% endif %}">
+          <span class="icon">&#9650;</span> Analytics
+        </a>
+
+        <div class="sidebar-section">Security & Audit</div>
+        <a href="/admin/security/" class="nav-item {% if active_section == 'security' %}active{% endif %}">
+          <span class="icon">&#9888;</span> Security
+        </a>
+        <a href="/admin/audit/" class="nav-item {% if active_section == 'audit' %}active{% endif %}">
+          <span class="icon">&#9776;</span> Audit Trail
+        </a>
+        <a href="/admin/forensics/" class="nav-item {% if active_section == 'forensics' %}active{% endif %}">
+          <span class="icon">&#9881;</span> Forensics
+        </a>
+
+        <div class="sidebar-section">Infrastructure</div>
+        <a href="/admin/infrastructure/" class="nav-item {% if active_section == 'infrastructure' %}active{% endif %}">
+          <span class="icon">&#9723;</span> Infrastructure
+        </a>
+        <a href="/admin/evidence/" class="nav-item {% if active_section == 'evidence' %}active{% endif %}">
+          <span class="icon">&#128230;</span> Evidence Vault
+        </a>
+        <a href="/admin/backups/" class="nav-item {% if active_section == 'backups' %}active{% endif %}">
+          <span class="icon">&#8635;</span> Backups
+        </a>
+        <a href="/admin/settings/" class="nav-item {% if active_section == 'settings' %}active{% endif %}">
+          <span class="icon">&#9881;</span> Settings
+        </a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="topbar">
+        <h2>{% block page_title %}Dashboard{% endblock %}</h2>
+        <div class="topbar-right">
+          <span>{{ request.session.admin_display_name }}</span>
+          <a href="/admin/logout/" class="logout-btn">Logout</a>
+        </div>
+      </div>
+      {% if messages %}
+      <div class="messages">
+        {% for msg in messages %}
+        <div class="alert-{{ msg.tags }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% else %}
+  {% block login_content %}{% endblock %}
+  {% endif %}
+  <script src="{% static 'admin_dashboard/js/admin.js' %}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

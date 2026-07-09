@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustLayer Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'customer_portal/css/portal.css' %}">
+</head>
+<body>
+<div class="portal-layout">
+  <aside class="sidebar">
+    <h2>TrustLayer</h2>
+    <a href="/portal/" class="{% if active == 'dashboard' %}active{% endif %}">Overview</a>
+    <a href="/portal/agreements/" class="{% if active == 'agreements' %}active{% endif %}">Agreements</a>
+    <a href="/portal/ledger/" class="{% if active == 'ledger' %}active{% endif %}">Ledger</a>
+    <a href="/portal/settlements/" class="{% if active == 'settlements' %}active{% endif %}">Settlements</a>
+    <a href="/portal/developers/" class="{% if active == 'developers' %}active{% endif %}">Developers</a>
+    <a href="/portal/settings/" class="{% if active == 'settings' %}active{% endif %}">Settings</a>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <h1>{% block title %}Dashboard{% endblock %}</h1>
+    </div>
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

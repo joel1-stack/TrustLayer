@@ -1,0 +1,35 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}Audit Trail{% endblock %}
+{% block content %}
+
+<form method="get" class="search-box">
+  <input type="text" name="search" class="search-input" placeholder="Search actor, action, resource..." value="{{ search }}">
+  <select name="actor" class="form-select" style="width:auto;">
+    <option value="">All Actors</option>
+    {% for a in actors %}
+    <option value="{{ a.actor }}" {% if actor_filter == a.actor %}selected{% endif %}>{{ a.actor }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+</form>
+
+<div class="table-container">
+  <div class="table-header"><h3>Immutable Audit Log</h3></div>
+  <table>
+    <thead><tr><th>Timestamp</th><th>Hash</th><th>Actor</th><th>Action</th><th>Resource</th><th>IP</th></tr></thead>
+    <tbody>
+      {% for e in entries %}
+      <tr>
+        <td style="font-size:11px;">{{ e.timestamp|date:"Y-m-d H:i:s" }}</td>
+        <td style="font-family:monospace;font-size:10px;color:var(--text-muted);">{{ e.hash|truncatechars:12 }}</td>
+        <td>{{ e.actor }}</td>
+        <td>{{ e.action }}</td>
+        <td style="font-size:12px;">{{ e.resource_type }} {{ e.resource_id|truncatechars:24 }}</td>
+        <td style="font-family:monospace;font-size:11px;">{{ e.actor_ip|default:"—" }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:40px;">No audit entries</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

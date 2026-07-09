@@ -1,0 +1,36 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}{{ customer.name }}{% endblock %}
+{% block content %}
+
+<a href="/admin/customers/" class="btn btn-sm btn-ghost">&larr; Back</a>
+
+<div class="stats-grid" style="margin-top:16px;">
+  <div class="stat-card"><div class="label">Status</div><div class="value" style="font-size:20px;">{{ customer.status|status_badge|safe }}</div></div>
+  <div class="stat-card"><div class="label">Industry</div><div class="value" style="font-size:18px;">{{ customer.industry|default:"—" }}</div></div>
+  <div class="stat-card"><div class="label">Admin</div><div class="value" style="font-size:16px;">{{ customer.admin_name|default:"—" }}</div></div>
+  <div class="stat-card"><div class="label">Agreements</div><div class="value">{{ agreements|length }}</div></div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Details</h3>
+    <div class="row"><span class="key">Name</span><span class="val">{{ customer.name }}</span></div>
+    <div class="row"><span class="key">Industry</span><span class="val">{{ customer.industry|default:"—" }}</span></div>
+    <div class="row"><span class="key">Admin Phone</span><span class="val">{{ customer.admin_phone|mask_phone }}</span></div>
+    <div class="row"><span class="key">Admin Email</span><span class="val">{{ customer.admin_email }}</span></div>
+    <div class="row"><span class="key">API Key</span><span class="val" style="font-family:monospace;font-size:12px;">{{ customer.api_key_masked }}</span></div>
+  </div>
+
+  <div class="card">
+    <h3>Agreements</h3>
+    {% for a in agreements %}
+    <div class="row">
+      <span class="key"><a href="/admin/agreements/{{ a.agreement_id }}/">{{ a.agreement_id }}</a></span>
+      <span class="val">{{ a.amount|currency }} {{ a.status|status_badge|safe }}</span>
+    </div>
+    {% empty %}<p style="color:var(--text-muted);">No agreements</p>{% endfor %}
+  </div>
+</div>
+
+{% endblock %}

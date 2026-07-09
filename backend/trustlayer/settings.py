@@ -32,6 +32,9 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.orchestration',
     'apps.payments',
+    # Dashboards
+    'apps.admin_dashboard',
+    'apps.customer_portal',
 ]
 
 MIDDLEWARE = [
@@ -44,6 +47,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Admin Dashboard Security
+    'apps.admin_dashboard.middleware.IPWhitelistMiddleware',
+    'apps.admin_dashboard.middleware.AdminAuthMiddleware',
+    'apps.admin_dashboard.middleware.AdminAuditMiddleware',
 ]
 
 ROOT_URLCONF = 'trustlayer.urls'
@@ -167,3 +174,25 @@ TRUSTLAYER_ADMIN_TOKEN = os.environ.get('TRUSTLAYER_ADMIN_TOKEN', 'change-me-in-
 # TrustLayer Platform Fee — auto-injected into every agreement as a split rule
 TRUSTLAYER_PLATFORM_FEE_PERCENT = Decimal(os.environ.get('TRUSTLAYER_PLATFORM_FEE', '5.00'))
 TRUSTLAYER_PLATFORM_PHONE = os.environ.get('TRUSTLAYER_PLATFORM_PHONE', '+254715641339')
+
+# --- Admin Dashboard Security ---
+ADMIN_ALLOWED_IPS = [
+    ip.strip() for ip in os.environ.get('ADMIN_ALLOWED_IPS', '127.0.0.1,172.*,10.*,192.168.*').split(',') if ip.strip()
+]
+ADMIN_SESSION_COOKIE_NAME = 'tl_admin_session'
+ADMIN_SESSION_EXPIRY_SECONDS = 1800
+
+# Session security
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SAMESITE = 'Strict'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
+# Security headers
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_USE_SESSIONS = True

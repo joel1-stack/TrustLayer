@@ -1,0 +1,28 @@
+from django.urls import path
+from .views import auth, overview, agreements, ledger, settlements, customers, security, infrastructure, audit, evidence, backups, analytics, notifications, settings_view, forensics
+
+urlpatterns = [
+    path('login/', auth.login_view, name='admin-login'),
+    path('logout/', auth.logout_view, name='admin-logout'),
+    path('dashboard/', overview.dashboard, name='admin-dashboard'),
+    path('agreements/', agreements.agreement_list, name='admin-agreements'),
+    path('agreements/<str:agreement_id>/', agreements.agreement_detail, name='admin-agreement-detail'),
+    path('ledger/', ledger.ledger_view, name='admin-ledger'),
+    path('settlements/', settlements.settlement_view, name='admin-settlements'),
+    path('customers/', customers.customer_list, name='admin-customers'),
+    path('customers/create/', customers.customer_create, name='admin-customer-create'),
+    path('customers/<str:customer_id>/', customers.customer_detail, name='admin-customer-detail'),
+    path('security/', security.security_view, name='admin-security'),
+    path('infrastructure/', infrastructure.infrastructure_view, name='admin-infrastructure'),
+    path('audit/', audit.audit_view, name='admin-audit'),
+    path('evidence/', evidence.evidence_view, name='admin-evidence'),
+    path('evidence/<str:agreement_id>/download/', evidence.evidence_download, name='admin-evidence-download'),
+    path('evidence/export/all/', evidence.evidence_export_all, name='admin-evidence-export-all'),
+    path('backups/', backups.backups_view, name='admin-backups'),
+    path('backups/create/', backups.backup_create, name='admin-backup-create'),
+    path('backups/<str:backup_id>/download/', backups.backup_download, name='admin-backup-download'),
+    path('analytics/', analytics.analytics_view, name='admin-analytics'),
+    path('notifications/', notifications.notifications_view, name='admin-notifications'),
+    path('settings/', settings_view.platform_settings, name='admin-settings'),
+    path('forensics/', forensics.forensics_view, name='admin-forensics'),
+]

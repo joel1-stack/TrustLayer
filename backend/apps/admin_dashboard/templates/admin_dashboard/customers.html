@@ -1,0 +1,30 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}Customers{% endblock %}
+{% block content %}
+
+<div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+  <a href="/admin/customers/create/" class="btn btn-sm btn-primary">+ Create Customer</a>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3>All Customers</h3></div>
+  <table>
+    <thead><tr><th>Name</th><th>Industry</th><th>API Key</th><th>Status</th><th>Agreements</th><th>Created</th></tr></thead>
+    <tbody>
+      {% for c in customers %}
+      <tr onclick="window.location='/admin/customers/{{ c.customer_id }}/'" style="cursor:pointer;">
+        <td><strong>{{ c.name }}</strong></td>
+        <td>{{ c.industry|default:"—" }}</td>
+        <td style="font-family:monospace;font-size:12px;">{{ c.api_key|mask_api_key }}</td>
+        <td>{{ c.status|status_badge|safe }}</td>
+        <td>{{ c.agreement_count }}</td>
+        <td style="font-size:11px;">{{ c.created_at|date:"Y-m-d" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:40px;">No customers yet. Create your first one.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

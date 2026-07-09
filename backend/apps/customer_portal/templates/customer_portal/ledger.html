@@ -1,0 +1,10 @@
+{% extends 'customer_portal/base.html' %}
+{% block title %}Ledger{% endblock %}
+{% block content %}
+<div class="table-wrap">
+  <div class="hdr">Ledger Entries</div>
+  <table><thead><tr><th>Agreement</th><th>Type</th><th>Amount</th><th>Description</th></tr></thead>
+    <tbody>{% for e in entries %}<tr><td style="font-family:monospace">{{ e.agreement.agreement_id|truncatechars:12 }}</td><td>{{ e.entry_type }}</td><td>KES {{ e.amount|floatformat:2 }}</td><td>{{ e.description|truncatechars:40 }}</td></tr>{% empty %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text3);">No entries</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endblock %}

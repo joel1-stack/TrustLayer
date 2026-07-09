@@ -1,0 +1,47 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}Security Center{% endblock %}
+{% block content %}
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="label">Failed Logins (All)</div><div class="value">{{ failed_logins }}</div></div>
+  <div class="stat-card"><div class="label">Failed Today</div><div class="value" style="color:var(--red);">{{ failed_today }}</div></div>
+  <div class="stat-card"><div class="label">Successful Logins</div><div class="value">{{ successful_logins }}</div></div>
+  <div class="stat-card"><div class="label">Unique IPs</div><div class="value">{{ unique_ips }}</div></div>
+  <div class="stat-card"><div class="label">Blocked IPs Today</div><div class="value" style="color:var(--orange);">{{ blocked_ips_today }}</div></div>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3>Recent Login Attempts</h3></div>
+  <table>
+    <thead><tr><th>Time</th><th>Username</th><th>IP</th><th>Result</th></tr></thead>
+    <tbody>
+      {% for a in recent_attempts %}
+      <tr>
+        <td style="font-size:11px;">{{ a.timestamp|date:"Y-m-d H:i:s" }}</td>
+        <td>{{ a.username }}</td>
+        <td style="font-family:monospace;font-size:12px;">{{ a.ip_address }}</td>
+        <td>{% if a.success %}<span style="color:var(--green);">Success</span>{% else %}<span style="color:var(--red);">Failed</span>{% endif %}</td>
+      </tr>
+      {% empty %}<tr><td colspan="4" style="color:var(--text-muted);">No attempts recorded</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3>Audit Events</h3></div>
+  <table>
+    <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Resource</th></tr></thead>
+    <tbody>
+      {% for e in audit_events %}
+      <tr>
+        <td style="font-size:11px;">{{ e.timestamp|date:"Y-m-d H:i:s" }}</td>
+        <td>{{ e.actor }}</td>
+        <td>{{ e.action }}</td>
+        <td style="font-size:12px;">{{ e.resource_type }} {{ e.resource_id|truncatechars:20 }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="4" style="color:var(--text-muted);">No audit events</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

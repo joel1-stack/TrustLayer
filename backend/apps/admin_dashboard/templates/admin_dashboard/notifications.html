@@ -1,0 +1,42 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}Notifications{% endblock %}
+{% block content %}
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="label">Sent</div><div class="value" style="color:var(--green);">{{ sent_count }}</div></div>
+  <div class="stat-card"><div class="label">Failed</div><div class="value" style="color:var(--red);">{{ failed_count }}</div></div>
+  <div class="stat-card"><div class="label">Pending</div><div class="value" style="color:var(--orange);">{{ pending_count }}</div></div>
+</div>
+
+<div class="pill-group">
+  <a href="/admin/notifications/" class="pill {% if not current_status %}active{% endif %}">All</a>
+  <a href="/admin/notifications/?status=sent" class="pill {% if current_status == 'sent' %}active{% endif %}">Sent</a>
+  <a href="/admin/notifications/?status=failed" class="pill {% if current_status == 'failed' %}active{% endif %}">Failed</a>
+  <a href="/admin/notifications/?status=pending" class="pill {% if current_status == 'pending' %}active{% endif %}">Pending</a>
+</div>
+
+<div class="table-container">
+  <div class="table-header"><h3>Events</h3></div>
+  <table>
+    <thead><tr><th>Agreement</th><th>Event</th><th>Status</th><th>Time</th></tr></thead>
+    <tbody>
+      {% for e in events %}
+      <tr>
+        <td style="font-family:monospace;font-size:11px;">{{ e.agreement.agreement_id|truncatechars:12 }}</td>
+        <td>{{ e.event_type }}</td>
+        <td>{{ e.status|status_badge|safe }}</td>
+        <td style="font-size:11px;">{{ e.created_at|age_from_now }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="4" style="color:var(--text-muted);">No events</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h3>By Type</h3>
+  {% for t in by_type %}
+  <div class="row"><span class="key">{{ t.event_type }}</span><span class="val">{{ t.c }}</span></div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}Evidence Vault{% endblock %}
+{% block content %}
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Download Evidence</h3>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">
+      Export a complete, SHA-256 signed evidence package for any agreement.
+      Includes full agreement data, ledger, settlements, conditions, state history, and notifications.
+    </p>
+    <form method="get" action="/admin/evidence/" class="search-box">
+      <input type="text" name="search" class="search-input" placeholder="Search agreement ID..." value="{{ search }}">
+      <button type="submit" class="btn btn-sm btn-primary">Search</button>
+    </form>
+    <table style="width:100%;">
+      <thead><tr><th>Agreement</th><th>Amount</th><th>Status</th><th>Export</th></tr></thead>
+      <tbody>
+        {% for a in agreements %}
+        <tr>
+          <td style="font-family:monospace;">{{ a.agreement_id }}</td>
+          <td>{{ a.amount|currency }}</td>
+          <td>{{ a.status|status_badge|safe }}</td>
+          <td><a href="/admin/evidence/{{ a.agreement_id }}/download/" class="btn btn-sm btn-ghost">Download JSON</a></td>
+        </tr>
+        {% empty %}<tr><td colspan="4" style="color:var(--text-muted);">No agreements</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Bulk Export</h3>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">
+      Export all agreements as CSV. Includes SHA-256 hash header for verification.
+    </p>
+    <a href="/admin/evidence/export/all/" class="btn btn-primary">Export All Agreements (CSV)</a>
+
+    <h3 style="margin-top:24px;">Verification</h3>
+    <p style="color:var(--text-muted);font-size:13px;">
+      Every exported file includes an <code>X-Evidence-Hash</code> header containing a SHA-256 hash.
+      You can verify file integrity at any time. The hash proves the file has not been altered since export.
+    </p>
+  </div>
+</div>
+{% endblock %}

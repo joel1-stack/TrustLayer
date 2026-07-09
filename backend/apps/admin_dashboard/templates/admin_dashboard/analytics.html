@@ -1,0 +1,36 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}Analytics{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h3>Industry Breakdown</h3>
+  {% for ind in industry_breakdown %}
+  <div style="margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;font-size:13px;">
+      <span>{{ ind.metadata__industry|default:"Unspecified" }}</span>
+      <span>{{ ind.count }} agreements &middot; {{ ind.total|default:0|currency }}</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:{% widthratio ind.count industry_breakdown.0.count 100 %}%;background:var(--accent);"></div>
+    </div>
+  </div>
+  {% empty %}<p style="color:var(--text-muted);">No data yet</p>{% endfor %}
+</div>
+
+<div class="card">
+  <h3>Status Breakdown</h3>
+  {% for s in status_breakdown %}
+  <div style="margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;font-size:13px;">
+      <span>{{ s.status|status_badge|safe }}</span>
+      <span>{{ s.count }} &middot; {{ s.total|default:0|currency }}</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:{% widthratio s.count status_breakdown.0.count 100 %}%;background:var(--teal);"></div>
+    </div>
+  </div>
+  {% empty %}<p style="color:var(--text-muted);">No data yet</p>{% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'customer_portal/base.html' %}
+{% block title %}Settlements{% endblock %}
+{% block content %}
+<div class="table-wrap">
+  <div class="hdr">Settlements</div>
+  <table><thead><tr><th>Agreement</th><th>Amount</th><th>Status</th><th>Provider</th></tr></thead>
+    <tbody>{% for s in settlements %}<tr><td style="font-family:monospace">{{ s.agreement.agreement_id|truncatechars:12 }}</td><td>KES {{ s.amount|floatformat:2 }}</td><td>{{ s.status }}</td><td>{{ s.provider }}</td></tr>{% empty %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text3);">No settlements</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endblock %}

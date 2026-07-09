@@ -1,0 +1,43 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}Forensics{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h3>Search</h3>
+  <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px;">
+    Search by agreement ID, phone number, transaction reference, or IP address to reconstruct the complete event timeline.
+  </p>
+  <form method="get" class="search-box">
+    <input type="text" name="q" class="search-input" placeholder="Enter agreement ID, phone, or reference..." value="{{ query }}">
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+</div>
+
+{% if query %}
+<div class="card">
+  <h3>Results for "{{ query }}"</h3>
+  {% if result %}
+  <div class="row"><span class="key">Agreement</span><span class="val"><a href="/admin/agreements/{{ result.agreement_id }}/">{{ result.agreement_id }}</a></span></div>
+  <div class="row"><span class="key">Title</span><span class="val">{{ result.title }}</span></div>
+  <div class="row"><span class="key">Amount</span><span class="val">{{ result.amount|currency }}</span></div>
+  <div class="row"><span class="key">Status</span><span class="val">{{ result.status|status_badge|safe }}</span></div>
+  <div class="row"><span class="key">Created</span><span class="val">{{ result.created_at|date:"Y-m-d H:i:s" }}</span></div>
+
+  <h3 style="margin-top:20px;">Complete Timeline</h3>
+  <div class="timeline">
+    {% for t in timeline %}
+    <div class="timeline-item">
+      <div class="time">{{ t.time|date:"H:i:s" }}</div>
+      <div class="event">{{ t.event }}</div>
+      <div class="actor">{{ t.actor }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color:var(--orange);">No results found for "{{ query }}"</p>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load admin_tags %}
+{% block page_title %}Infrastructure{% endblock %}
+{% block content %}
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="label">Containers</div><div class="value">{{ containers|length }}</div></div>
+</div>
+
+{% if containers %}
+<div class="table-container">
+  <div class="table-header"><h3>Docker Containers</h3></div>
+  <table>
+    <thead><tr><th>Name</th><th>Status</th><th>CPU</th><th>Memory</th></tr></thead>
+    <tbody>
+      {% for c in containers %}
+      <tr>
+        <td style="font-family:monospace;">{{ c.name }}</td>
+        <td><span class="health-dot green"></span> Running</td>
+        <td>{{ c.cpu }}</td>
+        <td>{{ c.memory }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card">
+  <p style="color:var(--text-muted);">Container stats not available. Docker socket may not be accessible.</p>
+</div>
+{% endif %}
+
+<div class="card">
+  <h3>Internal Endpoints</h3>
+  <div class="row"><span class="key">Health</span><span class="val"><a href="/internal/health/" target="_blank">/internal/health/</a></span></div>
+  <div class="row"><span class="key">Containers</span><span class="val"><a href="/internal/containers/" target="_blank">/internal/containers/</a></span></div>
+</div>
+{% endblock %}

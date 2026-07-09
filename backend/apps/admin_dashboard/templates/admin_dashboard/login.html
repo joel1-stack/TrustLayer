@@ -1,0 +1,36 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block login_content %}
+<div class="login-container">
+  <div class="login-card fade-in">
+    <h1>TrustLayer</h1>
+    <p>Control Center — authorized personnel only</p>
+
+    {% if locked %}
+    <div class="alert-warning">Account temporarily locked. Too many failed attempts. Try again in {{ lockout_minutes }} minutes.</div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" class="form-input" placeholder="Enter admin username" required autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" class="form-input" placeholder="Enter admin password" required>
+      </div>
+      {% if not locked %}
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px;">Sign In</button>
+      {% endif %}
+    </form>
+
+    {% if remaining <= 3 and not locked %}
+    <p style="margin-top:12px;font-size:11px;color:var(--orange);text-align:center;">{{ remaining }} attempt{{ remaining|pluralize }} remaining before lockout</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
