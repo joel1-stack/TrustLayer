@@ -1,53 +1,78 @@
 {% extends 'admin_dashboard/base.html' %}
 {% load admin_tags %}
 {% block page_title %}Overview{% endblock %}
+{% block extra_head %}
+<style>
+  .growth-bar { display: flex; align-items: flex-end; gap: 6px; height: 60px; margin-top: 12px; }
+  .growth-bar .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .growth-bar .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; background: var(--accent); transition: height 0.3s; }
+  .growth-bar .day-label { font-size: 10px; color: var(--text-muted); }
+  .growth-bar .view-label { font-size: 9px; color: var(--text-secondary); }
+  .hero-img { width: 100%; height: 120px; border-radius: 12px; object-fit: cover; margin-bottom: 16px; opacity: 0.15; }
+</style>
+{% endblock %}
 {% block content %}
 
 <div class="stats-grid">
   <div class="stat-card fade-in">
-    <div class="label">Today</div>
+    <div class="label">Today Collected</div>
     <div class="value">KES {{ collected_today|floatformat:0 }}</div>
-    <div class="sub">Collected</div>
-  </div>
-  <div class="stat-card fade-in">
-    <div class="label">Today</div>
-    <div class="value">{{ agreements_today }}</div>
-    <div class="sub">Agreements</div>
-  </div>
-  <div class="stat-card fade-in">
-    <div class="label">Today</div>
-    <div class="value">{{ settled_today }}</div>
-    <div class="sub">Settled</div>
+    <div class="sub">{{ agreements_today }} agreements</div>
   </div>
   <div class="stat-card fade-in">
     <div class="label">Active</div>
     <div class="value">{{ active_agreements }}</div>
-    <div class="sub">Ongoing agreements</div>
-  </div>
-  <div class="stat-card fade-in">
-    <div class="label">Waiting</div>
-    <div class="value">{{ waiting_count }}</div>
-    <div class="sub" style="color:var(--orange);">Awaiting conditions</div>
-  </div>
-  <div class="stat-card fade-in">
-    <div class="label">Disputed</div>
-    <div class="value">{{ disputed_count }}</div>
-    <div class="sub" style="color:var(--red);">Needs attention</div>
+    <div class="sub">{{ waiting_count }} waiting, {{ disputed_count }} disputed</div>
   </div>
   <div class="stat-card fade-in">
     <div class="label">This Month</div>
     <div class="value">KES {{ collected_month|floatformat:0 }}</div>
-    <div class="sub">Total collected</div>
+    <div class="sub">{{ agreements_month }} agreements</div>
   </div>
   <div class="stat-card fade-in">
     <div class="label">Platform Fees</div>
     <div class="value">KES {{ platform_fees_today|floatformat:0 }}</div>
-    <div class="sub">Today &middot; KES {{ platform_fees_month|floatformat:0 }} this month</div>
+    <div class="sub">KES {{ platform_fees_month|floatformat:0 }} this month</div>
+  </div>
+  <div class="stat-card fade-in">
+    <div class="label">Settled Today</div>
+    <div class="value">{{ settled_today }}</div>
+    <div class="sub">KES {{ total_settled|floatformat:0 }} all time</div>
+  </div>
+  <div class="stat-card fade-in">
+    <div class="label">Page Views</div>
+    <div class="value">{{ total_page_views }}</div>
+    <div class="sub">{{ total_views_today }} today &middot; {{ unique_visitors }} unique</div>
   </div>
 </div>
 
 <div class="grid-2">
   <div>
+    <img src="https://images.unsplash.com/photo-1559526324-593bc073d938?w=600&q=80" class="hero-img" alt="">
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h3>Visitor Growth (7 days)</h3>
+        <form method="post" action="/admin/settings/reset-visitor-stats/" style="display:inline;" onsubmit="return confirm('Reset all visitor stats? This cannot be undone.');">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-ghost" style="color:var(--red);">Reset Data</button>
+        </form>
+      </div>
+      <div class="growth-bar">
+        {% for d in growth_days %}
+        <div class="col">
+          {% if d.views > 0 %}
+          <div class="bar" style="height:{{ d.views|add:4 }}px;" title="{{ d.views }} views"></div>
+          {% else %}
+          <div class="bar" style="height:4px;"></div>
+          {% endif %}
+          <span class="day-label">{{ d.date }}</span>
+          <span class="view-label">{{ d.views }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
     <div class="card">
       <h3>Active by Industry</h3>
       {% for ind in industries %}
@@ -55,35 +80,44 @@
         <span class="key">{{ ind.metadata__industry|default:"Unspecified" }}</span>
         <span class="val">{{ ind.count }}</span>
       </div>
-      {% empty %}
-      <p style="color:var(--text-muted);font-size:13px;">No agreements yet</p>
-      {% endfor %}
+      {% empty %}<p style="color:var(--text-muted);font-size:13px;">No agreements yet</p>{% endfor %}
     </div>
   </div>
+
   <div>
+    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80" class="hero-img" alt="">
+
     <div class="card">
       <h3>System Health</h3>
       {% for name, status in engine_status.items %}
       <div class="row">
         <span class="key">{{ name|title }} Engine</span>
-        <span class="val">
-          <span class="health-dot green"></span> {{ status|title }}
-        </span>
+        <span class="val"><span class="health-dot green"></span> {{ status|title }}</span>
       </div>
       {% endfor %}
       <div class="row">
         <span class="key">Database</span>
-        <span class="val">
-          <span class="health-dot {% if db_status == 'connected' %}green{% else %}red{% endif %}"></span> {{ db_status|title }}
-        </span>
+        <span class="val"><span class="health-dot {% if db_status == 'connected' %}green{% else %}red{% endif %}"></span> {{ db_status|title }}</span>
       </div>
       <div class="row">
         <span class="key">Redis</span>
-        <span class="val">
-          <span class="health-dot {% if redis_status == 'connected' %}green{% else %}red{% endif %}"></span> {{ redis_status|title }}
-        </span>
+        <span class="val"><span class="health-dot {% if redis_status == 'connected' %}green{% else %}red{% endif %}"></span> {{ redis_status|title }}</span>
       </div>
     </div>
+
+    <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=600&q=80" class="hero-img" alt="">
+
+    {% if recent_errors %}
+    <div class="card">
+      <h3>Recent Errors</h3>
+      {% for e in recent_errors %}
+      <div class="row">
+        <span class="key">{{ e.created_at|age_from_now }}</span>
+        <span class="val" style="color:var(--red);">{{ e.error|truncatechars:80 }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 </div>
 
@@ -93,15 +127,7 @@
     <a href="/admin/agreements/" class="btn btn-sm btn-ghost">View All</a>
   </div>
   <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Title</th>
-        <th>Amount</th>
-        <th>Status</th>
-        <th>Age</th>
-      </tr>
-    </thead>
+    <thead><tr><th>ID</th><th>Title</th><th>Amount</th><th>Status</th><th>Age</th></tr></thead>
     <tbody>
       {% for a in recent_agreements %}
       <tr onclick="window.location='/admin/agreements/{{ a.agreement_id }}/'" style="cursor:pointer;">
@@ -111,23 +137,9 @@
         <td>{{ a.status|status_badge|safe }}</td>
         <td>{{ a.created_at|age_from_now }}</td>
       </tr>
-      {% empty %}
-      <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No agreements yet</td></tr>
-      {% endfor %}
+      {% empty %}<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No agreements yet</td></tr>{% endfor %}
     </tbody>
   </table>
 </div>
-
-{% if recent_errors %}
-<div class="card">
-  <h3>Recent Errors</h3>
-  {% for e in recent_errors %}
-  <div class="row">
-    <span class="key">{{ e.created_at|age_from_now }}</span>
-    <span class="val" style="color:var(--red);">{{ e.error|truncatechars:80 }}</span>
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
 
 {% endblock %}

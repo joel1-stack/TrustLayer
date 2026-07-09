@@ -24,5 +24,6 @@ urlpatterns = [
     path('analytics/', analytics.analytics_view, name='admin-analytics'),
     path('notifications/', notifications.notifications_view, name='admin-notifications'),
     path('settings/', settings_view.platform_settings, name='admin-settings'),
+    path('settings/reset-visitor-stats/', settings_view.reset_visitor_stats, name='admin-reset-visitor-stats'),
     path('forensics/', forensics.forensics_view, name='admin-forensics'),
 ]

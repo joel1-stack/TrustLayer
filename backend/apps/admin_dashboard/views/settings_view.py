@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.http import JsonResponse
 from decimal import Decimal
 from django.conf import settings
 from ..models import PlatformSettings, AuditLogEntry
@@ -35,3 +36,19 @@ def platform_settings(request):
     return render(request, 'admin_dashboard/settings.html', {
         'all_settings': all_settings,
     })
+
+
+def reset_visitor_stats(request):
+    if request.method == 'POST':
+        count = AuditLogEntry.objects.filter(action='viewed_page').count()
+        AuditLogEntry.objects.filter(action='viewed_page').delete()
+        AuditLogEntry.objects.create(
+            actor=request.session.get('admin_username', 'admin'),
+            actor_ip=request.META.get('REMOTE_ADDR', ''),
+            action='reset_visitor_stats',
+            resource_type='stats',
+            detail={'deleted_entries': count},
+        )
+        messages.success(request, f'Visitor stats reset. {count} entries cleared.')
+        return redirect('/admin/dashboard/')
+    return JsonResponse({'error': 'POST required'}, status=405)

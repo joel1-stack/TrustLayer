@@ -53,8 +53,11 @@ class AuditLogEntry(models.Model):
     hash = models.CharField(max_length=64, unique=True, editable=False)
 
     def save(self, *args, **kwargs):
+        from django.utils import timezone
         if not self.entry_id:
             self.entry_id = str(uuid.uuid4())
+        if not self.timestamp:
+            self.timestamp = timezone.now()
         last = AuditLogEntry.objects.order_by('-timestamp').first()
         self.previous_hash = last.hash if last else '0' * 64
         raw = f'{self.entry_id}|{self.timestamp.isoformat()}|{self.actor}|{self.action}|{self.previous_hash}'

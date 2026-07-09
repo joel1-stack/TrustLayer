@@ -1,19 +1,14 @@
 """
-TrustLayer Root URL Configuration — Core Engine APIs + Admin Dashboard + Internal.
+TrustLayer Root URL Configuration — Landing + APIs + Admin + Internal.
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.http import JsonResponse
+from django.shortcuts import render
 from apps.admin_dashboard.views.infrastructure import health_json, containers_json
 
 
 def home(request):
-    return JsonResponse({
-        'service': 'TrustLayer',
-        'version': '2.0',
-        'status': 'operational',
-        'engines': ['agreements', 'state_machine', 'conditions', 'ledger', 'settlements', 'notifications', 'orchestration'],
-    })
+    return render(request, 'landing.html')
 
 
 urlpatterns = [
@@ -28,7 +23,7 @@ urlpatterns = [
     path('api/settlements/', include('apps.settlements.urls')),
     path('api/notifications/', include('apps.notifications.urls')),
 
-    # Payment Provider Webhooks (Direction 2: Provider → TrustLayer)
+    # Payment Provider Webhooks
     path('webhooks/', include('apps.payments.urls')),
 
     # Developer API — generate payment link

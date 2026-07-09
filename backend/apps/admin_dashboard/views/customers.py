@@ -33,6 +33,7 @@ def customer_create(request):
         admin_name = request.POST.get('admin_name', '').strip()
         admin_phone = request.POST.get('admin_phone', '').strip()
         admin_email = request.POST.get('admin_email', '').strip()
+        password = request.POST.get('password', '').strip()
         if name:
             key = 'tl_live_' + secrets.token_hex(16)
             customer = Customer.objects.create(
@@ -44,6 +45,9 @@ def customer_create(request):
                 api_key=key,
                 api_key_masked=key[:8] + '****' + key[-4:],
             )
+            if password:
+                customer.set_password(password)
+                customer.save()
             from ..models import AuditLogEntry
             AuditLogEntry.objects.create(
                 actor=request.session.get('admin_username', 'admin'),

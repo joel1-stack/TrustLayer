@@ -13,10 +13,19 @@ class Customer(models.Model):
     api_key = models.CharField(max_length=128, unique=True, blank=True)
     api_key_masked = models.CharField(max_length=64, blank=True, default='')
     split_default = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('5.00'))
+    password_hash = models.CharField(max_length=256, blank=True, default='')
     status = models.CharField(max_length=32, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     metadata = models.JSONField(default=dict, blank=True)
+
+    def set_password(self, raw):
+        from django.contrib.auth.hashers import make_password
+        self.password_hash = make_password(raw)
+
+    def check_password(self, raw):
+        from django.contrib.auth.hashers import check_password
+        return check_password(raw, self.password_hash)
 
     def save(self, *args, **kwargs):
         if not self.customer_id:

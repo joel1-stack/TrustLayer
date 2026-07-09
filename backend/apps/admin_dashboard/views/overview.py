@@ -1,3 +1,4 @@
+import json
 from datetime import date, timedelta
 from decimal import Decimal
 from django.shortcuts import render
@@ -8,7 +9,6 @@ from apps.agreements.models import Agreement
 from apps.ledger.models import LedgerEntry
 from apps.settlements.models import Settlement
 from apps.payments.models import WebhookEvent
-from apps.conditions.models import Condition
 from ..models import AdminUser, LoginAttempt, AuditLogEntry
 
 
@@ -88,6 +88,16 @@ def dashboard(request):
 
     recent_errors = WebhookEvent.objects.filter(error__isnull=False).order_by('-created_at')[:5]
 
+    # Visitor growth tracking
+    total_page_views = AuditLogEntry.objects.filter(action='viewed_page').count()
+    unique_visitors = AuditLogEntry.objects.filter(action='viewed_page').values('actor_ip').distinct().count()
+    growth_days = []
+    for i in range(6, -1, -1):
+        d = today - timedelta(days=i)
+        views = AuditLogEntry.objects.filter(action='viewed_page', timestamp__date=d).count()
+        growth_days.append({'date': d.strftime('%a'), 'views': views})
+    total_views_today = AuditLogEntry.objects.filter(action='viewed_page', timestamp__date=today).count()
+
     return render(request, 'admin_dashboard/dashboard.html', {
         'agreements_today': agreements_today,
         'agreements_month': agreements_month,
@@ -111,4 +121,8 @@ def dashboard(request):
         'db_status': db_status,
         'redis_status': redis_status,
         'recent_errors': recent_errors,
+        'total_page_views': total_page_views,
+        'unique_visitors': unique_visitors,
+        'total_views_today': total_views_today,
+        'growth_days': growth_days,
     })
