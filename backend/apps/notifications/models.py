@@ -1,28 +1,41 @@
-import uuid
 from django.db import models
 
-
-class Notification(models.Model):
-    CHANNEL_CHOICES = [('SMS','SMS'),('EMAIL','Email'),('WEBHOOK','Webhook')]
-    STATUS_CHOICES  = [('PENDING','Pending'),('SENT','Sent'),('FAILED','Failed'),('DELIVERED','Delivered')]
-
-    id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    recipient     = models.CharField(max_length=100)
-    channel       = models.CharField(max_length=20, choices=CHANNEL_CHOICES)
-    status        = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
-    template_name = models.CharField(max_length=100)
-    subject       = models.CharField(max_length=200, blank=True)
-    body          = models.TextField()
-    data          = models.JSONField(default=dict)
-    external_id   = models.CharField(max_length=100, blank=True)
-    error_message = models.TextField(blank=True)
-    created_at    = models.DateTimeField(auto_now_add=True)
-    sent_at       = models.DateTimeField(null=True, blank=True)
-    delivered_at  = models.DateTimeField(null=True, blank=True)
-
+class NotificationEvent(models.Model):
+    class Event(models.TextChoices):
+        AGREEMENT_CREATED = 'agreement.created', 'Agreement Created'
+        PAYMENT_PENDING = 'payment.pending', 'Payment Pending'
+        PAYMENT_COLLECTED = 'payment.collected', 'Payment Collected'
+        CONDITION_MET = 'condition.met', 'Condition Met'
+        AGREEMENT_WAITING = 'agreement.waiting', 'Agreement Waiting'
+        AGREEMENT_READY = 'agreement.ready', 'Agreement Ready'
+        SETTLEMENT_STARTED = 'settlement.started', 'Settlement Started'
+        SETTLEMENT_COMPLETED = 'settlement.completed', 'Settlement Completed'
+        SETTLEMENT_FAILED = 'settlement.failed', 'Settlement Failed'
+        AGREEMENT_SETTLED = 'agreement.settled', 'Agreement Settled'
+        AGREEMENT_REFUNDED = 'agreement.refunded', 'Agreement Refunded'
+        AGREEMENT_CANCELLED = 'agreement.cancelled', 'Agreement Cancelled'
+    
+    event_id = models.CharField(max_length=24, unique=True, editable=False)
+    agreement = models.ForeignKey('agreements.Agreement', on_delete=models.CASCADE, related_name='notifications')
+    event = models.CharField(max_length=32, choices=Event.choices)
+    channel = models.CharField(max_length=32, default='log', help_text='sms, email, webhook, push, log')
+    recipient = models.CharField(max_length=255, blank=True, default='')
+    message = models.TextField(blank=True, default='')
+    sent = models.BooleanField(default=False)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    error = models.TextField(blank=True, default='')
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
     class Meta:
-        db_table = 'notifications'
+        db_table = 'notification_events'
         ordering = ['-created_at']
-
+    
+    def save(self, *args, **kwargs):
+        if not self.event_id:
+            import secrets, string
+            self.event_id = 'NOT' + ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+        super().save(*args, **kwargs)
+    
     def __str__(self):
-        return f"{self.channel} to {self.recipient} — {self.status}"
+        return f"{self.event_id} {self.event} sent={self.sent}"

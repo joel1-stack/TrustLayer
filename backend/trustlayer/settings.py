@@ -22,19 +22,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    # TrustLayer B2B platform
-    'apps.portal',
-    'apps.merchants',
-    'apps.jwtsessions',
-    'apps.escrow',
-    'apps.payments',
-    'apps.disputes',
-    'apps.webhooks',
-    'apps.notifications',
-    'apps.trust_scoring',
-    'apps.compliance',
+    # TrustLayer Core Engines
+    'apps.agreements',
+    'apps.state_machine',
+    'apps.conditions',
     'apps.ledger',
     'apps.settlements',
+    'apps.notifications',
+    'apps.orchestration',
+    'apps.payments',
 ]
 
 MIDDLEWARE = [
@@ -47,7 +43,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'trustlayer.middleware.NgrokMiddleware',
 ]
 
 ROOT_URLCONF = 'trustlayer.urls'
@@ -131,9 +126,9 @@ CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND') or os.environ.ge
 
 from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
-    'auto-release-held-deals': {
-        'task':     'apps.escrow.tasks.auto_release_held_deals',
-        'schedule': crontab(minute='*/15'),  # every 15 minutes
+    'check-condition-timeouts': {
+        'task':     'apps.conditions.services.check_condition_timeouts',
+        'schedule': crontab(minute='*/5'),
     },
 }
 

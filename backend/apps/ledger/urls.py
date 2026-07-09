@@ -2,6 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('stats/',   views.dashboard_stats, name='ledger-stats'),
-    path('wallet/<str:phone>/', views.wallet_balance, name='ledger-wallet'),
+    path('agreement/<str:agreement_id>/', views.get_entries, name='get-ledger-entries'),
+    path('balance/<int:party_id>/', views.get_balance, name='get-party-balance'),
 ]

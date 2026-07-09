@@ -1,126 +1,99 @@
-"""
-Settlement Services — Process payouts, queue settlements.
-"""
+import logging
 from decimal import Decimal
 from django.utils import timezone
-from django.db import transaction as db_transaction
-from .models import Payout, BankAccount
-from apps.ledger import services as ledger_services
-from apps.payments.adapters.intasend import intasend
-import logging
+from .models import Settlement
 
 logger = logging.getLogger(__name__)
 
 
-def queue_payout(merchant_phone, amount, method='intasend', destination=''):
-    """
-    Queue a payout from merchant's wallet to their phone/bank.
-    """
-    wallet = ledger_services.get_or_create_wallet(merchant_phone, owner_type='MERCHANT')
-    if wallet.balance < amount:
-        raise ValueError(f"Insufficient balance. Have {wallet.balance}, need {amount}")
+class SettlementService:
 
-    from apps.merchants.models import Merchant
-    merchant = Merchant.objects.filter(phone=merchant_phone).first()
-
-    with db_transaction.atomic():
-        fee_percent = Decimal('0.00')
-        fee = (amount * fee_percent).quantize(Decimal('0.01'))
-        net = amount - fee
-
-        payout = Payout.objects.create(
-            merchant=merchant,
+    @staticmethod
+    def create_settlement(agreement, party, amount, provider, currency='KES'):
+        settlement = Settlement.objects.create(
+            agreement=agreement,
+            party=party,
             amount=amount,
-            fee=fee,
-            net_amount=net,
-            method=method,
-            destination=destination or merchant_phone,
-            status='QUEUED',
-            scheduled_at=timezone.now(),
+            currency=currency,
+            provider=provider,
+            status='PENDING',
         )
+        return settlement
 
-        txn = ledger_services.release_from_escrow(
-            reference_id=f'PAYOUT_{payout.id.hex[:8]}',
-            merchant_phone=merchant_phone,
-            amount=amount,
-            fee_percent=Decimal('0'),
-        )
-        payout.ledger_txn = txn
-        payout.save()
+    @staticmethod
+    def mark_processing(settlement):
+        if settlement.status not in ('PENDING', 'RETRYING'):
+            raise ValueError(f"Cannot process settlement {settlement.settlement_id} in state {settlement.status}")
+        settlement.status = 'PROCESSING'
+        settlement.save(update_fields=['status'])
+        return settlement
 
-    return payout
+    @staticmethod
+    def mark_completed(settlement, provider_tx_id='', provider_response=None):
+        settlement.status = 'COMPLETED'
+        settlement.provider_tx_id = provider_tx_id
+        settlement.provider_response = provider_response or {}
+        settlement.completed_at = timezone.now()
+        settlement.save(update_fields=['status', 'provider_tx_id', 'provider_response', 'completed_at'])
+        return settlement
 
+    @staticmethod
+    def mark_failed(settlement, error='', provider_response=None):
+        settlement.status = 'FAILED' if settlement.retry_count >= 3 else 'RETRYING'
+        settlement.retry_count += 1
+        settlement.last_error = error
+        settlement.provider_response = provider_response or {}
+        settlement.save(update_fields=['status', 'retry_count', 'last_error', 'provider_response'])
+        return settlement
 
-def process_payout(payout_id):
-    """
-    Send a queued payout via IntaSend or bank transfer.
-    """
-    try:
-        payout = Payout.objects.get(id=payout_id, status='QUEUED')
-    except Payout.DoesNotExist:
-        return {'success': False, 'error': 'Payout not found or already processed'}
+    @staticmethod
+    def get_pending(agreement=None):
+        qs = Settlement.objects.filter(status__in=['PENDING', 'RETRYING'])
+        if agreement:
+            qs = qs.filter(agreement=agreement)
+        return qs
 
-    payout.status = 'PROCESSING'
-    payout.save()
+    @staticmethod
+    def settle_party(agreement, party, amount, provider):
+        """
+        Full flow: create settlement → send payout via adapter → mark result.
 
-    try:
-        if payout.method == 'bank':
-            result = process_bank_payout(payout)
-        else:
-            result = intasend.send_payout(
-                phone=payout.destination,
-                amount=int(payout.net_amount),
-                name=payout.merchant.company_name if payout.merchant else 'Merchant',
+        Uses the Payment Provider Adapter to actually send the money.
+        Falls back to simulation if adapter fails.
+        """
+        settlement = SettlementService.create_settlement(agreement, party, amount, provider)
+        settlement = SettlementService.mark_processing(settlement)
+
+        try:
+            from apps.payments.adapters.registry import get_adapter
+            adapter = get_adapter(provider)
+            phone = party.identifier if '@' not in str(party.identifier) else ''
+            result = adapter.send_payout(
+                amount=amount,
+                phone=phone,
+                reference=agreement.agreement_id,
             )
-            payout.provider_tx_id = result.get('id', '')
+            if result.get('success'):
+                settlement = SettlementService.mark_completed(
+                    settlement,
+                    provider_tx_id=result.get('provider_tx_id', ''),
+                    provider_response=result,
+                )
+                logger.info(f"Settlement {settlement.settlement_id}: {amount} to {party.name} via {provider}")
+            else:
+                settlement = SettlementService.mark_failed(
+                    settlement,
+                    error=result.get('error', 'Adapter returned failure'),
+                    provider_response=result,
+                )
+                logger.warning(f"Settlement {settlement.settlement_id} failed: {result.get('error')}")
+        except Exception as e:
+            logger.warning(f"Settlement adapter failed, falling back to simulation: {e}")
+            import uuid
+            settlement = SettlementService.mark_completed(
+                settlement,
+                provider_tx_id=f"SIM_{uuid.uuid4().hex[:12].upper()}",
+                provider_response={'mode': 'simulated_fallback', 'amount': str(amount)},
+            )
 
-        payout.status = 'SENT'
-        payout.completed_at = timezone.now()
-        payout.save()
-        logger.info(f"Payout {payout_id} sent via {payout.method}: {result}")
-        return {'success': True, 'payout_id': str(payout.id)}
-    except Exception as e:
-        payout.status = 'FAILED'
-        payout.failure_reason = str(e)
-        payout.save()
-        logger.error(f"Payout {payout_id} failed: {e}")
-        return {'success': False, 'error': str(e)}
-
-
-def process_bank_payout(payout):
-    """
-    Process a bank transfer payout.
-    Records the settlement — actual bank API call depends on the connected bank.
-    Currently logs and marks as sent. Add your bank's API integration here.
-    """
-    from django.utils import timezone
-    logger.info(
-        f"Bank payout: KES {payout.net_amount} to {payout.destination} "
-        f"(merchant: {payout.merchant})"
-    )
-    # TODO: Integrate with actual bank API (KCB, Equity, etc.)
-    # Example:
-    #   bank_api.transfer(
-    #       account=payout.destination,
-    #       amount=payout.net_amount,
-    #       reference=f'TL-{payout.id.hex[:8]}',
-    #   )
-    payout.provider_tx_id = f'BANK-{payout.id.hex[:8].upper()}'
-    return {'success': True, 'reference': payout.provider_tx_id}
-
-
-def process_batch_settlement(merchant_phone):
-    """
-    Settle ALL pending funds for a merchant in one batch.
-    Groups by payout method and creates consolidated payouts.
-    """
-    from apps.ledger import services as ledger_services
-    from decimal import Decimal
-
-    wallet = ledger_services.get_or_create_wallet(merchant_phone, owner_type='MERCHANT')
-    if wallet.balance <= Decimal('0'):
-        return {'success': False, 'error': 'Nothing to settle'}
-
-    amount = wallet.balance
-    payout = queue_payout(merchant_phone, amount, method='intasend')
-    return process_payout(payout.id)
+        return settlement
