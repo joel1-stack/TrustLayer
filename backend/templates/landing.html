@@ -7,6 +7,7 @@
   <title>TrustLayer — Trust Orchestration Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: #f4f6f9; color: #1a2332; line-height: 1.6; overflow-x: hidden; }
@@ -28,7 +29,6 @@
     .links .secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px); }
     .links .secondary:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
 
-    /* Provider logos in hero */
     .hero-providers { margin-top: 40px; display: flex; gap: 24px; align-items: center; justify-content: center; z-index: 2; position: relative; flex-wrap: wrap; }
     .hero-providers span { font-size: 11px; color: #6b7a93; text-transform: uppercase; letter-spacing: 2px; }
     .hero-providers img { height: 28px; opacity: 0.5; transition: opacity 0.2s; }
@@ -40,26 +40,44 @@
     .stat-card .num { font-size: 2rem; font-weight: 700; color: #2563eb; font-family: 'Outfit', sans-serif; }
     .stat-card .lbl { font-size: 11px; color: #8a9bb5; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; }
 
-    /* Features with real images */
+    /* Features with real icons */
     .features-section { max-width: 1100px; margin: 60px auto; padding: 0 24px; }
     .features-section .section-title { text-align: center; font-size: 28px; font-weight: 600; margin-bottom: 8px; font-family: 'Outfit', sans-serif; color: #1a2332; }
     .features-section .section-sub { text-align: center; color: #6b7a93; font-size: 14px; margin-bottom: 40px; }
     .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
-    .feature { background: #fff; border: 1px solid #dde3ea; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.25s; }
-    .feature:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
-    .feature-img { width: 100%; height: 180px; object-fit: cover; display: block; }
-    .feature-body { padding: 24px; }
-    .feature-body h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; font-family: 'Outfit', sans-serif; color: #1a2332; }
-    .feature-body p { font-size: 13px; color: #4a5a72; line-height: 1.7; }
+    .feature { background: #fff; border: 1px solid #dde3ea; border-radius: 16px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.25s; text-align: center; }
+    .feature:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); border-color: #2563eb; }
+    .feature .icon-wrap { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 22px; color: #fff; }
+    .feature .icon-wrap.blue { background: linear-gradient(135deg, #2563eb, #7c3aed); }
+    .feature .icon-wrap.green { background: linear-gradient(135deg, #059669, #0d9488); }
+    .feature .icon-wrap.amber { background: linear-gradient(135deg, #d97706, #dc2626); }
+    .feature .icon-wrap.purple { background: linear-gradient(135deg, #7c3aed, #2563eb); }
+    .feature .icon-wrap.teal { background: linear-gradient(135deg, #0d9488, #059669); }
+    .feature .icon-wrap.pink { background: linear-gradient(135deg, #ec4899, #a855f7); }
+    .feature h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; font-family: 'Outfit', sans-serif; color: #1a2332; }
+    .feature p { font-size: 13px; color: #4a5a72; line-height: 1.7; }
 
-    /* Engines section */
-    .engines-section { max-width: 900px; margin: 0 auto 60px; padding: 0 24px; }
-    .engines-section .section-title { text-align: center; font-size: 28px; font-weight: 600; margin-bottom: 32px; font-family: 'Outfit', sans-serif; color: #1a2332; }
-    .engine-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 10px; }
-    .engine-label { background: #fff; border: 1px solid #dde3ea; border-radius: 10px; padding: 12px 22px; font-size: 13px; font-weight: 500; color: #4a5a72; transition: all 0.15s; }
-    .engine-label:hover { border-color: #2563eb; color: #2563eb; }
-    .engine-label.orchestrator { border-color: #2563eb; color: #2563eb; background: #dbeafe; font-weight: 600; padding: 12px 32px; }
-    .engine-label.provider { border-color: #dde3ea; color: #8a9bb5; }
+    /* Engines section with marquee */
+    .engines-section { max-width: 100%; margin: 0 auto 60px; padding: 40px 0; overflow: hidden; background: #1a2332; }
+    .engines-section .section-title { text-align: center; font-size: 24px; font-weight: 600; margin-bottom: 32px; font-family: 'Outfit', sans-serif; color: #fff; }
+    .marquee-wrap { width: 100%; overflow: hidden; position: relative; padding: 10px 0; }
+    .marquee-wrap::before, .marquee-wrap::after { content: ''; position: absolute; top: 0; bottom: 0; width: 60px; z-index: 2; }
+    .marquee-wrap::before { left: 0; background: linear-gradient(90deg, #1a2332, transparent); }
+    .marquee-wrap::after { right: 0; background: linear-gradient(90deg, transparent, #1a2332); }
+    .marquee-track { display: flex; gap: 16px; width: max-content; animation: marquee 30s linear infinite; }
+    .marquee-track:hover { animation-play-state: paused; }
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .marquee-item { display: flex; align-items: center; gap: 10px; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 500; white-space: nowrap; }
+    .marquee-item.engine { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #c8d0dc; }
+    .marquee-item.engine i { color: #60a5fa; font-size: 16px; }
+    .marquee-item.orchestrator { background: rgba(37,99,235,0.15); border: 1px solid #2563eb; color: #60a5fa; font-weight: 600; }
+    .marquee-item.orchestrator i { color: #60a5fa; font-size: 18px; }
+    .marquee-item.provider { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #6b7a93; }
+    .marquee-item.provider i { color: #8a9bb5; font-size: 16px; }
+    .marquee-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #2563eb; }
 
     /* Curved Footer */
     .footer-curved {
@@ -96,11 +114,9 @@
     .footer-curved .input-group textarea { resize: vertical; min-height: 80px; }
     .footer-curved .btn-submit { background: #2563eb; color: #fff; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; font-family: 'Inter', sans-serif; }
     .footer-curved .btn-submit:hover { background: #1d4ed8; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
-
     .footer-curved .footer-bottom { border-top: 1px solid #2a3448; margin-top: 48px; padding-top: 24px; text-align: center; font-size: 12px; color: #4a5a72; max-width: 1100px; margin-left: auto; margin-right: auto; }
     .footer-curved .footer-brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: #fff; margin-bottom: 12px; }
 
-    .section-title { text-align: center; }
     @media (max-width: 768px) {
       .footer-curved .grid { grid-template-columns: 1fr; gap: 32px; }
       .hero h1 { font-size: 2rem; }
@@ -119,9 +135,9 @@
       <h1><span class="gradient-text">TrustLayer</span></h1>
       <p>Conditional-release payment orchestration built for African commerce. Hold instructions in escrow, verify conditions, and settle through your preferred provider.</p>
       <div class="links">
-        <a href="/admin/dashboard/" class="primary">Operations Center</a>
-        <a href="/portal/" class="secondary">Customer Portal</a>
-        <a href="/api/agreements/" class="secondary">API</a>
+        <a href="/admin/dashboard/" class="primary"><i class="fas fa-shield-halved"></i> Operations Center</a>
+        <a href="/portal/" class="secondary"><i class="fas fa-building"></i> Customer Portal</a>
+        <a href="/api/agreements/" class="secondary"><i class="fas fa-code"></i> API</a>
       </div>
       <div class="hero-providers">
         <span>Supported Payments</span>
@@ -144,42 +160,57 @@
     <p class="section-sub">Purpose-built for conditional payment orchestration in African markets</p>
     <div class="features">
       <div class="feature">
-        <img class="feature-img" src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&q=80" alt="Agreements">
-        <div class="feature-body"><h3>Agreement Engine</h3><p>Multi-party agreements with split rules, conditions, and automated lifecycle management.</p></div>
+        <div class="icon-wrap blue"><i class="fas fa-file-signature"></i></div>
+        <h3>Agreement Engine</h3><p>Multi-party agreements with split rules, conditions, and automated lifecycle management.</p>
       </div>
       <div class="feature">
-        <img class="feature-img" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" alt="State Machine">
-        <div class="feature-body"><h3>State Machine</h3><p>Deterministic state transitions — locked from CREATED through to SETTLED with full audit trail.</p></div>
+        <div class="icon-wrap purple"><i class="fas fa-diagram-project"></i></div>
+        <h3>State Machine</h3><p>Deterministic state transitions — locked from CREATED through to SETTLED with full audit trail.</p>
       </div>
       <div class="feature">
-        <img class="feature-img" src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&q=80" alt="Conditions">
-        <div class="feature-body"><h3>Condition Engine</h3><p>Buyer confirmation, document upload, timeouts, inspections — programmable release triggers.</p></div>
+        <div class="icon-wrap amber"><i class="fas fa-toggle-on"></i></div>
+        <h3>Condition Engine</h3><p>Buyer confirmation, document upload, timeouts, inspections — programmable release triggers.</p>
       </div>
       <div class="feature">
-        <img class="feature-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80" alt="Ledger">
-        <div class="feature-body"><h3>Ledger</h3><p>Append-only, SHA-256 chained ledger. Every debit and credit recorded immutably.</p></div>
+        <div class="icon-wrap teal"><i class="fas fa-book"></i></div>
+        <h3>Ledger</h3><p>Append-only, SHA-256 chained ledger. Every debit and credit recorded immutably.</p>
       </div>
       <div class="feature">
-        <img class="feature-img" src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&q=80" alt="Settlement">
-        <div class="feature-body"><h3>Settlement Engine</h3><p>Pluggable provider adapters — IntaSend, M-Pesa, Stripe. Swap providers without touching core engines.</p></div>
+        <div class="icon-wrap green"><i class="fas fa-hand-holding-dollar"></i></div>
+        <h3>Settlement Engine</h3><p>Pluggable provider adapters — IntaSend, M-Pesa, Stripe. Swap providers without touching core engines.</p>
       </div>
       <div class="feature">
-        <img class="feature-img" src="https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=600&q=80" alt="Notifications">
-        <div class="feature-body"><h3>Notification Engine</h3><p>Lifecycle webhooks to your developer endpoint, plus SMS for end-customers via Africa's Talking.</p></div>
+        <div class="icon-wrap pink"><i class="fas fa-bell"></i></div>
+        <h3>Notification Engine</h3><p>Lifecycle webhooks to your developer endpoint, plus SMS for end-customers via Africa's Talking.</p>
       </div>
     </div>
   </section>
 
   <section class="engines-section">
-    <h2 class="section-title">Orchestration Architecture</h2>
-    <div class="engine-row"><span class="engine-label orchestrator">Orchestration Engine</span></div>
-    <div class="engine-row">
-      <span class="engine-label">Agreement</span><span class="engine-label">State Machine</span>
-      <span class="engine-label">Condition</span><span class="engine-label">Ledger</span>
-      <span class="engine-label">Settlement</span><span class="engine-label">Notification</span>
-    </div>
-    <div class="engine-row">
-      <span class="engine-label provider">IntaSend</span><span class="engine-label provider">M-Pesa</span><span class="engine-label provider">Stripe</span>
+    <h2 class="section-title"><i class="fas fa-cogs"></i> Orchestration Architecture</h2>
+    <div class="marquee-wrap">
+      <div class="marquee-track">
+        <span class="marquee-item orchestrator"><i class="fas fa-microchip"></i> Orchestration Engine</span>
+        <span class="marquee-item engine"><i class="fas fa-file-signature"></i> Agreement</span>
+        <span class="marquee-item engine"><i class="fas fa-diagram-project"></i> State Machine</span>
+        <span class="marquee-item engine"><i class="fas fa-toggle-on"></i> Condition</span>
+        <span class="marquee-item engine"><i class="fas fa-book"></i> Ledger</span>
+        <span class="marquee-item engine"><i class="fas fa-hand-holding-dollar"></i> Settlement</span>
+        <span class="marquee-item engine"><i class="fas fa-bell"></i> Notification</span>
+        <span class="marquee-item provider"><i class="fas fa-building-columns"></i> IntaSend</span>
+        <span class="marquee-item provider"><i class="fas fa-mobile-screen"></i> M-Pesa</span>
+        <span class="marquee-item provider"><i class="fas fa-credit-card"></i> Stripe</span>
+        <span class="marquee-item orchestrator"><i class="fas fa-microchip"></i> Orchestration Engine</span>
+        <span class="marquee-item engine"><i class="fas fa-file-signature"></i> Agreement</span>
+        <span class="marquee-item engine"><i class="fas fa-diagram-project"></i> State Machine</span>
+        <span class="marquee-item engine"><i class="fas fa-toggle-on"></i> Condition</span>
+        <span class="marquee-item engine"><i class="fas fa-book"></i> Ledger</span>
+        <span class="marquee-item engine"><i class="fas fa-hand-holding-dollar"></i> Settlement</span>
+        <span class="marquee-item engine"><i class="fas fa-bell"></i> Notification</span>
+        <span class="marquee-item provider"><i class="fas fa-building-columns"></i> IntaSend</span>
+        <span class="marquee-item provider"><i class="fas fa-mobile-screen"></i> M-Pesa</span>
+        <span class="marquee-item provider"><i class="fas fa-credit-card"></i> Stripe</span>
+      </div>
     </div>
   </section>
 
@@ -204,10 +235,10 @@
       </div>
       <div>
         <h3>Quick Links</h3>
-        <p><a href="/admin/dashboard/">Operations Center</a></p>
-        <p><a href="/portal/">Customer Portal</a></p>
-        <p><a href="/api/agreements/">API Reference</a></p>
-        <p><a href="/admin/evidence/">Evidence Vault</a></p>
+        <p><a href="/admin/dashboard/"><i class="fas fa-shield-halved"></i> Operations Center</a></p>
+        <p><a href="/portal/"><i class="fas fa-building"></i> Customer Portal</a></p>
+        <p><a href="/api/agreements/"><i class="fas fa-code"></i> API Reference</a></p>
+        <p><a href="/admin/evidence/"><i class="fas fa-folder-open"></i> Evidence Vault</a></p>
       </div>
       <div>
         <h3>Get in Touch</h3>
@@ -222,18 +253,19 @@
           <div class="input-group">
             <textarea name="message" placeholder="How can we help?" required></textarea>
           </div>
-          <button type="submit" class="btn-submit">Send Message</button>
+          <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Send Message</button>
         </form>
       </div>
     </div>
     <div class="footer-bottom">
-      TrustLayer &mdash; Built for Africa. Safe payments. Real trust. &copy; {% now "Y" %}
+      <div class="footer-brand">TrustLayer</div>
+      Built for Africa. Safe payments. Real trust. &copy; {% now "Y" %}
     </div>
   </footer>
 
   <script>
     fetch('/api/agreements/').then(r => r.json()).then(data => {
-      var count = Array.isArray(data) ? data.length : (data.count || '—');
+      var count = data.count || (Array.isArray(data) ? data.length : '—');
       document.getElementById('totalAgreements').textContent = count;
     }).catch(function(){});
   </script>
