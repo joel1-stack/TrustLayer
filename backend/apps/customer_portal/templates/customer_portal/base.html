@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TrustLayer Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
   {% load static %}
   <link rel="stylesheet" href="{% static 'customer_portal/css/portal.css' %}">
 </head>
@@ -13,19 +13,71 @@
 <div class="portal-layout">
   <aside class="sidebar">
     <h2>TrustLayer</h2>
-    <a href="/portal/" class="{% if active == 'dashboard' %}active{% endif %}">Overview</a>
-    <a href="/portal/agreements/" class="{% if active == 'agreements' %}active{% endif %}">Agreements</a>
-    <a href="/portal/ledger/" class="{% if active == 'ledger' %}active{% endif %}">Ledger</a>
-    <a href="/portal/settlements/" class="{% if active == 'settlements' %}active{% endif %}">Settlements</a>
-    <a href="/portal/developers/" class="{% if active == 'developers' %}active{% endif %}">Developers</a>
-    <a href="/portal/settings/" class="{% if active == 'settings' %}active{% endif %}">Settings</a>
+    <a href="/portal/" class="{% if active == 'dashboard' %}active{% endif %}">&#9679; Overview</a>
+    <a href="/portal/agreements/" class="{% if active == 'agreements' %}active{% endif %}">&#9776; Agreements</a>
+    <a href="/portal/ledger/" class="{% if active == 'ledger' %}active{% endif %}">&#36; Ledger</a>
+    <a href="/portal/settlements/" class="{% if active == 'settlements' %}active{% endif %}">&#8644; Settlements</a>
+    <a href="/portal/developers/" class="{% if active == 'developers' %}active{% endif %}">&#9881; Developers</a>
+    <a href="/portal/settings/" class="{% if active == 'settings' %}active{% endif %}">&#9881; Settings</a>
+    <div style="border-top:1px solid #2a3448;margin:12px 24px 0;"></div>
+    <a href="/" style="font-size:12px;color:#6b7a93;">&#8592; Back to Home</a>
   </aside>
   <main class="main">
     <div class="topbar">
       <h1>{% block title %}Dashboard{% endblock %}</h1>
     </div>
+    {% if request.session.customer_email_verified == False %}
+    <div class="verify-banner">
+      <p>Please verify your email address to access all features.</p>
+      <form method="post" action="/portal/verify/send/" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn" style="width:auto;">Send Verification Email</button>
+      </form>
+    </div>
+    {% endif %}
     {% block content %}{% endblock %}
   </main>
 </div>
+<footer class="footer-curved slide-up">
+  <div class="grid">
+    <div>
+      <h3>Contact Us</h3>
+      <div class="contact-item">
+        <span class="icon">&#9742;</span>
+        <a href="https://wa.me/254715641339" target="_blank">+254 715 641 339</a>
+      </div>
+      <div class="contact-item">
+        <span class="icon">&#9993;</span>
+        <a href="mailto:help@trustlayer.com">help@trustlayer.com</a>
+      </div>
+      <div class="contact-item">
+        <span class="icon">&#9830;</span>
+        <span>Nairobi, Kenya</span>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#4a5a72;">Available on WhatsApp. Typically respond within 1 hour.</p>
+    </div>
+    <div>
+      <h3>Portal</h3>
+      <p><a href="/portal/">Dashboard</a></p>
+      <p><a href="/portal/agreements/">Agreements</a></p>
+      <p><a href="/portal/ledger/">Ledger</a></p>
+      <p><a href="/portal/settings/">Settings</a></p>
+    </div>
+    <div>
+      <h3>Get in Touch</h3>
+      <form method="post" action="/portal/contact/">
+        {% csrf_token %}
+        <input type="text" name="name" class="form-input-sm" placeholder="Your name" required>
+        <input type="email" name="email" class="form-input-sm" placeholder="Your email" required>
+        <textarea name="message" class="form-input-sm" placeholder="How can we help?" style="min-height:60px;" required></textarea>
+        <button type="submit" class="btn-sm">Send Message</button>
+      </form>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-brand">TrustLayer</div>
+    <p>Built for Africa. Safe payments. Real trust. &copy; {% now "Y" %}</p>
+  </div>
+</footer>
 </body>
 </html>

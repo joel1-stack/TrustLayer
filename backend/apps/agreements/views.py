@@ -4,10 +4,16 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .services import AgreementService
 from .serializers import AgreementSerializer
+from .models import Agreement
+
 
 @csrf_exempt
-@require_http_methods(["POST"])
-def create_agreement(request):
+@require_http_methods(["GET", "POST"])
+def list_or_create_agreement(request):
+    if request.method == 'GET':
+        agreements = Agreement.objects.all().order_by('-created_at')
+        data = [AgreementSerializer(a).data for a in agreements]
+        return JsonResponse({'count': len(data), 'results': data})
     try:
         data = json.loads(request.body)
         agreement = AgreementService.create_agreement(
@@ -22,13 +28,13 @@ def create_agreement(request):
         for party in data.get('parties', []):
             AgreementService.add_party(
                 agreement=agreement,
-            role=party['role'],
-            identifier=party['identifier'],
-            name=party['name'],
-            split_percentage=party.get('split_percentage'),
-            split_fixed=party.get('split_fixed'),
-            payout_method=party.get('payout_method', ''),
-            payout_details=party.get('payout_details'),
+                role=party['role'],
+                identifier=party['identifier'],
+                name=party['name'],
+                split_percentage=party.get('split_percentage'),
+                split_fixed=party.get('split_fixed'),
+                payout_method=party.get('payout_method', ''),
+                payout_details=party.get('payout_details'),
             )
         serializer = AgreementSerializer(agreement)
         return JsonResponse(serializer.data, status=201)
@@ -38,6 +44,7 @@ def create_agreement(request):
         return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 @require_http_methods(["GET"])
 def get_agreement(request, agreement_id):

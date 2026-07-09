@@ -7,7 +7,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <title>TrustLayer Control Center</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
   {% load static %}
   <link rel="stylesheet" href="{% static 'admin_dashboard/css/admin.css' %}">
   {% block extra_head %}{% endblock %}
@@ -38,6 +38,9 @@
         <div class="sidebar-section">Management</div>
         <a href="/admin/customers/" class="nav-item {% if active_section == 'customers' %}active{% endif %}">
           <span class="icon">&#9679;</span> Customers
+        </a>
+        <a href="/admin/team/" class="nav-item {% if active_section == 'team' %}active{% endif %}">
+          <span class="icon">&#128101;</span> Team
         </a>
         <a href="/admin/notifications/" class="nav-item {% if active_section == 'notifications' %}active{% endif %}">
           <span class="icon">&#9993;</span> Notifications
@@ -70,6 +73,10 @@
         <a href="/admin/settings/" class="nav-item {% if active_section == 'settings' %}active{% endif %}">
           <span class="icon">&#9881;</span> Settings
         </a>
+
+        <a href="/portal/" class="nav-item portal-link">
+          <span class="icon">&#8594;</span> <span>Customer Portal</span> <span>LIVE</span>
+        </a>
       </nav>
     </aside>
 
@@ -91,8 +98,46 @@
       {% block content %}{% endblock %}
     </main>
   </div>
+  <footer class="footer-curved slide-up">
+    <div class="grid">
+      <div>
+        <h3>Contact</h3>
+        <div class="contact-item">
+          <span class="icon">&#9742;</span>
+          <a href="https://wa.me/254715641339" target="_blank">+254 715 641 339</a>
+        </div>
+        <div class="contact-item">
+          <span class="icon">&#9993;</span>
+          <a href="mailto:help@trustlayer.com">help@trustlayer.com</a>
+        </div>
+      </div>
+      <div>
+        <h3>Quick Links</h3>
+        <p><a href="/portal/">Customer Portal</a></p>
+        <p><a href="/admin/dashboard/">Dashboard</a></p>
+        <p><a href="/admin/settings/">Settings</a></p>
+      </div>
+      <div>
+        <h3>Send a Message</h3>
+        <form method="post" action="/portal/contact/">
+          {% csrf_token %}
+          <input type="text" name="name" class="form-input-sm" placeholder="Your name" required>
+          <input type="email" name="email" class="form-input-sm" placeholder="Email" required>
+          <textarea name="message" class="form-input-sm" placeholder="Message" style="min-height:60px;" required></textarea>
+          <button type="submit" class="btn-sm">Send</button>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-brand">TrustLayer</div>
+      &copy; {% now "Y" %}
+    </div>
+  </footer>
   {% else %}
-  {% block login_content %}{% endblock %}
+  <div class="login-container">
+    <div class="login-overlay"></div>
+    {% block login_content %}{% endblock %}
+  </div>
   {% endif %}
   <script src="{% static 'admin_dashboard/js/admin.js' %}"></script>
   {% block extra_scripts %}{% endblock %}

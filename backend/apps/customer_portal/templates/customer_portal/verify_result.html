@@ -1,0 +1,15 @@
+{% extends 'customer_portal/base.html' %}
+{% block title %}Verification{% endblock %}
+{% block content %}
+<div class="card" style="max-width:500px;margin:40px auto;text-align:center;">
+  {% if success %}
+  <h3 style="color:var(--green);">Verified!</h3>
+  <p style="color:var(--text3);margin:12px 0;">{{ message }}</p>
+  <a href="/portal/" class="btn" style="width:auto;padding:10px 28px;display:inline-block;">Go to Dashboard</a>
+  {% else %}
+  <h3 style="color:var(--red);">Verification Failed</h3>
+  <p style="color:var(--text3);margin:12px 0;">{{ message }}</p>
+  <a href="/portal/login/" class="btn" style="width:auto;padding:10px 28px;display:inline-block;">Back to Login</a>
+  {% endif %}
+</div>
+{% endblock %}

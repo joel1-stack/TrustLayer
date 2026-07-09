@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import auth, overview, agreements, ledger, settlements, customers, security, infrastructure, audit, evidence, backups, analytics, notifications, settings_view, forensics
+from .views import auth, overview, agreements, ledger, settlements, customers, security, infrastructure, audit, evidence, backups, analytics, notifications, settings_view, forensics, team
 
 urlpatterns = [
     path('login/', auth.login_view, name='admin-login'),
@@ -26,4 +26,7 @@ urlpatterns = [
     path('settings/', settings_view.platform_settings, name='admin-settings'),
     path('settings/reset-visitor-stats/', settings_view.reset_visitor_stats, name='admin-reset-visitor-stats'),
     path('forensics/', forensics.forensics_view, name='admin-forensics'),
+    path('team/', team.team_list, name='admin-team'),
+    path('team/create/', team.team_create, name='admin-team-create'),
+    path('team/<str:username>/toggle/', team.team_deactivate, name='admin-team-toggle'),
 ]

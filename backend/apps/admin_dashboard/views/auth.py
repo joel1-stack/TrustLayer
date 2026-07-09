@@ -3,7 +3,8 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.utils import timezone
 from django.conf import settings
-from ..models import AdminUser, LoginAttempt, AuditLogEntry
+from ..models import AdminUser, LoginAttempt, AuditLogEntry, SecurityAlert
+from apps.notifications.alert_service import check_and_alert_brute_force
 
 
 LOGIN_MAX_ATTEMPTS = 5
@@ -33,6 +34,7 @@ def login_view(request):
             locked = True
             AuditLogEntry.objects.create(actor='system', actor_ip=ip, action='login_locked',
                 resource_type='auth', detail={'username': username, 'reason': 'too_many_attempts'})
+            check_and_alert_brute_force(ip, username)
         else:
             try:
                 admin = AdminUser.objects.get(username=username, is_active=True)
@@ -43,6 +45,7 @@ def login_view(request):
                     request.session['admin_authenticated'] = True
                     request.session['admin_username'] = admin.username
                     request.session['admin_display_name'] = admin.display_name
+                    request.session['admin_role'] = admin.role
                     request.session['admin_login_time'] = timezone.now().isoformat()
                     request.session.set_expiry(1800)
                     LoginAttempt.objects.create(username=username, ip_address=ip, success=True, user_agent=ua)
@@ -54,6 +57,7 @@ def login_view(request):
                     error = 'Invalid credentials'
                     AuditLogEntry.objects.create(actor='system', actor_ip=ip,
                         action='login_failed', resource_type='auth', detail={'username': username, 'reason': 'wrong_password'})
+                    check_and_alert_brute_force(ip, username)
             except AdminUser.DoesNotExist:
                 LoginAttempt.objects.create(username=username, ip_address=ip, success=False, user_agent=ua)
                 error = 'Invalid credentials'

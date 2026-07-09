@@ -8,13 +8,20 @@ from django.conf import settings
 
 
 class AdminUser(models.Model):
+    ROLE_CHOICES = [('owner', 'Owner'), ('staff', 'Staff')]
     username = models.CharField(max_length=64, unique=True)
     password_hash = models.CharField(max_length=256)
     display_name = models.CharField(max_length=128, default='Operator')
+    email = models.EmailField(blank=True, default='')
+    phone = models.CharField(max_length=32, blank=True, default='')
+    role = models.CharField(max_length=16, choices=ROLE_CHOICES, default='staff')
+    created_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='team_members')
+    permissions = models.JSONField(default=dict, blank=True)
     is_active = models.BooleanField(default=True)
     last_login = models.DateTimeField(null=True, blank=True)
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def set_password(self, raw):
         self.password_hash = make_password(raw)
@@ -125,3 +132,27 @@ class PlatformSettings(models.Model):
             return int(val)
         except Exception:
             return default
+
+
+class SecurityAlert(models.Model):
+    SEVERITY_CHOICES = [('low', 'Low'), ('medium', 'Medium'), ('high', 'High'), ('critical', 'Critical')]
+    alert_id = models.CharField(max_length=36, unique=True, editable=False)
+    alert_type = models.CharField(max_length=64)
+    severity = models.CharField(max_length=16, choices=SEVERITY_CHOICES, default='medium')
+    message = models.TextField()
+    detail = models.JSONField(default=dict, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    notified_via_email = models.BooleanField(default=False)
+    notified_via_sms = models.BooleanField(default=False)
+    resolved = models.BooleanField(default=False)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.alert_id:
+            self.alert_id = str(uuid.uuid4())
+        super().save(*args, **kwargs)
+
+    class Meta:
+        db_table = 'admin_security_alert'
+        ordering = ['-created_at']
