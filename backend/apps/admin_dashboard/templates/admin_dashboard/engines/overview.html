@@ -1,0 +1,131 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block page_title %}Engines & Providers{% endblock %}
+{% block content %}
+<style>
+.engine-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+.engine-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; transition: all 0.2s; }
+.engine-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); transform: translateY(-1px); }
+.engine-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.engine-icon { font-size: 28px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 10px; }
+.engine-title { flex: 1; }
+.engine-title h3 { margin: 0; font-size: 16px; color: #1a2332; }
+.engine-title small { color: #64748b; font-size: 12px; }
+.engine-desc { font-size: 13px; color: #475569; line-height: 1.5; margin-bottom: 12px; }
+.engine-status { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.status-running { background: #dcfce7; color: #166534; }
+.status-stopped { background: #fee2e2; color: #991b1b; }
+.engine-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.engine-actions .btn { padding: 6px 14px; font-size: 12px; border-radius: 6px; text-decoration: none; font-weight: 500; }
+.btn-primary { background: #2563eb; color: white; border: none; }
+.btn-outline { background: transparent; border: 1px solid #cbd5e1; color: #475569; }
+.btn-outline:hover { background: #f8fafc; }
+.btn-success { background: #16a34a; color: white; border: none; }
+.section-title { font-size: 20px; font-weight: 700; color: #1a2332; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.provider-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 20px; }
+.provider-card { background: white; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+.provider-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.provider-name { font-weight: 600; font-size: 15px; }
+.provider-badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.badge-configured { background: #dcfce7; color: #166534; }
+.badge-missing { background: #fef3c7; color: #92400e; }
+.engine-config-list { margin-top: 10px; }
+.config-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; color: #64748b; border-bottom: 1px solid #f1f5f9; }
+.config-row:last-child { border-bottom: none; }
+.config-key { font-weight: 500; color: #475569; }
+.endpoint-list { margin-top: 8px; }
+.endpoint-item { font-size: 11px; color: #2563eb; font-family: monospace; padding: 2px 0; }
+</style>
+
+<div style="max-width:1200px;margin:0 auto;">
+  <div class="section-title">⚙️ Platform Engines
+    <span style="font-size:13px;font-weight:400;color:#64748b;margin-left:8px;">
+      Configure how TrustLayer processes agreements, payments, and settlements
+    </span>
+  </div>
+
+  <div class="engine-grid">
+    {% for engine in engines %}
+    <div class="engine-card">
+      <div class="engine-header">
+        <div class="engine-icon">{{ engine.icon }}</div>
+        <div class="engine-title">
+          <h3>{{ engine.name }}</h3>
+          <small>{{ engine.id|title }} Engine</small>
+        </div>
+        <span class="engine-status {% if engine.enabled %}status-running{% else %}status-stopped{% endif %}">
+          {{ engine.enabled|yesno:"Running,Stopped" }}
+        </span>
+      </div>
+      <div class="engine-desc">{{ engine.desc }}</div>
+      <div class="engine-config-list">
+        {% for key, val in engine.settings.items %}
+        <div class="config-row">
+          <span class="config-key">{{ engine.fields|first|cut:key }}{{ key|cut:"engine_"|cut:"TRUSTLAYER_"|cut:"PLATFORM_"|title }}</span>
+          <span>{{ val }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="endpoint-list">
+        {% for ep in engine.endpoints %}
+        <div class="endpoint-item">{{ ep }}</div>
+        {% endfor %}
+      </div>
+      <div class="engine-actions">
+        <a href="/admin/engines/{{ engine.id }}/" class="btn btn-primary">Configure</a>
+        <a href="/admin/engines/{{ engine.id }}/test/" class="btn btn-outline test-engine" data-engine="{{ engine.id }}">Test</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="section-title" style="margin-top:40px;">🔌 Payment Providers
+    <span style="font-size:13px;font-weight:400;color:#64748b;margin-left:8px;">
+      Connect payment APIs for collections and payouts
+    </span>
+  </div>
+
+  <div class="provider-grid">
+    {% for provider in providers %}
+    <div class="provider-card">
+      <div class="provider-header">
+        <span class="provider-name">{{ provider.name }}</span>
+        <span class="provider-badge {% if provider.configured %}badge-configured{% else %}badge-missing{% endif %}">
+          {{ provider.configured|yesno:"Configured,Not Configured" }}
+        </span>
+      </div>
+      <div class="config-row" style="margin-bottom:8px;">
+        <span class="config-key">Adapter</span>
+        <span>{{ provider.id }}</span>
+      </div>
+      {% for key, val in provider.settings.items %}
+      <div class="config-row">
+        <span class="config-key">{{ key|cut:"PLATFORM_"|cut:"INTASEND_"|cut:"MPESA_"|title }}</span>
+        <span>{{ val|truncatechars:20 }}</span>
+      </div>
+      {% endfor %}
+      <div class="engine-actions">
+        <a href="/admin/engines/provider/{{ provider.id }}/" class="btn btn-outline" style="margin-top:8px;">Configure</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.test-engine').forEach(btn => {
+  btn.addEventListener('click', async function(e) {
+    e.preventDefault();
+    const engine = this.dataset.engine;
+    this.textContent = 'Testing...';
+    try {
+      const resp = await fetch('/admin/engines/' + engine + '/test/', { method: 'POST' });
+      const data = await resp.json();
+      alert('Engine ' + engine + ' test result:\n' + JSON.stringify(data, null, 2));
+    } catch(err) {
+      alert('Test failed: ' + err.message);
+    }
+    this.textContent = 'Test';
+  });
+});
+</script>
+{% endblock %}

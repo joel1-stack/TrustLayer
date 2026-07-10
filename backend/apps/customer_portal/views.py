@@ -250,6 +250,29 @@ def portal_toggle_member(request, member_id):
     return redirect('/portal/settings/')
 
 
+def portal_engines(request):
+    if not _check_customer_auth(request):
+        return redirect('/portal/login/')
+    from apps.payments.adapters.registry import list_providers, get_adapter
+    from apps.admin_dashboard.models import PlatformSettings
+    all_s = {s.key: s.value for s in PlatformSettings.objects.all()}
+    providers = []
+    for p in list_providers():
+        providers.append({'name': p.replace('_', ' ').title(), 'id': p})
+    from apps.agreements.models import Agreement
+    state_counts = {}
+    for s in ['CREATED', 'COLLECTED', 'SETTLED']:
+        c = Agreement.objects.filter(status=s).count()
+        if c:
+            state_counts[s] = c
+    return render(request, 'customer_portal/engines.html', {
+        'active': 'engines',
+        'providers': providers,
+        'state_counts': state_counts,
+        'platform_fee': all_s.get('TRUSTLAYER_PLATFORM_FEE_PERCENT', '5.00'),
+    })
+
+
 def portal_contact(request):
     if request.method != 'POST':
         return redirect('/')

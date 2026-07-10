@@ -60,6 +60,14 @@
           <span class="icon">&#9881;</span> Forensics
         </a>
 
+        <div class="sidebar-section">Engines</div>
+        <a href="/admin/engines/" class="nav-item {% if active_section == 'engines' %}active{% endif %}">
+          <span class="icon">&#9881;</span> Engines & Providers
+        </a>
+        <a href="/admin/settings/" class="nav-item {% if active_section == 'settings' %}active{% endif %}">
+          <span class="icon">&#9878;</span> Split Rules
+        </a>
+
         <div class="sidebar-section">Infrastructure</div>
         <a href="/admin/infrastructure/" class="nav-item {% if active_section == 'infrastructure' %}active{% endif %}">
           <span class="icon">&#9723;</span> Infrastructure
@@ -69,9 +77,6 @@
         </a>
         <a href="/admin/backups/" class="nav-item {% if active_section == 'backups' %}active{% endif %}">
           <span class="icon">&#8635;</span> Backups
-        </a>
-        <a href="/admin/settings/" class="nav-item {% if active_section == 'settings' %}active{% endif %}">
-          <span class="icon">&#9881;</span> Settings
         </a>
 
         <a href="/portal/" class="nav-item portal-link">

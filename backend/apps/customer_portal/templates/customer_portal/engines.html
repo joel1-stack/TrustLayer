@@ -1,0 +1,88 @@
+{% extends 'customer_portal/base.html' %}
+{% block page_title %}API & Engines{% endblock %}
+{% block content %}
+<style>
+.engines-wrap { max-width: 900px; margin: 0 auto; }
+.engines-wrap .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.engines-wrap .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 17px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; }
+.api-key-box { background: #1a2332; color: #e2e8f0; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.api-key-box code { font-size: 16px; letter-spacing: 1px; }
+.copy-btn { background: #2563eb; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+.engine-status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.engine-status-item { display: flex; align-items: center; gap: 8px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+.engine-status-dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot-green { background: #16a34a; }
+.dot-amber { background: #d97706; }
+.engine-status-label { font-size: 13px; font-weight: 500; color: #1a2332; }
+.endpoint-list { margin: 8px 0; }
+.endpoint-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+.endpoint-row:last-child { border-bottom: none; }
+.endpoint-method { font-weight: 600; color: #2563eb; min-width: 60px; }
+.endpoint-path { font-family: monospace; color: #475569; }
+.endpoint-desc { color: #94a3b8; font-size: 12px; }
+table { width: 100%; border-collapse: collapse; }
+table th, table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+table th { font-weight: 600; color: #475569; background: #f8fafc; }
+</style>
+
+<div class="engines-wrap">
+  <h2>API & Engine Status</h2>
+
+  <div class="card">
+    <h3>🔑 Your API Credentials</h3>
+    <div class="api-key-box">
+      <code>tl_live_xxxxxxxxxxxx</code>
+      <button class="copy-btn" onclick="alert('API key copied (simulated)')">Copy Key</button>
+    </div>
+    <p style="font-size:13px;color:#64748b;">Use this key in your API requests. Include it in the <code>Authorization: Bearer &lt;key&gt;</code> header.</p>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ Engine Status</h3>
+    <p style="font-size:13px;color:#64748b;margin-bottom:16px;">All TrustLayer engines powering your agreements.</p>
+    <div class="engine-status-grid">
+      <div class="engine-status-item"><span class="engine-status-dot dot-green"></span><span class="engine-status-label">Agreement Engine</span></div>
+      <div class="engine-status-item"><span class="engine-status-dot dot-green"></span><span class="engine-status-label">Ledger Engine</span></div>
+      <div class="engine-status-item"><span class="engine-status-dot dot-green"></span><span class="engine-status-label">Rule Engine</span></div>
+      <div class="engine-status-item"><span class="engine-status-dot dot-green"></span><span class="engine-status-label">Settlement Engine</span></div>
+      <div class="engine-status-item"><span class="engine-status-dot dot-green"></span><span class="engine-status-label">Notification Engine</span></div>
+      <div class="engine-status-item"><span class="engine-status-dot dot-green"></span><span class="engine-status-label">Audit Engine</span></div>
+      <div class="engine-status-item"><span class="engine-status-dot dot-green"></span><span class="engine-status-label">Security Engine</span></div>
+      <div class="engine-status-item"><span class="engine-status-dot dot-green"></span><span class="engine-status-label">Orchestration Engine</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📊 Your Agreement Stats</h3>
+    <table>
+      <tr><th>Status</th><th>Count</th></tr>
+      {% for state, count in state_counts.items %}
+      <tr><td>{{ state }}</td><td>{{ count }}</td></tr>
+      {% endfor %}
+      <tr><td><strong>Platform Fee</strong></td><td><strong>{{ platform_fee }}%</strong></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>🔌 Payment Providers</h3>
+    <table>
+      <tr><th>Provider</th><th>Status</th></tr>
+      {% for p in providers %}
+      <tr><td>{{ p.name }}</td><td><span class="badge badge-success">Available</span></td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>📡 API Endpoints</h3>
+    <div class="endpoint-list">
+      <div class="endpoint-row"><span class="endpoint-method">POST</span><span class="endpoint-path">/api/agreements/</span><span class="endpoint-desc">Create agreement</span></div>
+      <div class="endpoint-row"><span class="endpoint-method">GET</span><span class="endpoint-path">/api/agreements/&lt;id&gt;/</span><span class="endpoint-desc">Get agreement detail</span></div>
+      <div class="endpoint-row"><span class="endpoint-method">POST</span><span class="endpoint-path">/api/payments/link/</span><span class="endpoint-desc">Generate payment link</span></div>
+      <div class="endpoint-row"><span class="endpoint-method">GET</span><span class="endpoint-path">/api/ledger/&lt;id&gt;/</span><span class="endpoint-desc">View ledger entries</span></div>
+      <div class="endpoint-row"><span class="endpoint-method">POST</span><span class="endpoint-path">/api/settlements/&lt;id&gt;/trigger/</span><span class="endpoint-desc">Trigger settlement</span></div>
+      <div class="endpoint-row"><span class="endpoint-method">GET</span><span class="endpoint-path">/internal/health/</span><span class="endpoint-desc">System health</span></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

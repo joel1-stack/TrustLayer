@@ -12,6 +12,7 @@ urlpatterns = [
     path('ledger/', views.portal_ledger, name='portal-ledger'),
     path('settlements/', views.portal_settlements, name='portal-settlements'),
     path('developers/', views.portal_developers, name='portal-developers'),
+    path('engines/', views.portal_engines, name='portal-engines'),
     path('settings/', views.portal_settings, name='portal-settings'),
     path('team/<str:member_id>/toggle/', views.portal_toggle_member, name='portal-team-toggle'),
     path('contact/', views.portal_contact, name='portal-contact'),

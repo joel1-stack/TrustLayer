@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from .services import SettlementService
 from .models import Settlement
 
@@ -15,6 +16,7 @@ def list_settlements(request, agreement_id):
     )
     return JsonResponse(list(settlements), safe=False)
 
+@csrf_exempt
 @require_http_methods(["POST"])
 def trigger_settlement(request, agreement_id):
     from apps.agreements.models import Agreement

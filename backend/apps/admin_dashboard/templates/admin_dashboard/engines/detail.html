@@ -1,0 +1,96 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block page_title %}{{ engine.name }}{% endblock %}
+{% block content %}
+<style>
+.config-form { max-width: 600px; margin: 0 auto; }
+.config-form .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.config-form .card h3 { margin-top: 0; margin-bottom: 20px; font-size: 17px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 4px; }
+.form-group .help-text { font-size: 11px; color: #94a3b8; }
+.form-input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+.form-input:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.form-select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white; }
+.toggle-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.toggle { position: relative; width: 48px; height: 24px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: #cbd5e1; border-radius: 24px; cursor: pointer; transition: 0.3s; }
+.toggle-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+.toggle input:checked + .toggle-slider { background: #2563eb; }
+.toggle input:checked + .toggle-slider:before { transform: translateX(24px); }
+.btn { padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; }
+.btn-primary { background: #2563eb; color: white; }
+.btn-outline { background: transparent; border: 1px solid #cbd5e1; color: #475569; }
+.back-link { display: inline-block; margin-bottom: 20px; color: #2563eb; text-decoration: none; font-size: 14px; }
+</style>
+
+<div class="config-form">
+  <a href="/admin/engines/" class="back-link">&larr; Back to Engines</a>
+  <div class="card">
+    <h3>{{ engine.icon }} {{ engine.name }}</h3>
+    <p style="color:#64748b;font-size:14px;margin-bottom:20px;">{{ engine.desc }}</p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="toggle-wrap">
+        <label class="toggle">
+          <input type="checkbox" name="enabled" {% if enabled %}checked{% endif %}>
+          <span class="toggle-slider"></span>
+        </label>
+        <span style="font-size:14px;font-weight:500;">Engine {{ enabled|yesno:"Enabled,Disabled" }}</span>
+      </div>
+
+      {% for field in engine.fields %}
+      <div class="form-group">
+        <label>{{ field.label }}</label>
+        {% if field.type == 'bool' %}
+          <select name="{{ field.key }}" class="form-select">
+            <option value="true" {% if settings|get_item:field.key == 'true' %}selected{% endif %}>Enabled</option>
+            <option value="false" {% if settings|get_item:field.key == 'false' %}selected{% endif %}>Disabled</option>
+          </select>
+        {% elif field.type == 'select' %}
+          <select name="{{ field.key }}" class="form-select">
+            {% for opt in field.options %}
+            <option value="{{ opt }}" {% if settings|get_item:field.key == opt %}selected{% endif %}>{{ opt|title }}</option>
+            {% endfor %}
+          </select>
+        {% else %}
+          <input type="text" name="{{ field.key }}" class="form-input" value="{{ settings|get_item:field.key|default:field.default }}">
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+        <a href="/admin/engines/{{ engine_id }}/test/" class="btn btn-outline test-this-engine" data-engine="{{ engine_id }}">Test Engine</a>
+      </div>
+    </form>
+
+    {% if engine.endpoints %}
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;">
+      <h4 style="font-size:14px;margin-bottom:8px;">API Endpoints</h4>
+      {% for ep in engine.endpoints %}
+      <div style="font-size:12px;color:#2563eb;font-family:monospace;padding:2px 0;">{{ ep }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+document.querySelector('.test-this-engine')?.addEventListener('click', async function(e) {
+  e.preventDefault();
+  const engine = this.dataset.engine;
+  this.textContent = 'Testing...';
+  try {
+    const resp = await fetch('/admin/engines/' + engine + '/test/', { method: 'POST' });
+    const data = await resp.json();
+    alert('Result:\n' + JSON.stringify(data, null, 2));
+  } catch(err) {
+    alert('Test failed: ' + err.message);
+  }
+  this.textContent = 'Test Engine';
+});
+</script>
+{% endblock %}

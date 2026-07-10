@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import render
 from apps.admin_dashboard.views.infrastructure import health_json, containers_json
+from apps.admin_dashboard.views.engines import engine_test, provider_test
 
 
 def home(request):
@@ -34,6 +35,10 @@ urlpatterns = [
 
     # Customer Portal
     path('portal/', include('apps.customer_portal.urls')),
+
+    # Engine Test APIs (no auth required — designed for testing)
+    path('api/engines/<str:engine_id>/test/', engine_test, name='api-engine-test'),
+    path('api/engines/provider/<str:provider_id>/test/', provider_test, name='api-provider-test'),
 
     # Internal Health / Infrastructure (IP-whitelisted)
     path('internal/health/', health_json, name='internal-health'),

@@ -72,6 +72,7 @@ class SettlementService:
                 amount=amount,
                 phone=phone,
                 reference=agreement.agreement_id,
+                party=party,
             )
             if result.get('success'):
                 settlement = SettlementService.mark_completed(
