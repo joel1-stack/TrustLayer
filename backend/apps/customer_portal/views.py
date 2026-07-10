@@ -165,12 +165,17 @@ def verify_confirm(request, token):
 def portal_home(request):
     if not _check_customer_auth(request):
         return redirect('/portal/login/')
-    total_agreements = Agreement.objects.count()
-    active = Agreement.objects.exclude(status__in=['SETTLED', 'REFUNDED', 'CANCELLED']).count()
-    settled = Agreement.objects.filter(status='SETTLED').count()
-    total_collected = LedgerEntry.objects.filter(entry_type='CREDIT').aggregate(t=Sum('amount'))['t'] or Decimal('0')
-    total_settled = Settlement.objects.filter(status='COMPLETED').aggregate(t=Sum('amount'))['t'] or Decimal('0')
-    recent = Agreement.objects.order_by('-created_at')[:10]
+    customer_name = request.session.get('customer_name', '')
+    if customer_name:
+        qs = Agreement.objects.filter(creator_id=customer_name)
+    else:
+        qs = Agreement.objects.all()
+    total_agreements = qs.count()
+    active = qs.exclude(status__in=['SETTLED', 'REFUNDED', 'CANCELLED']).count()
+    settled = qs.filter(status='SETTLED').count()
+    total_collected = LedgerEntry.objects.filter(entry_type='CREDIT', agreement__in=qs).aggregate(t=Sum('amount'))['t'] or Decimal('0')
+    total_settled = Settlement.objects.filter(status='COMPLETED', agreement__in=qs).aggregate(t=Sum('amount'))['t'] or Decimal('0')
+    recent = qs.order_by('-created_at')[:10]
     return render(request, 'customer_portal/dashboard.html', {
         'total_agreements': total_agreements, 'active_agreements': active,
         'settled_count': settled, 'total_collected': total_collected, 'total_settled': total_settled,
@@ -181,21 +186,33 @@ def portal_home(request):
 def portal_agreements(request):
     if not _check_customer_auth(request):
         return redirect('/portal/login/')
-    agreements = Agreement.objects.all().order_by('-created_at')[:50]
+    customer_name = request.session.get('customer_name', '')
+    if customer_name:
+        agreements = Agreement.objects.filter(creator_id=customer_name).order_by('-created_at')[:50]
+    else:
+        agreements = Agreement.objects.all().order_by('-created_at')[:50]
     return render(request, 'customer_portal/agreements.html', {'agreements': agreements})
 
 
 def portal_ledger(request):
     if not _check_customer_auth(request):
         return redirect('/portal/login/')
-    entries = LedgerEntry.objects.all().order_by('-created_at')[:100]
+    customer_name = request.session.get('customer_name', '')
+    if customer_name:
+        entries = LedgerEntry.objects.filter(agreement__creator_id=customer_name).order_by('-created_at')[:100]
+    else:
+        entries = LedgerEntry.objects.all().order_by('-created_at')[:100]
     return render(request, 'customer_portal/ledger.html', {'entries': entries})
 
 
 def portal_settlements(request):
     if not _check_customer_auth(request):
         return redirect('/portal/login/')
-    settlements = Settlement.objects.all().order_by('-created_at')[:50]
+    customer_name = request.session.get('customer_name', '')
+    if customer_name:
+        settlements = Settlement.objects.filter(agreement__creator_id=customer_name).order_by('-created_at')[:100]
+    else:
+        settlements = Settlement.objects.all().order_by('-created_at')[:100]
     return render(request, 'customer_portal/settlements.html', {'settlements': settlements})
 
 
@@ -260,9 +277,13 @@ def portal_engines(request):
     for p in list_providers():
         providers.append({'name': p.replace('_', ' ').title(), 'id': p})
     from apps.agreements.models import Agreement
+    customer_name = request.session.get('customer_name', '')
     state_counts = {}
     for s in ['CREATED', 'COLLECTED', 'SETTLED']:
-        c = Agreement.objects.filter(status=s).count()
+        if customer_name:
+            c = Agreement.objects.filter(status=s, creator_id=customer_name).count()
+        else:
+            c = Agreement.objects.filter(status=s).count()
         if c:
             state_counts[s] = c
     return render(request, 'customer_portal/engines.html', {
