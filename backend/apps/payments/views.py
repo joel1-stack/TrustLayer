@@ -2,12 +2,14 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from apps.auth_decorator import require_api_auth
 from .services import PaymentService
 from apps.orchestration.services import Orchestrator
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_api_auth
 def generate_payment_link(request):
     """
     POST /api/payments/link/

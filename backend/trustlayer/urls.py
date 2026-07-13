@@ -4,12 +4,30 @@ TrustLayer Root URL Configuration — Landing + APIs + Admin + Internal.
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import render
+from django.db.models import Sum, Count
+from django.utils import timezone
 from apps.admin_dashboard.views.infrastructure import health_json, containers_json
 from apps.admin_dashboard.views.engines import engine_test, provider_test
+from apps.agreements.models import Agreement, AgreementParty
+from apps.ledger.models import LedgerEntry
 
 
 def home(request):
-    return render(request, 'landing.html')
+    today = timezone.now().date()
+    total_agreements = Agreement.objects.count()
+    settled_today = Agreement.objects.filter(status='SETTLED', updated_at__date=today).count()
+    from apps.agreements.models import STATUS_CATEGORIES
+    terminal_states = [s for s, c in STATUS_CATEGORIES.items() if c == 'terminal']
+    active = Agreement.objects.exclude(status__in=terminal_states).count()
+    fees = LedgerEntry.objects.filter(
+        entry_type='CREDIT', description__icontains='Platform'
+    ).aggregate(t=Sum('amount'))['t'] or 0
+    return render(request, 'landing.html', {
+        'total_agreements': total_agreements,
+        'settled_today': settled_today,
+        'active_agreements': active,
+        'platform_fees': float(fees),
+    })
 
 
 urlpatterns = [

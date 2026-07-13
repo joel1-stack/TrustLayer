@@ -2,6 +2,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from apps.auth_decorator import require_api_auth
 from .services import AgreementService
 from .serializers import AgreementSerializer
 from .models import Agreement
@@ -9,6 +10,7 @@ from .models import Agreement
 
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
+@require_api_auth
 def list_or_create_agreement(request):
     if request.method == 'GET':
         agreements = Agreement.objects.all().order_by('-created_at')
@@ -47,6 +49,7 @@ def list_or_create_agreement(request):
 
 
 @require_http_methods(["GET"])
+@require_api_auth
 def get_agreement(request, agreement_id):
     agreement = AgreementService.get_agreement(agreement_id)
     if not agreement:

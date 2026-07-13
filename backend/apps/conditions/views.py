@@ -2,10 +2,12 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from apps.auth_decorator import require_api_auth
 from .services import ConditionService
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_api_auth
 def add_condition(request):
     try:
         data = json.loads(request.body)
@@ -38,6 +40,7 @@ def add_condition(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_api_auth
 def mark_condition_met(request, condition_id):
     try:
         data = json.loads(request.body) if request.body else {}
@@ -63,6 +66,7 @@ def mark_condition_met(request, condition_id):
         return JsonResponse({'error': str(e)}, status=500)
 
 @require_http_methods(["GET"])
+@require_api_auth
 def get_conditions(request, agreement_id):
     from apps.agreements.models import Agreement
     from .models import Condition

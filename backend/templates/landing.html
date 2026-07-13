@@ -149,10 +149,10 @@
   </section>
 
   <section class="stats-strip" id="stats">
-    <div class="stat-card"><div class="num" id="totalAgreements">—</div><div class="lbl">Agreements</div></div>
-    <div class="stat-card"><div class="num" id="settledToday">—</div><div class="lbl">Settled Today</div></div>
-    <div class="stat-card"><div class="num" id="activeDeals">—</div><div class="lbl">Active</div></div>
-    <div class="stat-card"><div class="num" id="platformFees">—</div><div class="lbl">Fees Earned</div></div>
+    <div class="stat-card"><div class="num">{{ total_agreements }}</div><div class="lbl">Agreements</div></div>
+    <div class="stat-card"><div class="num">{{ settled_today }}</div><div class="lbl">Settled Today</div></div>
+    <div class="stat-card"><div class="num">{{ active_agreements }}</div><div class="lbl">Active</div></div>
+    <div class="stat-card"><div class="num">KES {{ platform_fees|floatformat:0 }}</div><div class="lbl">Fees Earned</div></div>
   </section>
 
   <section class="features-section">
@@ -263,11 +263,5 @@
     </div>
   </footer>
 
-  <script>
-    fetch('/api/agreements/').then(r => r.json()).then(data => {
-      var count = data.count || (Array.isArray(data) ? data.length : '—');
-      document.getElementById('totalAgreements').textContent = count;
-    }).catch(function(){});
-  </script>
 </body>
 </html>

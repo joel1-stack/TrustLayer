@@ -23,7 +23,7 @@
 <div class="table-container">
   <div class="table-header"><h3>Ledger Entries</h3></div>
   <table>
-    <thead><tr><th>Agreement</th><th>Type</th><th>Amount</th><th>Description</th><th>Reference</th><th>Party</th><th>Time</th></tr></thead>
+    <thead><tr><th>Agreement</th><th>Type</th><th>Amount</th><th>Description</th><th>Ref</th><th>Party</th><th>Prev Hash</th><th>Hash</th><th>Time</th></tr></thead>
     <tbody>
       {% for e in entries %}
       <tr>
@@ -33,9 +33,11 @@
         <td style="font-size:12px;">{{ e.description|truncatechars:40 }}</td>
         <td style="font-size:11px;font-family:monospace;">{{ e.reference|truncatechars:16 }}</td>
         <td>{{ e.party.name|default:"—"|truncatechars:16 }}</td>
+        <td style="font-family:monospace;font-size:10px;max-width:100px;overflow:hidden;text-overflow:ellipsis;" title="{{ e.previous_hash }}">{{ e.previous_hash|truncatechars:12 }}</td>
+        <td style="font-family:monospace;font-size:10px;max-width:100px;overflow:hidden;text-overflow:ellipsis;color:#2563eb;" title="{{ e.hash }}">{{ e.hash|truncatechars:12 }}</td>
         <td style="font-size:11px;">{{ e.created_at|date:"Y-m-d H:i:s" }}</td>
       </tr>
-      {% empty %}<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">No entries</td></tr>{% endfor %}
+      {% empty %}<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px;">No entries</td></tr>{% endfor %}
     </tbody>
   </table>
 </div>

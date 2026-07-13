@@ -19,16 +19,32 @@ class LedgerEntry(models.Model):
     # Who
     party = models.ForeignKey('agreements.AgreementParty', on_delete=models.SET_NULL, null=True, blank=True, related_name='ledger_entries')
     
+    # SHA-256 Chain (immutability)
+    previous_hash = models.CharField(max_length=64, blank=True, default='', help_text='SHA-256 of previous ledger entry')
+    hash = models.CharField(max_length=64, unique=True, null=True, blank=True, help_text='SHA-256 of this entry')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         db_table = 'ledger_entries'
         ordering = ['-created_at']
     
+    def compute_hash(self):
+        import hashlib
+        last = LedgerEntry.objects.filter(created_at__lt=self.created_at).order_by('-created_at').first()
+        prev = last.hash if last else '0' * 64
+        raw = f'{self.entry_id}|{self.entry_type}|{self.amount}|{self.balance_before}|{self.balance_after}|{self.reference}|{prev}'
+        return hashlib.sha256(raw.encode()).hexdigest(), prev
+    
     def save(self, *args, **kwargs):
         if not self.entry_id:
             import secrets, string
             self.entry_id = 'LED' + ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+        is_new = not self.pk
+        if is_new:
+            h, prev = self.compute_hash()
+            self.previous_hash = prev
+            self.hash = h
         super().save(*args, **kwargs)
     
     def __str__(self):
