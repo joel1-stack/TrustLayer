@@ -99,3 +99,49 @@ class StateMachine:
             return bool(kyc.get('id_number') and (kyc.get('phone') or kyc.get('email')))
         else:
             return bool(kyc.get('id_number') and kyc.get('id_photo_url') and kyc.get('phone'))
+
+    @staticmethod
+    def enforce_held_timeout(max_hold_hours=72):
+        """Auto-expire agreements stuck in HELD beyond max_hold_hours."""
+        from django.utils import timezone
+        from datetime import timedelta
+        cutoff = timezone.now() - timedelta(hours=max_hold_hours)
+        stuck = Agreement.objects.filter(
+            status='HELD',
+            updated_at__lte=cutoff
+        )
+        expired = []
+        for agreement in stuck:
+            try:
+                StateMachine.transition(
+                    agreement, 'EXPIRED',
+                    triggered_by='system',
+                    actor_role='system',
+                    channel='system',
+                    trigger_reason='held_timeout',
+                    reason=f'Auto-expired after {max_hold_hours}h in HELD without conditions being met',
+                )
+                expired.append(agreement.agreement_id)
+            except ValueError:
+                pass
+        return expired
+
+    @staticmethod
+    def enforce_reversal_window(window_hours=24):
+        """Prevent SETTLED->REVERSED beyond the allowed window."""
+        from django.utils import timezone
+        from datetime import timedelta
+        cutoff = timezone.now() - timedelta(hours=window_hours)
+        stale = Agreement.objects.filter(
+            status='SETTLED',
+            updated_at__lte=cutoff
+        )
+        for agreement in stale:
+            locked = StateTransition.objects.filter(
+                agreement=agreement,
+                to_status='REVERSED',
+                created_at__gte=cutoff
+            ).exists()
+            if locked:
+                continue
+        return len(stale)

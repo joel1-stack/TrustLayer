@@ -76,4 +76,14 @@ class ConditionService:
                     )
                 except ValueError:
                     pass
-        return list(timed_out)
+
+        # Also enforce HELD max duration (72h default)
+        from apps.state_machine.services import StateMachine as SM
+        held_expired = SM.enforce_held_timeout(max_hold_hours=72)
+        locked_settled = SM.enforce_reversal_window(window_hours=24)
+
+        return {
+            'conditions_timed_out': [c.condition_id for c in timed_out],
+            'held_expired': held_expired,
+            'settled_locked': locked_settled,
+        }
