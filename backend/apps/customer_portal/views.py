@@ -171,7 +171,9 @@ def portal_home(request):
     else:
         qs = Agreement.objects.all()
     total_agreements = qs.count()
-    active = qs.exclude(status__in=['SETTLED', 'REFUNDED', 'CANCELLED']).count()
+    from apps.agreements.models import STATUS_CATEGORIES
+    terminal_states = [s for s, c in STATUS_CATEGORIES.items() if c == 'terminal']
+    active = qs.exclude(status__in=terminal_states).count()
     settled = qs.filter(status='SETTLED').count()
     total_collected = LedgerEntry.objects.filter(entry_type='CREDIT', agreement__in=qs).aggregate(t=Sum('amount'))['t'] or Decimal('0')
     total_settled = Settlement.objects.filter(status='COMPLETED', agreement__in=qs).aggregate(t=Sum('amount'))['t'] or Decimal('0')
@@ -276,16 +278,16 @@ def portal_engines(request):
     providers = []
     for p in list_providers():
         providers.append({'name': p.replace('_', ' ').title(), 'id': p})
-    from apps.agreements.models import Agreement
+    from apps.agreements.models import Agreement, STATUS_CODES
     customer_name = request.session.get('customer_name', '')
     state_counts = {}
-    for s in ['CREATED', 'COLLECTED', 'SETTLED']:
+    for s in ['CREATED', 'AVAILABLE', 'HELD', 'SETTLED']:
         if customer_name:
             c = Agreement.objects.filter(status=s, creator_id=customer_name).count()
         else:
             c = Agreement.objects.filter(status=s).count()
         if c:
-            state_counts[s] = c
+            state_counts[f"{s} ({STATUS_CODES.get(s, '')})"] = c
     return render(request, 'customer_portal/engines.html', {
         'active': 'engines',
         'providers': providers,

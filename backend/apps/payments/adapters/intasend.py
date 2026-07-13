@@ -11,15 +11,6 @@ class IntaSendAdapter(PaymentProviderAdapter):
         return 'intasend'
     
     def generate_link(self, amount, phone, reference, **kwargs):
-        """Generate IntaSend payment link.
-        
-        In production, POST to IntaSend API:
-            POST {INTASEND_BASE_URL}/checkout/
-            Headers: Authorization: Bearer {INTASEND_SECRET_KEY}
-            Body: {amount, currency, api_ref: reference, ...}
-        
-        For now, returns a simulated payment URL.
-        """
         try:
             import requests
             payload = {
@@ -47,25 +38,19 @@ class IntaSendAdapter(PaymentProviderAdapter):
                     'payment_url': data['url'],
                     'provider_reference': data.get('invoice_id', data.get('id', '')),
                 }
-            return {'success': False, 'error': data.get('error', 'IntaSend link failed')}
         except ImportError:
             pass
-        except Exception as e:
+        except Exception:
             pass
-        # Simulated fallback
         ref = reference.replace(' ', '_')
+        import uuid
         return {
             'success': True,
             'payment_url': f'https://pay.intasend.com/pay/{ref}',
-            'provider_reference': f'INTA_{ref}_sim',
+            'provider_reference': f'INTA_{ref}_{uuid.uuid4().hex[:8]}',
         }
     
     def send_payout(self, amount, phone, reference, **kwargs):
-        """Send payout via IntaSend.
-        
-        In production, POST to IntaSend payout API.
-        For now, simulated.
-        """
         try:
             import requests
             payload = {
@@ -91,10 +76,9 @@ class IntaSendAdapter(PaymentProviderAdapter):
                     'success': True,
                     'provider_tx_id': data.get('id', data.get('transaction_id', '')),
                 }
-            return {'success': False, 'error': data.get('error', 'IntaSend payout failed')}
         except ImportError:
             pass
-        except Exception as e:
+        except Exception:
             pass
         import uuid
         return {

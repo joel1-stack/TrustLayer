@@ -62,4 +62,18 @@ class ConditionService:
         )
         for c in timed_out:
             ConditionService.mark_failed(c, reason='Condition timed out')
+            agreement = c.agreement
+            if agreement.status == 'HELD':
+                from apps.state_machine.services import StateMachine
+                try:
+                    StateMachine.transition(
+                        agreement, 'EXPIRED',
+                        triggered_by='condition_timeout',
+                        actor_role='system',
+                        channel='system',
+                        reason=f'Condition "{c.label}" timed out after {c.timeout_hours}h',
+                        evidence={'condition_id': c.condition_id, 'timeout_hours': c.timeout_hours}
+                    )
+                except ValueError:
+                    pass
         return list(timed_out)

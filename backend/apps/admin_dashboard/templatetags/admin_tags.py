@@ -34,15 +34,29 @@ def currency(value):
 def status_badge(status):
     colors = {
         'CREATED': 'bg-gray-500',
+        'CONFIRMED': 'bg-blue-400',
+        'SUBMITTED': 'bg-yellow-500',
+        'PENDING': 'bg-orange-400',
+        'AVAILABLE': 'bg-teal-500',
+        'RECONCILING': 'bg-purple-400',
+        'HELD': 'bg-indigo-500',
+        'DISPUTED': 'bg-pink-500',
+        'READY': 'bg-teal-500',
+        'SETTLING': 'bg-purple-500',
+        'PARTIALLY_SETTLED': 'bg-yellow-600',
+        'SETTLED': 'bg-green-500',
+        'REVERSED': 'bg-red-400',
+        'REFUNDED': 'bg-red-500',
+        'DECLINED': 'bg-orange-700',
+        'REJECTED': 'bg-red-700',
+        'CANCELLED': 'bg-red-700',
+        'EXPIRED': 'bg-gray-600',
+        'FAILED': 'bg-red-600',
+        'RETRYING': 'bg-yellow-500',
+        'FAILED_PERMANENT': 'bg-red-800',
         'PAYMENT_PENDING': 'bg-yellow-500',
         'COLLECTED': 'bg-blue-500',
         'WAITING': 'bg-orange-500',
-        'READY': 'bg-teal-500',
-        'SETTLING': 'bg-purple-500',
-        'SETTLED': 'bg-green-500',
-        'REFUNDED': 'bg-red-500',
-        'CANCELLED': 'bg-red-700',
-        'DISPUTED': 'bg-pink-500',
         'active': 'bg-green-500',
         'inactive': 'bg-red-500',
         'suspended': 'bg-orange-500',
@@ -77,3 +91,16 @@ def age_from_now(dt):
 @register.filter
 def get_item(d, key):
     return d.get(key, '')
+
+
+@register.filter
+def status_code(state):
+    from apps.agreements.models import STATUS_CODES
+    return STATUS_CODES.get(state, 0)
+
+
+@register.filter
+def status_display(state):
+    from apps.agreements.models import STATUS_CODES
+    code = STATUS_CODES.get(state, 0)
+    return f"{state} ({code})" if code else state

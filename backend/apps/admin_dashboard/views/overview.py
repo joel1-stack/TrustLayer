@@ -20,9 +20,12 @@ def dashboard(request):
     agreements_month = Agreement.objects.filter(created_at__date__gte=month_start).count()
     total_agreements = Agreement.objects.count()
 
-    active_agreements = Agreement.objects.exclude(status__in=['SETTLED', 'REFUNDED', 'CANCELLED']).count()
-    waiting_count = Agreement.objects.filter(status='WAITING').count()
+    from apps.agreements.models import STATUS_CATEGORIES
+    terminal_states = [s for s, c in STATUS_CATEGORIES.items() if c == 'terminal']
+    active_agreements = Agreement.objects.exclude(status__in=terminal_states).count()
+    held_count = Agreement.objects.filter(status='HELD').count()
     disputed_count = Agreement.objects.filter(status='DISPUTED').count()
+    failed_count = Agreement.objects.filter(status__in=['FAILED', 'FAILED_PERMANENT']).count()
     settled_today = Agreement.objects.filter(status='SETTLED', updated_at__date=today).count()
 
     collected_today = LedgerEntry.objects.filter(
@@ -103,8 +106,9 @@ def dashboard(request):
         'agreements_month': agreements_month,
         'total_agreements': total_agreements,
         'active_agreements': active_agreements,
-        'waiting_count': waiting_count,
+        'held_count': held_count,
         'disputed_count': disputed_count,
+        'failed_count': failed_count,
         'settled_today': settled_today,
         'collected_today': collected_today,
         'collected_month': collected_month,

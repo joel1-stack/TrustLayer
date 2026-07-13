@@ -3,11 +3,12 @@ Orchestration Engine — the conductor.
 
 Flow:
   1. Developer creates agreement → CREATED → notify developer
-  2. Developer requests payment link → generate via adapter → PAYMENT_PENDING
-  3. Payment provider sends webhook → verify → COLLECTED → Ledger → WAITING
+  2. Developer requests payment link → generate via adapter → SUBMITTED
+  3. Payment provider sends webhook → verify → AVAILABLE → Ledger → HELD
   4. Conditions met → READY → notify developer
   5. Trigger settlement → send payouts via adapter → SETTLING
   6. All payouts confirmed → SETTLED → notify developer
+  7. Payout failures → FAILED → RETRYING → FAILED_PERMANENT
 """
 
 import logging
@@ -24,32 +25,38 @@ class Orchestrator:
 
     @staticmethod
     def on_agreement_created(agreement):
-        """Step 1: Agreement created → notify → move to CREATED"""
         NotificationService.on_agreement_created(agreement)
         return agreement
 
     @staticmethod
-    def on_payment_link_generated(agreement, payment_url=''):
-        """Step 1.5: Payment link generated → PAYMENT_PENDING → notify developer"""
+    def on_payment_link_generated(agreement, payment_url='', ip_address=None):
+        if agreement.status == 'CREATED':
+            StateMachine.transition(
+                agreement, 'CONFIRMED',
+                triggered_by='orchestrator',
+                actor_role='system',
+                channel='api',
+                ip_address=ip_address,
+                reason='Validation passed, generating payment link',
+            )
         transition = StateMachine.transition(
-            agreement, 'PAYMENT_PENDING',
+            agreement, 'SUBMITTED',
             triggered_by='orchestrator',
+            actor_role='system',
+            channel='api',
+            ip_address=ip_address,
             reason=f'Payment link generated: {payment_url}',
             evidence={'payment_url': payment_url}
         )
-        NotificationService.on_payment_pending(agreement, payment_url=payment_url)
+        NotificationService.on_payment_submitted(agreement, payment_url=payment_url)
         return transition
 
     @staticmethod
-    def on_payment_collected(agreement, amount, reference='', phone=''):
-        """Step 2: Incoming webhook says payment completed → COLLECTED → Ledger → WAITING"""
-
-        # Verify state is PAYMENT_PENDING
-        if agreement.status != 'PAYMENT_PENDING':
+    def on_payment_collected(agreement, amount, reference='', phone='', ip_address=None):
+        if agreement.status != 'SUBMITTED' and agreement.status != 'PENDING':
             logger.warning(f"Payment webhook for {agreement.agreement_id} but state is {agreement.status}")
             return None
 
-        # Credit the agreement ledger (total received)
         entry = LedgerService.credit(
             agreement, amount,
             reference=reference,
@@ -57,7 +64,6 @@ class Orchestrator:
             metadata={'phone': phone, 'provider_ref': reference}
         )
 
-        # Compute splits and credit each party's ledger account
         from apps.agreements.services import AgreementService
         splits = AgreementService.calculate_splits(agreement)
 
@@ -74,33 +80,35 @@ class Orchestrator:
                 )
                 split_entries.append(se)
 
-        # Move state: PAYMENT_PENDING → COLLECTED
         StateMachine.transition(
-            agreement, 'COLLECTED',
+            agreement, 'AVAILABLE',
             triggered_by='orchestrator',
+            actor_role='provider_webhook',
+            channel='webhook',
+            ip_address=ip_address,
             reason=f'Payment of {amount} collected (ref: {reference})',
             evidence={'ledger_entry': entry.entry_id, 'reference': reference, 'splits': len(split_entries)}
         )
 
-        # Notify developer
         NotificationService.on_payment_collected(agreement, amount)
 
-        # Check if there are required conditions
         has_conditions = agreement.conditions.filter(required=True).exists()
 
         if has_conditions:
-            # Escrow flow: wait for conditions
             StateMachine.transition(
-                agreement, 'WAITING',
+                agreement, 'HELD',
                 triggered_by='orchestrator',
+                actor_role='system',
+                channel='system',
                 reason='Payment collected, awaiting conditions',
             )
         else:
-            # Immediate split: no waiting, go straight to READY
             StateMachine.transition(
                 agreement, 'READY',
                 triggered_by='orchestrator',
-                reason='Immediate split — no conditions required',
+                actor_role='system',
+                channel='system',
+                reason='No conditions required, proceeding to settlement',
             )
             NotificationService.on_agreement_ready(agreement)
 
@@ -108,13 +116,14 @@ class Orchestrator:
 
     @staticmethod
     def on_condition_met(agreement, condition):
-        """Step 3: Condition met → check if all ready → READY"""
         NotificationService.on_condition_met(agreement, condition)
 
         if ConditionService.are_all_required_met(agreement):
             StateMachine.transition(
                 agreement, 'READY',
                 triggered_by='orchestrator',
+                actor_role='system',
+                channel='api',
                 reason='All required conditions satisfied',
                 evidence={'condition': condition.condition_id}
             )
@@ -124,19 +133,22 @@ class Orchestrator:
 
     @staticmethod
     def trigger_settlement(agreement):
-        """Step 4: Agreement READY → settle each party → SETTLED"""
         if agreement.status != 'READY':
             raise ValueError(f"Agreement {agreement.agreement_id} is not READY (currently {agreement.status})")
 
         StateMachine.transition(
             agreement, 'SETTLING',
             triggered_by='orchestrator',
+            actor_role='system',
+            channel='api',
             reason='Triggering settlement for all parties'
         )
 
         parties = agreement.parties.all()
         settlements = []
         settlement_ids = []
+        all_succeeded = True
+        any_succeeded = False
 
         for party in parties:
             balance = LedgerService.get_balance(party)
@@ -155,18 +167,46 @@ class Orchestrator:
                     description=f'Settled to {party.name} via {provider}'
                 )
 
+                if settlement.status == 'COMPLETED':
+                    any_succeeded = True
+                else:
+                    all_succeeded = False
+
         NotificationService.on_settlement_started(agreement, settlements=settlement_ids)
 
         for settlement in settlements:
-            NotificationService.on_settlement_completed(agreement, settlement)
+            if settlement.status == 'COMPLETED':
+                NotificationService.on_settlement_completed(agreement, settlement)
+            elif settlement.status in ('FAILED', 'RETRYING'):
+                NotificationService.on_settlement_failed(agreement, settlement)
 
-        StateMachine.transition(
-            agreement, 'SETTLED',
-            triggered_by='orchestrator',
-            reason='All settlements completed',
-            evidence={'settlements': settlement_ids}
-        )
-
-        NotificationService.on_agreement_settled(agreement)
+        if all_succeeded and settlements:
+            StateMachine.transition(
+                agreement, 'SETTLED',
+                triggered_by='orchestrator',
+                actor_role='system',
+                channel='system',
+                reason='All settlements completed',
+                evidence={'settlements': settlement_ids}
+            )
+            NotificationService.on_agreement_settled(agreement)
+        elif any_succeeded and not all_succeeded:
+            StateMachine.transition(
+                agreement, 'PARTIALLY_SETTLED',
+                triggered_by='orchestrator',
+                actor_role='system',
+                channel='system',
+                reason='Some settlements completed, some failed',
+                evidence={'settlements': settlement_ids, 'failed': [s.settlement_id for s in settlements if s.status != 'COMPLETED']}
+            )
+        else:
+            StateMachine.transition(
+                agreement, 'FAILED',
+                triggered_by='orchestrator',
+                actor_role='system',
+                channel='system',
+                reason='All settlements failed',
+                evidence={'settlements': settlement_ids}
+            )
 
         return settlements

@@ -1,16 +1,88 @@
 from django.db import models
 
+STATUS_CODES = {
+    'CREATED': 10000,
+    'CONFIRMED': 11000,
+    'SUBMITTED': 12000,
+    'PENDING': 13000,
+    'AVAILABLE': 14000,
+    'RECONCILING': 14500,
+    'HELD': 15000,
+    'DISPUTED': 15500,
+    'READY': 16000,
+    'SETTLING': 17000,
+    'PARTIALLY_SETTLED': 17500,
+    'SETTLED': 18000,
+    'REVERSED': 19000,
+    'REFUNDED': 20000,
+    'DECLINED': 21000,
+    'REJECTED': 22000,
+    'CANCELLED': 23000,
+    'EXPIRED': 23500,
+    'FAILED': 24000,
+    'RETRYING': 25000,
+    'FAILED_PERMANENT': 26000,
+    # Legacy codes
+    'PAYMENT_PENDING': 6000,
+    'COLLECTED': 7000,
+    'WAITING': 9000,
+}
+
+STATUS_CATEGORIES = {
+    'CREATED': 'active',
+    'CONFIRMED': 'active',
+    'SUBMITTED': 'active',
+    'PENDING': 'active',
+    'AVAILABLE': 'active',
+    'RECONCILING': 'active',
+    'HELD': 'active',
+    'DISPUTED': 'active',
+    'READY': 'active',
+    'SETTLING': 'active',
+    'PARTIALLY_SETTLED': 'active',
+    'SETTLED': 'terminal',
+    'REVERSED': 'terminal',
+    'REFUNDED': 'terminal',
+    'DECLINED': 'terminal',
+    'REJECTED': 'terminal',
+    'CANCELLED': 'terminal',
+    'EXPIRED': 'terminal',
+    'FAILED': 'active',
+    'RETRYING': 'active',
+    'FAILED_PERMANENT': 'terminal',
+    'PAYMENT_PENDING': 'active',
+    'COLLECTED': 'active',
+    'WAITING': 'active',
+}
+
+
 class Agreement(models.Model):
     class Status(models.TextChoices):
         CREATED = 'CREATED', 'Created'
-        PAYMENT_PENDING = 'PAYMENT_PENDING', 'Payment Pending'
-        COLLECTED = 'COLLECTED', 'Collected'
-        WAITING = 'WAITING', 'Waiting'
+        CONFIRMED = 'CONFIRMED', 'Confirmed'
+        SUBMITTED = 'SUBMITTED', 'Submitted'
+        PENDING = 'PENDING', 'Pending'
+        AVAILABLE = 'AVAILABLE', 'Available'
+        RECONCILING = 'RECONCILING', 'Reconciling'
+        HELD = 'HELD', 'Held'
+        DISPUTED = 'DISPUTED', 'Disputed'
         READY = 'READY', 'Ready'
         SETTLING = 'SETTLING', 'Settling'
+        PARTIALLY_SETTLED = 'PARTIALLY_SETTLED', 'Partially Settled'
         SETTLED = 'SETTLED', 'Settled'
+        REVERSED = 'REVERSED', 'Reversed'
         REFUNDED = 'REFUNDED', 'Refunded'
+        DECLINED = 'DECLINED', 'Declined'
+        REJECTED = 'REJECTED', 'Rejected'
         CANCELLED = 'CANCELLED', 'Cancelled'
+        EXPIRED = 'EXPIRED', 'Expired'
+        FAILED = 'FAILED', 'Failed'
+        RETRYING = 'RETRYING', 'Retrying'
+        FAILED_PERMANENT = 'FAILED_PERMANENT', 'Failed Permanent'
+        # Legacy states — still valid for existing records
+        PAYMENT_PENDING = 'PAYMENT_PENDING', 'Payment Pending (legacy)'
+        COLLECTED = 'COLLECTED', 'Collected (legacy)'
+        WAITING = 'WAITING', 'Waiting (legacy)'
 
     agreement_id = models.CharField(max_length=24, unique=True, editable=False)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.CREATED)
@@ -37,6 +109,19 @@ class Agreement(models.Model):
             import secrets, string
             self.agreement_id = 'AGR' + ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(16))
         super().save(*args, **kwargs)
+
+    @property
+    def status_code(self):
+        return STATUS_CODES.get(self.status, 0)
+
+    @property
+    def status_category(self):
+        return STATUS_CATEGORIES.get(self.status, 'active')
+
+    @property
+    def status_display(self):
+        code = self.status_code
+        return f"{self.status} ({code})" if code else self.status
 
     def __str__(self):
         return f"{self.agreement_id} [{self.status}] {self.title}"

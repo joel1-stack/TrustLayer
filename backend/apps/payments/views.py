@@ -51,13 +51,19 @@ def generate_payment_link(request):
     agreement.payment_url = result.get('payment_url', '')
     agreement.save(update_fields=['payment_url', 'updated_at'])
 
-    # Orchestrate: move to PAYMENT_PENDING
-    Orchestrator.on_payment_link_generated(agreement, payment_url=result.get('payment_url', ''))
+    ip_address = request.META.get('REMOTE_ADDR')
+
+    Orchestrator.on_payment_link_generated(
+        agreement,
+        payment_url=result.get('payment_url', ''),
+        ip_address=ip_address,
+    )
 
     return JsonResponse({
         'payment_url': result.get('payment_url', ''),
         'transaction_id': tx.transaction_id,
         'provider': provider,
         'agreement_id': agreement.agreement_id,
-        'status': 'PAYMENT_PENDING',
+        'status': 'SUBMITTED',
+        'status_code': 12000,
     })

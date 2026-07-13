@@ -94,9 +94,9 @@ ENGINE_DEFINITIONS = {
     'orchestration': {
         'name': 'Orchestration Engine',
         'icon': '🎯',
-        'desc': 'State machine conductor. Moves agreements through CREATED → SETTLED flow.',
+        'desc': 'State machine conductor. Moves agreements through CREATED -> SETTLED flow.',
         'fields': [
-            {'key': 'engine_orchestration_immediate_split', 'label': 'Immediate Split (skip WAITING)', 'type': 'bool', 'default': 'true'},
+            {'key': 'engine_orchestration_immediate_split', 'label': 'Immediate Split (skip HELD)', 'type': 'bool', 'default': 'true'},
             {'key': 'engine_orchestration_require_conditions', 'label': 'Require Conditions by Default', 'type': 'bool', 'default': 'false'},
         ],
         'test_action': 'Run full flow on test agreement',
@@ -233,12 +233,12 @@ def engine_test(request, engine_id):
             fails = LoginAttempt.objects.filter(success=False).count()
             return JsonResponse({'status': 'ok', 'failed_logins': fails})
         elif engine_id == 'orchestration':
-            from apps.agreements.models import Agreement
+            from apps.agreements.models import Agreement, STATUS_CODES
             counts = {}
-            for s in ['CREATED', 'PAYMENT_PENDING', 'COLLECTED', 'WAITING', 'READY', 'SETTLING', 'SETTLED']:
+            for s in STATUS_CODES:
                 c = Agreement.objects.filter(status=s).count()
                 if c:
-                    counts[s] = c
+                    counts[f"{s} ({STATUS_CODES[s]})"] = c
             return JsonResponse({'status': 'ok', 'state_counts': counts})
         return JsonResponse({'status': 'ok', 'engine': engine_id})
     except Exception as e:

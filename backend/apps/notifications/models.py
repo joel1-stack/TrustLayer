@@ -3,15 +3,19 @@ from django.db import models
 class NotificationEvent(models.Model):
     class Event(models.TextChoices):
         AGREEMENT_CREATED = 'agreement.created', 'Agreement Created'
+        PAYMENT_SUBMITTED = 'payment.submitted', 'Payment Submitted'
         PAYMENT_PENDING = 'payment.pending', 'Payment Pending'
         PAYMENT_COLLECTED = 'payment.collected', 'Payment Collected'
+        PAYMENT_DECLINED = 'payment.declined', 'Payment Declined'
         CONDITION_MET = 'condition.met', 'Condition Met'
-        AGREEMENT_WAITING = 'agreement.waiting', 'Agreement Waiting'
+        AGREEMENT_HELD = 'agreement.held', 'Agreement Held'
         AGREEMENT_READY = 'agreement.ready', 'Agreement Ready'
+        AGREEMENT_DISPUTED = 'agreement.disputed', 'Agreement Disputed'
         SETTLEMENT_STARTED = 'settlement.started', 'Settlement Started'
         SETTLEMENT_COMPLETED = 'settlement.completed', 'Settlement Completed'
         SETTLEMENT_FAILED = 'settlement.failed', 'Settlement Failed'
         AGREEMENT_SETTLED = 'agreement.settled', 'Agreement Settled'
+        AGREEMENT_REVERSED = 'agreement.reversed', 'Agreement Reversed'
         AGREEMENT_REFUNDED = 'agreement.refunded', 'Agreement Refunded'
         AGREEMENT_CANCELLED = 'agreement.cancelled', 'Agreement Cancelled'
     
