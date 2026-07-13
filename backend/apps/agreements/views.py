@@ -53,3 +53,65 @@ def get_agreement(request, agreement_id):
         return JsonResponse({'error': 'Agreement not found'}, status=404)
     serializer = AgreementSerializer(agreement)
     return JsonResponse(serializer.data)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def approve_kyc(request, agreement_id):
+    try:
+        data = json.loads(request.body) if request.body else {}
+        from apps.state_machine.services import StateMachine
+        from apps.orchestration.services import Orchestrator
+        agreement = AgreementService.get_agreement(agreement_id)
+        if not agreement:
+            return JsonResponse({'error': 'Agreement not found'}, status=404)
+        if agreement.status != 'PENDING_KYC':
+            return JsonResponse({'error': f'Agreement is {agreement.status}, not PENDING_KYC'}, status=400)
+        kyc_data = data.get('kyc', {})
+        meta = agreement.metadata or {}
+        meta['kyc'] = {**meta.get('kyc', {}), **kyc_data, 'approved': True, 'approved_by': data.get('approved_by', 'system')}
+        agreement.metadata = meta
+        agreement.save(update_fields=['metadata'])
+        ip_address = request.META.get('REMOTE_ADDR')
+        StateMachine.transition(
+            agreement, 'CONFIRMED',
+            triggered_by=data.get('approved_by', 'system'),
+            actor_id=data.get('actor_id', ''),
+            actor_role='admin',
+            channel='api',
+            ip_address=ip_address,
+            trigger_reason='kyc_approved',
+            reason=f'KYC approved for tier {StateMachine.get_required_kyc_tier(agreement.amount)}',
+            evidence={'kyc': kyc_data}
+        )
+        from apps.notifications.services import NotificationService
+        NotificationService.on_kyc_approved(agreement)
+        return JsonResponse({'status': 'kyc_approved', 'agreement_id': agreement.agreement_id, 'status_code': agreement.status_code})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def reject_kyc(request, agreement_id):
+    try:
+        data = json.loads(request.body) if request.body else {}
+        from apps.state_machine.services import StateMachine
+        agreement = AgreementService.get_agreement(agreement_id)
+        if not agreement:
+            return JsonResponse({'error': 'Agreement not found'}, status=404)
+        if agreement.status != 'PENDING_KYC':
+            return JsonResponse({'error': f'Agreement is {agreement.status}, not PENDING_KYC'}, status=400)
+        ip_address = request.META.get('REMOTE_ADDR')
+        StateMachine.transition(
+            agreement, 'REJECTED',
+            triggered_by=data.get('rejected_by', 'system'),
+            actor_role='admin',
+            channel='api',
+            ip_address=ip_address,
+            trigger_reason='kyc_rejected',
+            reason=data.get('reason', 'KYC verification rejected'),
+        )
+        return JsonResponse({'status': 'kyc_rejected', 'agreement_id': agreement.agreement_id})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

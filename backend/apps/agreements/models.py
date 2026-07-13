@@ -2,6 +2,7 @@ from django.db import models
 
 STATUS_CODES = {
     'CREATED': 10000,
+    'PENDING_KYC': 10500,
     'CONFIRMED': 11000,
     'SUBMITTED': 12000,
     'PENDING': 13000,
@@ -30,6 +31,7 @@ STATUS_CODES = {
 
 STATUS_CATEGORIES = {
     'CREATED': 'active',
+    'PENDING_KYC': 'active',
     'CONFIRMED': 'active',
     'SUBMITTED': 'active',
     'PENDING': 'active',
@@ -59,6 +61,7 @@ STATUS_CATEGORIES = {
 class Agreement(models.Model):
     class Status(models.TextChoices):
         CREATED = 'CREATED', 'Created'
+        PENDING_KYC = 'PENDING_KYC', 'Pending KYC'
         CONFIRMED = 'CONFIRMED', 'Confirmed'
         SUBMITTED = 'SUBMITTED', 'Submitted'
         PENDING = 'PENDING', 'Pending'
@@ -128,15 +131,9 @@ class Agreement(models.Model):
 
 
 class AgreementParty(models.Model):
-    class Role(models.TextChoices):
-        PAYER = 'PAYER', 'Payer'
-        PAYEE = 'PAYEE', 'Payee'
-        PLATFORM = 'PLATFORM', 'Platform'
-        PARTNER = 'PARTNER', 'Partner'
-        AGENT = 'AGENT', 'Agent'
-
     agreement = models.ForeignKey(Agreement, on_delete=models.CASCADE, related_name='parties')
-    role = models.CharField(max_length=16, choices=Role.choices)
+    role = models.CharField(max_length=32, db_index=True,
+        help_text='Party role: BUYER, SELLER, VENDOR, DELIVERY_AGENT, MARKETPLACE, CUSTOMER, PLATFORM, PAYER, PAYEE, PARTNER, AGENT')
     identifier = models.CharField(max_length=128, help_text='Email, phone, or org ID')
     name = models.CharField(max_length=255)
     payout_method = models.CharField(max_length=32, blank=True, default='')

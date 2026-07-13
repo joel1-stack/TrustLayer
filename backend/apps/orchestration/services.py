@@ -31,6 +31,19 @@ class Orchestrator:
     @staticmethod
     def on_payment_link_generated(agreement, payment_url='', ip_address=None):
         if agreement.status == 'CREATED':
+            kyc_ok = StateMachine.validate_kyc(agreement)
+            if not kyc_ok and agreement.amount >= 50000:
+                StateMachine.transition(
+                    agreement, 'PENDING_KYC',
+                    triggered_by='orchestrator',
+                    actor_role='system',
+                    channel='api',
+                    ip_address=ip_address,
+                    trigger_reason='kyc_required',
+                    reason=f'KYC verification required for amount {agreement.amount}',
+                )
+                NotificationService.on_kyc_required(agreement)
+                return None
             StateMachine.transition(
                 agreement, 'CONFIRMED',
                 triggered_by='orchestrator',
@@ -86,6 +99,8 @@ class Orchestrator:
             actor_role='provider_webhook',
             channel='webhook',
             ip_address=ip_address,
+            provider_ref=reference,
+            trigger_reason='payment_collected',
             reason=f'Payment of {amount} collected (ref: {reference})',
             evidence={'ledger_entry': entry.entry_id, 'reference': reference, 'splits': len(split_entries)}
         )
@@ -100,6 +115,7 @@ class Orchestrator:
                 triggered_by='orchestrator',
                 actor_role='system',
                 channel='system',
+                trigger_reason='awaiting_conditions',
                 reason='Payment collected, awaiting conditions',
             )
         else:
@@ -108,6 +124,7 @@ class Orchestrator:
                 triggered_by='orchestrator',
                 actor_role='system',
                 channel='system',
+                trigger_reason='no_conditions',
                 reason='No conditions required, proceeding to settlement',
             )
             NotificationService.on_agreement_ready(agreement)
@@ -186,6 +203,7 @@ class Orchestrator:
                 triggered_by='orchestrator',
                 actor_role='system',
                 channel='system',
+                trigger_reason='all_settlements_completed',
                 reason='All settlements completed',
                 evidence={'settlements': settlement_ids}
             )

@@ -34,6 +34,7 @@ def currency(value):
 def status_badge(status):
     colors = {
         'CREATED': 'bg-gray-500',
+        'PENDING_KYC': 'bg-purple-400',
         'CONFIRMED': 'bg-blue-400',
         'SUBMITTED': 'bg-yellow-500',
         'PENDING': 'bg-orange-400',
@@ -97,6 +98,12 @@ def get_item(d, key):
 def status_code(state):
     from apps.agreements.models import STATUS_CODES
     return STATUS_CODES.get(state, 0)
+
+
+@register.filter
+def status_category(state):
+    from apps.agreements.models import STATUS_CATEGORIES
+    return STATUS_CATEGORIES.get(state, 'active')
 
 
 @register.filter

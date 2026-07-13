@@ -2,7 +2,8 @@ from .models import StateTransition
 from apps.agreements.models import STATUS_CODES
 
 VALID_TRANSITIONS = {
-    'CREATED': ['CONFIRMED', 'REJECTED', 'CANCELLED'],
+    'CREATED': ['PENDING_KYC', 'REJECTED', 'CANCELLED'],
+    'PENDING_KYC': ['CONFIRMED', 'REJECTED', 'CANCELLED'],
     'CONFIRMED': ['SUBMITTED', 'CANCELLED'],
     'SUBMITTED': ['PENDING', 'DECLINED', 'EXPIRED'],
     'PENDING': ['AVAILABLE', 'DECLINED', 'EXPIRED'],
@@ -32,7 +33,8 @@ class StateMachine:
 
     @staticmethod
     def transition(agreement, to_status, triggered_by='system', reason='', evidence=None,
-                   actor_role='system', channel='system', ip_address=None):
+                   actor_role='system', channel='system', ip_address=None,
+                   actor_id='', provider_ref='', trigger_reason=''):
         if to_status not in VALID_TRANSITIONS.get(agreement.status, []):
             raise ValueError(
                 f"Cannot transition from {agreement.status} to {to_status}. "
@@ -47,9 +49,12 @@ class StateMachine:
             to_status=to_status,
             status_code=status_code,
             triggered_by=triggered_by,
+            actor_id=actor_id,
             actor_role=actor_role,
             channel=channel,
             ip_address=ip_address,
+            provider_ref=provider_ref,
+            trigger_reason=trigger_reason,
             reason=reason,
             evidence=evidence or {},
         )
@@ -74,3 +79,23 @@ class StateMachine:
     @staticmethod
     def is_terminal(state_name):
         return state_name in TERMINAL_STATES
+
+    @staticmethod
+    def get_required_kyc_tier(amount):
+        if amount < 50000:
+            return 1
+        elif amount < 500000:
+            return 2
+        return 3
+
+    @staticmethod
+    def validate_kyc(agreement):
+        tier = StateMachine.get_required_kyc_tier(agreement.amount)
+        metadata = agreement.metadata or {}
+        kyc = metadata.get('kyc', {})
+        if tier == 1:
+            return bool(kyc.get('phone') or kyc.get('email'))
+        elif tier == 2:
+            return bool(kyc.get('id_number') and (kyc.get('phone') or kyc.get('email')))
+        else:
+            return bool(kyc.get('id_number') and kyc.get('id_photo_url') and kyc.get('phone'))

@@ -10,10 +10,11 @@
 <div class="grid-2">
   <div class="card">
     <h3>Overview</h3>
-    <div class="row"><span class="key">Status</span><span class="val">{{ agreement.status|status_badge|safe }}</span></div>
+    <div class="row"><span class="key">Status</span><span class="val">{{ agreement.status|status_badge|safe }} <span style="font-family:monospace;font-size:11px;color:var(--text-muted);">{{ agreement.status_code }}</span></span></div>
     <div class="row"><span class="key">Amount</span><span class="val">{{ agreement.amount|currency }}</span></div>
     <div class="row"><span class="key">Currency</span><span class="val">{{ agreement.currency }}</span></div>
     <div class="row"><span class="key">Title</span><span class="val">{{ agreement.title }}</span></div>
+    <div class="row"><span class="key">Category</span><span class="val"><span class="status-badge" style="background:{% if agreement.status_category == 'terminal' %}var(--red){% else %}var(--teal){% endif %};color:#000;padding:2px 8px;border-radius:10px;font-size:10px;">{{ agreement.status_category }}</span></span></div>
     <div class="row"><span class="key">Industry</span><span class="val">{{ agreement.metadata.industry|default:"—" }}</span></div>
     <div class="row"><span class="key">Created</span><span class="val">{{ agreement.created_at|date:"Y-m-d H:i:s" }}</span></div>
     <div class="row"><span class="key">Updated</span><span class="val">{{ agreement.updated_at|date:"Y-m-d H:i:s" }}</span></div>
@@ -36,13 +37,26 @@
 
 <div class="grid-2">
   <div class="card">
-    <h3>State History</h3>
+    <h3>State History <span style="font-size:11px;color:var(--text-muted);">(Personal Journey / Touchpoints)</span></h3>
     <div class="timeline">
       {% for t in transitions %}
       <div class="timeline-item">
         <div class="time">{{ t.created_at|date:"H:i:s" }}</div>
-        <div class="event">{{ t.from_status }} &rarr; {{ t.to_status }}</div>
-        <div class="actor">{{ t.triggered_by }} &middot; {{ t.reason|truncatechars:40 }}</div>
+        <div class="event">
+          <span style="font-weight:500;">{{ t.from_status }}</span>
+          {% if t.status_code %}<span style="font-family:monospace;font-size:10px;color:var(--text-muted);">({{ t.status_code }})</span>{% endif %}
+          &rarr;
+          <span style="font-weight:500;">{{ t.to_status }}</span>
+          {% if t.to_status|status_code %}<span style="font-family:monospace;font-size:10px;color:var(--text-muted);">({{ t.to_status|status_code }})</span>{% endif %}
+        </div>
+        <div class="actor">
+          {{ t.triggered_by }}
+          {% if t.actor_id %} <span style="font-family:monospace;font-size:10px;">[{{ t.actor_id }}]</span>{% endif %}
+          &middot; {{ t.actor_role }}
+          &middot; {{ t.channel }}
+        </div>
+        {% if t.provider_ref %}<div class="actor" style="font-family:monospace;font-size:10px;color:var(--accent);">Provider: {{ t.provider_ref }}</div>{% endif %}
+        {% if t.reason %}<div class="actor" style="color:var(--text-muted);">{{ t.reason|truncatechars:60 }}</div>{% endif %}
       </div>
       {% empty %}<p style="color:var(--text-muted);">No transitions</p>{% endfor %}
     </div>

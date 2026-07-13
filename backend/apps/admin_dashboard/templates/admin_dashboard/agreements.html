@@ -27,7 +27,9 @@
         <th>ID</th>
         <th>Title</th>
         <th>Amount</th>
+        <th>Code</th>
         <th>Status</th>
+        <th>Parties</th>
         <th>Industry</th>
         <th>Created</th>
       </tr>
@@ -38,12 +40,14 @@
         <td style="font-family:monospace;">{{ a.agreement_id }}</td>
         <td>{{ a.title|truncatechars:40 }}</td>
         <td>{{ a.amount|currency }}</td>
+        <td style="font-family:monospace;font-size:11px;">{{ a.status_code }}</td>
         <td>{{ a.status|status_badge|safe }}</td>
+        <td style="font-size:12px;">{{ a.parties.all|length }}</td>
         <td>{{ a.metadata.industry|default:"—" }}</td>
         <td>{{ a.created_at|age_from_now }}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:40px;">No agreements found</td></tr>
+      <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:40px;">No agreements found</td></tr>
       {% endfor %}
     </tbody>
   </table>

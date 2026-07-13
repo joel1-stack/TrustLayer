@@ -5,6 +5,8 @@ from .models import NotificationEvent
 
 logger = logging.getLogger(__name__)
 
+from apps.state_machine.services import StateMachine
+
 
 class NotificationService:
 
@@ -116,6 +118,18 @@ class NotificationService:
         msg = f"Settlement {settlement.settlement_id} failed: {settlement.last_error or 'Unknown error'}"
         NotificationService.notify('settlement.failed', agreement, message=msg, channel='log',
                                    metadata={'settlement': settlement.settlement_id, 'error': settlement.last_error})
+
+    @staticmethod
+    def on_kyc_required(agreement):
+        msg = f"KYC verification required for {agreement.agreement_id} (amount: {agreement.amount})"
+        NotificationService.notify('kyc.required', agreement, message=msg, channel='log',
+                                   metadata={'tier': StateMachine.get_required_kyc_tier(agreement.amount)})
+        logger.info(msg)
+
+    @staticmethod
+    def on_kyc_approved(agreement):
+        msg = f"KYC approved for {agreement.agreement_id}"
+        NotificationService.notify('kyc.approved', agreement, message=msg, channel='log')
 
     @staticmethod
     def on_agreement_settled(agreement):

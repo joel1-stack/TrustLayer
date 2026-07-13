@@ -5,10 +5,13 @@ class StateTransition(models.Model):
     from_status = models.CharField(max_length=20)
     to_status = models.CharField(max_length=20)
     status_code = models.IntegerField(null=True, blank=True, help_text='Numeric code for the target state')
-    triggered_by = models.CharField(max_length=128, help_text='Who triggered this')
-    actor_role = models.CharField(max_length=32, blank=True, default='', help_text='Role of the actor: system, admin, customer, provider_webhook')
-    channel = models.CharField(max_length=32, blank=True, default='', help_text='Channel: api, webhook, admin_dashboard, portal, system')
+    triggered_by = models.CharField(max_length=128, help_text='Who triggered this (name/username)')
+    actor_id = models.CharField(max_length=128, blank=True, default='', help_text='Specific identifier of the actor (user ID, system ID, provider agent ID)')
+    actor_role = models.CharField(max_length=32, blank=True, default='', help_text='Role of the actor: system, admin, customer, provider_webhook, vendor, buyer, delivery_agent')
+    channel = models.CharField(max_length=32, blank=True, default='', help_text='Channel: api, webhook, admin_dashboard, portal, system, sms, email')
     ip_address = models.GenericIPAddressField(null=True, blank=True, help_text='IP address of the requester')
+    provider_ref = models.CharField(max_length=256, blank=True, default='', help_text='Payment provider reference (M-Pesa txn ID, IntaSend ID, Stripe PI)')
+    trigger_reason = models.CharField(max_length=512, blank=True, default='', help_text='Short machine-readable reason code for the transition')
     reason = models.TextField(blank=True, default='')
     evidence = models.JSONField(default=dict, blank=True, help_text='Supporting data (receipt, doc ref, etc)')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -19,4 +22,5 @@ class StateTransition(models.Model):
 
     def __str__(self):
         code_str = f" ({self.status_code})" if self.status_code else ""
-        return f"{self.agreement.agreement_id}: {self.from_status} -> {self.to_status}{code_str}"
+        ref = f" ref:{self.provider_ref}" if self.provider_ref else ""
+        return f"{self.agreement.agreement_id}: {self.from_status} -> {self.to_status}{code_str}{ref}"

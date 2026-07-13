@@ -70,9 +70,12 @@ def _handle_webhook(request, provider):
                         StateMachine.transition(
                             agreement, 'PENDING',
                             triggered_by='provider_webhook',
+                            actor_id=provider,
                             actor_role='provider_webhook',
                             channel='webhook',
                             ip_address=ip_address,
+                            provider_ref=reference,
+                            trigger_reason='payment_pending',
                             reason=f'Provider acknowledged payment (ref: {reference})',
                             evidence={'provider': provider, 'provider_ref': reference}
                         )
@@ -99,9 +102,12 @@ def _handle_webhook(request, provider):
                         StateMachine.transition(
                             agreement, 'DECLINED',
                             triggered_by='provider_webhook',
+                            actor_id=provider,
                             actor_role='provider_webhook',
                             channel='webhook',
                             ip_address=ip_address,
+                            provider_ref=reference,
+                            trigger_reason='payment_declined',
                             reason=f'Provider declined payment: {standard.get("failure_reason", "Unknown reason")}',
                             evidence={'provider': provider, 'provider_ref': reference}
                         )
