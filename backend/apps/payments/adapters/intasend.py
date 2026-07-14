@@ -1,49 +1,99 @@
 import hashlib
 import hmac
 import json
+import logging
 from decimal import Decimal
 from django.conf import settings
 from .base import PaymentProviderAdapter
+
+logger = logging.getLogger(__name__)
+
 
 class IntaSendAdapter(PaymentProviderAdapter):
     
     def get_provider_name(self):
         return 'intasend'
     
+    def _get_headers(self):
+        return {
+            'Authorization': f'Bearer {settings.INTASEND_SECRET_KEY}',
+            'Content-Type': 'application/json',
+        }
+    
+    def _get_base_url(self):
+        return settings.INTASEND_BASE_URL.rstrip('/')
+    
     def generate_link(self, amount, phone, reference, **kwargs):
+        """
+        Generate IntaSend checkout link.
+        
+        Args:
+            amount: Decimal amount to charge
+            phone: Customer phone number (optional)
+            reference: Internal reference (agreement_id)
+            **kwargs: Additional params:
+                - email: Customer email
+                - name: Payment name/description
+                - redirect_url: Success redirect URL
+                - webhook_url: Webhook callback URL
+                - currency: Currency code (default KES)
+        """
         try:
             import requests
+            
+            email = kwargs.get('email', '')
+            name = kwargs.get('name', f'Agreement {reference}')
+            redirect_url = kwargs.get('redirect_url', '')
+            webhook_url = kwargs.get('webhook_url', '')
+            currency = kwargs.get('currency', 'KES')
+            
+            # Use TRUSTLAYER_BASE_URL to construct default URLs if not provided
+            base_url = getattr(settings, 'TRUSTLAYER_BASE_URL', '').rstrip('/')
+            if not redirect_url and base_url:
+                redirect_url = f'{base_url}/success/'
+            if not webhook_url and base_url:
+                webhook_url = f'{base_url}/webhooks/intasend/'
+            
             payload = {
+                'name': name,
                 'amount': str(amount),
-                'currency': 'KES',
-                'api_ref': reference,
-                'phone_number': phone or '',
-                'redirect_url': '',
-                'method': 'M-PESA',
+                'currency': currency,
+                'email': email,
+                'comment': f'TrustLayer Agreement {reference}',
+                'redirect_url': redirect_url,
+                'webhook_url': webhook_url,
+                'internal_id': reference,
             }
-            headers = {
-                'Authorization': f'Bearer {settings.INTASEND_SECRET_KEY}',
-                'Content-Type': 'application/json',
-            }
+            
+            logger.info(f"IntaSend generate_link for {reference}: {payload}")
+            
             resp = requests.post(
-                f'{settings.INTASEND_BASE_URL}/checkout/',
+                f'{self._get_base_url()}/checkout/',
                 json=payload,
-                headers=headers,
+                headers=self._get_headers(),
                 timeout=15,
             )
             data = resp.json()
+            logger.info(f"IntaSend response: {data}")
+            
             if resp.ok and data.get('url'):
                 return {
                     'success': True,
                     'payment_url': data['url'],
                     'provider_reference': data.get('invoice_id', data.get('id', '')),
                 }
+            else:
+                logger.error(f"IntaSend checkout failed: {data}")
+                return {'success': False, 'error': data.get('message', 'Checkout creation failed')}
+                
         except ImportError:
-            pass
-        except Exception:
-            pass
-        ref = reference.replace(' ', '_')
+            logger.warning("requests not available, using fallback")
+        except Exception as e:
+            logger.error(f"IntaSend generate_link error: {e}")
+        
+        # Fallback for testing without requests
         import uuid
+        ref = reference.replace(' ', '_')
         return {
             'success': True,
             'payment_url': f'https://pay.intasend.com/pay/{ref}',
@@ -60,14 +110,10 @@ class IntaSendAdapter(PaymentProviderAdapter):
                 'phone_number': phone,
                 'method': 'MPESA_B2C',
             }
-            headers = {
-                'Authorization': f'Bearer {settings.INTASEND_SECRET_KEY}',
-                'Content-Type': 'application/json',
-            }
             resp = requests.post(
-                f'{settings.INTASEND_BASE_URL}/payout/',
+                f'{self._get_base_url()}/payout/',
                 json=payload,
-                headers=headers,
+                headers=self._get_headers(),
                 timeout=15,
             )
             data = resp.json()
@@ -78,8 +124,8 @@ class IntaSendAdapter(PaymentProviderAdapter):
                 }
         except ImportError:
             pass
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"IntaSend send_payout error: {e}")
         import uuid
         return {
             'success': True,
@@ -92,7 +138,7 @@ class IntaSendAdapter(PaymentProviderAdapter):
         IntaSend sends:
         {
             "id": "inv_123",
-            "state": "complete" | "failed" | "processing",
+            "state": "COMPLETED" | "FAILED" | "PENDING" | "CANCELLED",
             "amount": 5000,
             "currency": "KES",
             "api_ref": "AGR_001",
@@ -102,7 +148,20 @@ class IntaSendAdapter(PaymentProviderAdapter):
             "channels": {...}
         }
         """
-        status = 'completed' if raw_payload.get('state') == 'complete' else 'failed'
+        state = raw_payload.get('state', '').upper()
+        
+        # Map IntaSend states to standard statuses
+        if state == 'COMPLETED':
+            status = 'completed'
+        elif state in ('FAILED', 'EXPIRED'):
+            status = 'failed'
+        elif state == 'CANCELLED':
+            status = 'cancelled'
+        elif state in ('PENDING', 'PROCESSING'):
+            status = 'pending'
+        else:
+            status = 'unknown'
+        
         return {
             'provider': 'intasend',
             'provider_transaction_id': raw_payload.get('id', ''),
@@ -112,4 +171,25 @@ class IntaSendAdapter(PaymentProviderAdapter):
             'status': status,
             'phone': raw_payload.get('phone', ''),
             'raw_payload': raw_payload,
+            'state': state,  # Keep original state for debugging
         }
+    
+    def verify_webhook_signature(self, payload, signature_header):
+        """Verify IntaSend webhook signature.
+        
+        IntaSend sends: X-IntaSend-Signature header with HMAC-SHA256 of payload
+        """
+        if not settings.INTASEND_SECRET_KEY:
+            logger.warning("INTASEND_SECRET_KEY not set, skipping signature verification")
+            return True
+        
+        try:
+            expected = hmac.new(
+                settings.INTASEND_SECRET_KEY.encode(),
+                json.dumps(payload, separators=(',', ':')).encode(),
+                hashlib.sha256
+            ).hexdigest()
+            return hmac.compare_digest(expected, signature_header)
+        except Exception as e:
+            logger.error(f"Webhook signature verification failed: {e}")
+            return False

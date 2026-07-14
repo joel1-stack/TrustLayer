@@ -70,6 +70,20 @@ class Orchestrator:
             logger.warning(f"Payment webhook for {agreement.agreement_id} but state is {agreement.status}")
             return None
 
+        # If coming from SUBMITTED, first transition to PENDING (13000)
+        if agreement.status == 'SUBMITTED':
+            StateMachine.transition(
+                agreement, 'PENDING',
+                triggered_by='orchestrator',
+                actor_role='provider_webhook',
+                channel='webhook',
+                ip_address=ip_address,
+                provider_ref=reference,
+                trigger_reason='payment_pending',
+                reason=f'Provider acknowledged payment processing (ref: {reference})',
+                evidence={'provider_ref': reference}
+            )
+        
         entry = LedgerService.credit(
             agreement, amount,
             reference=reference,
@@ -93,6 +107,7 @@ class Orchestrator:
                 )
                 split_entries.append(se)
 
+        # Now transition to AVAILABLE (14000)
         StateMachine.transition(
             agreement, 'AVAILABLE',
             triggered_by='orchestrator',
