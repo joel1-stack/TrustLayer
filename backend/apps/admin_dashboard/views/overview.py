@@ -21,13 +21,16 @@ def dashboard(request):
     total_agreements = Agreement.objects.count()
 
     from apps.agreements.models import STATUS_CATEGORIES, STATUS_CODES
-    terminal_states = [s for s, c in STATUS_CATEGORIES.items() if c == 'terminal']
-    active_agreements = Agreement.objects.exclude(status__in=terminal_states).count()
-    held_count = Agreement.objects.filter(status='HELD').count()
-    waiting_count = Agreement.objects.filter(status__in=['PENDING_KYC', 'PENDING', 'SUBMITTED']).count()
-    disputed_count = Agreement.objects.filter(status='DISPUTED').count()
-    failed_count = Agreement.objects.filter(status__in=['FAILED', 'FAILED_PERMANENT']).count()
-    settled_today = Agreement.objects.filter(status='SETTLED', updated_at__date=today).count()
+    active_agreements = Agreement.objects.filter(
+        status_code_value__gte=10000, status_code_value__lte=17999
+    ).exclude(
+        status_code_value__in=[22000, 23000, 21000]
+    ).count()
+    held_count = Agreement.objects.filter(status_code_value=15000).count()
+    waiting_count = Agreement.objects.filter(status_code_value__in=[10500, 13000, 12000]).count()
+    disputed_count = Agreement.objects.filter(status_code_value=15500).count()
+    failed_count = Agreement.objects.filter(status_code_value__in=[24000, 26000]).count()
+    settled_today = Agreement.objects.filter(status_code_value=18000, updated_at__date=today).count()
 
     collected_today = LedgerEntry.objects.filter(
         entry_type='CREDIT', created_at__date=today,

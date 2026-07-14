@@ -60,6 +60,7 @@ def get_agreement(request, agreement_id):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_api_auth
 def approve_kyc(request, agreement_id):
     try:
         data = json.loads(request.body) if request.body else {}
@@ -96,6 +97,7 @@ def approve_kyc(request, agreement_id):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_api_auth
 def reject_kyc(request, agreement_id):
     try:
         data = json.loads(request.body) if request.body else {}

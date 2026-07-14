@@ -60,7 +60,8 @@ class StateMachine:
         )
 
         agreement.status = to_status
-        agreement.save(update_fields=['status', 'updated_at'])
+        agreement.status_code_value = status_code
+        agreement.save(update_fields=['status', 'status_code_value', 'updated_at'])
 
         return transition
 

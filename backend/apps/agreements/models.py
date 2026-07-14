@@ -89,6 +89,7 @@ class Agreement(models.Model):
 
     agreement_id = models.CharField(max_length=24, unique=True, editable=False)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.CREATED)
+    status_code_value = models.IntegerField(default=10000, db_index=True, help_text='Numeric status code for fast range queries')
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
@@ -111,11 +112,13 @@ class Agreement(models.Model):
         if not self.agreement_id:
             import secrets, string
             self.agreement_id = 'AGR' + ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+        if not self.status_code_value or self.status_code_value == 10000:
+            self.status_code_value = STATUS_CODES.get(self.status, 10000)
         super().save(*args, **kwargs)
 
     @property
     def status_code(self):
-        return STATUS_CODES.get(self.status, 0)
+        return self.status_code_value or STATUS_CODES.get(self.status, 0)
 
     @property
     def status_category(self):
