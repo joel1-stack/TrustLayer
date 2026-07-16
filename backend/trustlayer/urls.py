@@ -1,5 +1,5 @@
 """
-TrustLayer Root URL Configuration — Landing + APIs + Admin + Internal.
+TrustLayer Root URL Configuration — V1 API + Swagger + Admin + Internal.
 """
 from django.contrib import admin
 from django.urls import path, include
@@ -10,6 +10,7 @@ from apps.admin_dashboard.views.infrastructure import health_json, containers_js
 from apps.admin_dashboard.views.engines import engine_test, provider_test
 from apps.agreements.models import Agreement, AgreementParty
 from apps.ledger.models import LedgerEntry
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 
 def home(request):
@@ -35,24 +36,30 @@ urlpatterns = [
 
     path('django-admin/', admin.site.urls),
 
-    # Core Engine APIs
+    # === V1 Developer API (the product) ===
+    path('api/v1/', include('apps.api_v1.urls')),
+
+    # === Core Engine APIs (internal/backward compat) ===
     path('api/agreements/',  include('apps.agreements.urls')),
     path('api/conditions/',  include('apps.conditions.urls')),
     path('api/ledger/',     include('apps.ledger.urls')),
     path('api/settlements/', include('apps.settlements.urls')),
     path('api/notifications/', include('apps.notifications.urls')),
+    path('api/payments/', include('apps.payments.urls_api')),
 
     # Payment Provider Webhooks
     path('webhooks/', include('apps.payments.urls')),
-
-    # Developer API — generate payment link
-    path('api/payments/', include('apps.payments.urls_api')),
 
     # TrustLayer Operations Dashboard (IP-whitelisted, separate auth)
     path('admin/', include('apps.admin_dashboard.urls')),
 
     # Customer Portal
     path('portal/', include('apps.customer_portal.urls')),
+
+    # === Swagger / OpenAPI Docs ===
+    path('api/docs/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
     # Engine Test APIs (no auth required — designed for testing)
     path('api/engines/<str:engine_id>/test/', engine_test, name='api-engine-test'),

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TrustLayer — Trust Orchestration Platform</title>
+  <title>TrustLayer — Conditional Payment API for African Commerce</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -28,6 +28,7 @@
     .links .primary:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,99,235,0.4); }
     .links .secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px); }
     .links .secondary:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+    .hero .badge { display: inline-block; background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3); color: #34d399; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
 
     .hero-providers { margin-top: 40px; display: flex; gap: 24px; align-items: center; justify-content: center; z-index: 2; position: relative; flex-wrap: wrap; }
     .hero-providers span { font-size: 11px; color: #6b7a93; text-transform: uppercase; letter-spacing: 2px; }
@@ -131,13 +132,13 @@
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <div class="tagline">Trust Infrastructure for Africa</div>
+      <div class="badge">&#9889; API-first · One JSON contract does it all</div>
       <h1><span class="gradient-text">TrustLayer</span></h1>
-      <p>Conditional-release payment orchestration built for African commerce. Hold instructions in escrow, verify conditions, and settle through your preferred provider.</p>
+      <p>Conditional payment orchestration for backend engineers building African commerce platforms. Send one POST request, get an escrow with multi-party splits, conditions, and automated settlement.</p>
       <div class="links">
-        <a href="/admin/dashboard/" class="primary"><i class="fas fa-shield-halved"></i> Operations Center</a>
+        <a href="/api/docs/" class="primary"><i class="fas fa-book"></i> API Docs (Swagger)</a>
+        <a href="/admin/dashboard/" class="secondary"><i class="fas fa-shield-halved"></i> Operations Center</a>
         <a href="/portal/" class="secondary"><i class="fas fa-building"></i> Customer Portal</a>
-        <a href="/api/agreements/" class="secondary"><i class="fas fa-code"></i> API</a>
       </div>
       <div class="hero-providers">
         <span>Supported Payments</span>

@@ -23,6 +23,14 @@ class Customer(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     metadata = models.JSONField(default=dict, blank=True)
 
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
     def set_password(self, raw):
         from django.contrib.auth.hashers import make_password
         self.password_hash = make_password(raw)

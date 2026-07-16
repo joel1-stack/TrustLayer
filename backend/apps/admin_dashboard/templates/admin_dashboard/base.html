@@ -21,6 +21,14 @@
         <span>Control Center</span>
       </div>
       <nav class="sidebar-nav">
+        <div class="sidebar-section">Developer</div>
+        <a href="/api/docs/" class="nav-item" target="_blank">
+          <span class="icon">&#128214;</span> API Docs
+        </a>
+        <a href="/admin/customers/" class="nav-item {% if active_section == 'customers' %}active{% endif %}">
+          <span class="icon">&#9679;</span> API Keys
+        </a>
+
         <div class="sidebar-section">Core</div>
         <a href="/admin/dashboard/" class="nav-item {% if active_section == 'dashboard' %}active{% endif %}">
           <span class="icon">&#9679;</span> Overview
@@ -36,9 +44,6 @@
         </a>
 
         <div class="sidebar-section">Management</div>
-        <a href="/admin/customers/" class="nav-item {% if active_section == 'customers' %}active{% endif %}">
-          <span class="icon">&#9679;</span> Customers
-        </a>
         <a href="/admin/team/" class="nav-item {% if active_section == 'team' %}active{% endif %}">
           <span class="icon">&#128101;</span> Team
         </a>

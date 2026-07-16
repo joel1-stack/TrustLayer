@@ -24,20 +24,8 @@ class IntaSendAdapter(PaymentProviderAdapter):
         return settings.INTASEND_BASE_URL.rstrip('/')
     
     def generate_link(self, amount, phone, reference, **kwargs):
-        """
-        Generate IntaSend checkout link.
-        
-        Args:
-            amount: Decimal amount to charge
-            phone: Customer phone number (optional)
-            reference: Internal reference (agreement_id)
-            **kwargs: Additional params:
-                - email: Customer email
-                - name: Payment name/description
-                - redirect_url: Success redirect URL
-                - webhook_url: Webhook callback URL
-                - currency: Currency code (default KES)
-        """
+        if not settings.INTASEND_SECRET_KEY:
+            return self._simulate_link(amount, phone, reference, **kwargs)
         try:
             import requests
             
@@ -91,7 +79,9 @@ class IntaSendAdapter(PaymentProviderAdapter):
         except Exception as e:
             logger.error(f"IntaSend generate_link error: {e}")
         
-        # Fallback for testing without requests
+        return self._simulate_link(amount, phone, reference, **kwargs)
+
+    def _simulate_link(self, amount, phone, reference, **kwargs):
         import uuid
         ref = reference.replace(' ', '_')
         return {
