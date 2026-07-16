@@ -2,7 +2,6 @@
 Shared auth decorator for all API views.
 Checks for admin session OR valid API key.
 """
-import json
 from functools import wraps
 from django.http import JsonResponse
 

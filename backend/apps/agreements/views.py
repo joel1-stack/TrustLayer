@@ -13,9 +13,26 @@ from .models import Agreement
 @require_api_auth
 def list_or_create_agreement(request):
     if request.method == 'GET':
-        agreements = Agreement.objects.all().order_by('-created_at')
+        from apps.constants import STATUS_CATEGORIES
+        qs = Agreement.objects.all().order_by('-created_at')
+        creator = request.GET.get('creator_id')
+        status = request.GET.get('status')
+        if creator:
+            qs = qs.filter(creator_id=creator)
+        if status:
+            qs = qs.filter(status=status.upper())
+        try:
+            limit = min(int(request.GET.get('limit', 50)), 200)
+        except (ValueError, TypeError):
+            limit = 50
+        try:
+            offset = int(request.GET.get('offset', 0))
+        except (ValueError, TypeError):
+            offset = 0
+        total = qs.count()
+        agreements = qs[offset:offset + limit]
         data = [AgreementSerializer(a).data for a in agreements]
-        return JsonResponse({'count': len(data), 'results': data})
+        return JsonResponse({'count': len(data), 'total': total, 'limit': limit, 'offset': offset, 'results': data})
     try:
         data = json.loads(request.body)
         agreement = AgreementService.create_agreement(

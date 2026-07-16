@@ -1,32 +1,6 @@
 from .models import StateTransition
-from apps.agreements.models import STATUS_CODES
-
-VALID_TRANSITIONS = {
-    'CREATED': ['PENDING_KYC', 'REJECTED', 'CANCELLED'],
-    'PENDING_KYC': ['CONFIRMED', 'REJECTED', 'CANCELLED'],
-    'CONFIRMED': ['SUBMITTED', 'CANCELLED'],
-    'SUBMITTED': ['PENDING', 'DECLINED', 'EXPIRED'],
-    'PENDING': ['AVAILABLE', 'DECLINED', 'EXPIRED'],
-    'AVAILABLE': ['RECONCILING', 'HELD', 'REFUNDED'],
-    'RECONCILING': ['HELD', 'REFUNDED'],
-    'HELD': ['READY', 'DISPUTED', 'CANCELLED', 'REFUNDED', 'EXPIRED'],
-    'DISPUTED': ['READY', 'REFUNDED', 'CANCELLED'],
-    'READY': ['SETTLING', 'CANCELLED'],
-    'SETTLING': ['SETTLED', 'PARTIALLY_SETTLED', 'FAILED', 'EXPIRED'],
-    'PARTIALLY_SETTLED': ['SETTLED', 'RETRYING', 'FAILED_PERMANENT'],
-    'FAILED': ['RETRYING', 'FAILED_PERMANENT'],
-    'RETRYING': ['SETTLED', 'PARTIALLY_SETTLED', 'FAILED_PERMANENT'],
-    'SETTLED': ['REVERSED'],
-    'REVERSED': ['REFUNDED'],
-    'DECLINED': [],
-    'REJECTED': [],
-    'CANCELLED': [],
-    'EXPIRED': [],
-    'REFUNDED': [],
-    'FAILED_PERMANENT': [],
-}
-
-TERMINAL_STATES = {'DECLINED', 'REJECTED', 'CANCELLED', 'EXPIRED', 'REFUNDED', 'FAILED_PERMANENT'}
+from apps.constants import STATUS_CODES, VALID_TRANSITIONS, TERMINAL_STATES
+from apps.agreements.models import Agreement
 
 
 class StateMachine:
@@ -103,7 +77,6 @@ class StateMachine:
 
     @staticmethod
     def enforce_held_timeout(max_hold_hours=72):
-        """Auto-expire agreements stuck in HELD beyond max_hold_hours."""
         from django.utils import timezone
         from datetime import timedelta
         cutoff = timezone.now() - timedelta(hours=max_hold_hours)
@@ -129,7 +102,6 @@ class StateMachine:
 
     @staticmethod
     def enforce_reversal_window(window_hours=24):
-        """Prevent SETTLED->REVERSED beyond the allowed window."""
         from django.utils import timezone
         from datetime import timedelta
         cutoff = timezone.now() - timedelta(hours=window_hours)

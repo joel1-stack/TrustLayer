@@ -1,6 +1,7 @@
 import json
 import logging
 from datetime import timedelta
+from django.db import models
 from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail
@@ -8,14 +9,26 @@ from apps.admin_dashboard.models import SecurityAlert, LoginAttempt
 
 logger = logging.getLogger(__name__)
 
-ALERT_EMAIL = 'joelkaunda15@gmail.com'
-ALERT_PHONE = '+254715641339'
 
-BRUTE_FORCE_THRESHOLD = 10
-SUSPICIOUS_IP_THRESHOLD = 20
+def _alert_email():
+    return getattr(settings, 'ALERT_EMAIL', '')
+
+
+def _alert_phone():
+    return getattr(settings, 'ALERT_PHONE', '')
+
+
+def _brute_force_threshold():
+    return getattr(settings, 'BRUTE_FORCE_THRESHOLD', 10)
+
+
+def _suspicious_ip_threshold():
+    return getattr(settings, 'SUSPICIOUS_IP_THRESHOLD', 20)
 
 
 def send_security_notification(alert):
+    to_email = _alert_email()
+    to_phone = _alert_phone()
     subject = f'[SECURITY] TrustLayer - {alert.severity.upper()}: {alert.alert_type}'
     message = (
         f'Security Alert: {alert.alert_type}\n'
@@ -27,38 +40,37 @@ def send_security_notification(alert):
         f'Action required. Log into TrustLayer Admin to review.'
     )
 
-    try:
-        send_mail(
-            subject, message, settings.DEFAULT_FROM_EMAIL,
-            [ALERT_EMAIL], fail_silently=True
-        )
-        alert.notified_via_email = True
-        logger.info(f'Security alert email sent to {ALERT_EMAIL}')
-    except Exception as e:
-        logger.error(f'Failed to send security alert email: {e}')
+    if to_email:
+        try:
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [to_email], fail_silently=True)
+            alert.notified_via_email = True
+            logger.info(f'Security alert email sent to {to_email}')
+        except Exception as e:
+            logger.error(f'Failed to send security alert email: {e}')
 
-    try:
-        sms_provider = getattr(settings, 'SMS_PROVIDER', 'generic')
-        if sms_provider == 'africastalking' and settings.SMS_API_KEY:
-            import requests
-            resp = requests.post(
-                settings.SMS_API_URL or 'https://api.africastalking.com/version1/messaging',
-                data={
-                    'username': settings.SMS_USERNAME or 'sandbox',
-                    'to': ALERT_PHONE,
-                    'message': f'[TrustLayer SECURITY] {alert.severity}: {alert.alert_type} - {alert.message[:120]}',
-                    'from': settings.SMS_SENDER_ID or 'TrustLayer',
-                },
-                headers={'ApiKey': settings.SMS_API_KEY, 'Content-Type': 'application/x-www-form-urlencoded'},
-                timeout=10,
-            )
-            if resp.status_code == 201 or resp.status_code == 200:
-                alert.notified_via_sms = True
-                logger.info(f'Security SMS sent to {ALERT_PHONE}')
-        else:
-            logger.info(f'SMS provider {sms_provider} not configured for alerts')
-    except Exception as e:
-        logger.error(f'Failed to send security SMS: {e}')
+    if to_phone:
+        try:
+            sms_provider = getattr(settings, 'SMS_PROVIDER', 'generic')
+            if sms_provider == 'africastalking' and settings.SMS_API_KEY:
+                import requests
+                resp = requests.post(
+                    settings.SMS_API_URL or 'https://api.africastalking.com/version1/messaging',
+                    data={
+                        'username': settings.SMS_USERNAME or 'sandbox',
+                        'to': to_phone,
+                        'message': f'[TrustLayer SECURITY] {alert.severity}: {alert.alert_type} - {alert.message[:120]}',
+                        'from': settings.SMS_SENDER_ID or 'TrustLayer',
+                    },
+                    headers={'ApiKey': settings.SMS_API_KEY, 'Content-Type': 'application/x-www-form-urlencoded'},
+                    timeout=10,
+                )
+                if resp.status_code == 201 or resp.status_code == 200:
+                    alert.notified_via_sms = True
+                    logger.info(f'Security SMS sent to {to_phone}')
+            else:
+                logger.info(f'SMS provider {sms_provider} not configured for alerts')
+        except Exception as e:
+            logger.error(f'Failed to send security SMS: {e}')
 
     alert.save(update_fields=['notified_via_email', 'notified_via_sms'])
 
@@ -70,7 +82,7 @@ def check_and_alert_brute_force(ip_address, username=''):
         timestamp__gte=timezone.now() - timedelta(hours=1)
     ).count()
 
-    if recent >= BRUTE_FORCE_THRESHOLD:
+    if recent >= _brute_force_threshold():
         existing = SecurityAlert.objects.filter(
             alert_type='brute_force',
             ip_address=ip_address,
@@ -90,7 +102,7 @@ def check_and_alert_brute_force(ip_address, username=''):
 
     suspicious_ips = LoginAttempt.objects.values('ip_address').annotate(
         cnt=models.Count('id')
-    ).filter(cnt__gte=SUSPICIOUS_IP_THRESHOLD)
+    ).filter(cnt__gte=_suspicious_ip_threshold())
 
     for entry in suspicious_ips:
         sip = entry['ip_address']
@@ -133,9 +145,3 @@ def check_and_alert_unauthorized_access(ip_address, path):
         send_security_notification(alert)
         return alert
     return None
-
-
-try:
-    from django.db import models
-except ImportError:
-    models = None

@@ -96,18 +96,18 @@ def get_item(d, key):
 
 @register.filter
 def status_code(state):
-    from apps.agreements.models import STATUS_CODES
+    from apps.constants import STATUS_CODES
     return STATUS_CODES.get(state, 0)
 
 
 @register.filter
 def status_category(state):
-    from apps.agreements.models import STATUS_CATEGORIES
+    from apps.constants import STATUS_CATEGORIES
     return STATUS_CATEGORIES.get(state, 'active')
 
 
 @register.filter
 def status_display(state):
-    from apps.agreements.models import STATUS_CODES
+    from apps.constants import STATUS_CODES
     code = STATUS_CODES.get(state, 0)
     return f"{state} ({code})" if code else state

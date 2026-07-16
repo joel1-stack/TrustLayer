@@ -78,12 +78,9 @@ class BankTransferAdapter(PaymentProviderAdapter):
 
         except Exception as e:
             logger.error(f'Bank transfer failed for {reference}: {e}')
-            import uuid
             return {
-                'success': True,
-                'provider_tx_id': f'BANK_SIM_{uuid.uuid4().hex[:12].upper()}',
-                'details': payout_details,
-                'note': 'Simulated until banking API is configured',
+                'success': False,
+                'error': f'Bank transfer adapter not yet configured: {e}',
             }
 
     def handle_webhook(self, raw_payload):

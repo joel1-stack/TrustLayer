@@ -33,7 +33,7 @@ class NotificationService:
 
     @staticmethod
     def _fire_developer_webhook(agreement, event, metadata=None):
-        from apps.agreements.models import STATUS_CODES
+        from apps.constants import STATUS_CODES
         status_code = STATUS_CODES.get(agreement.status, 0)
         payload = {
             'event': event,

@@ -233,7 +233,8 @@ def engine_test(request, engine_id):
             fails = LoginAttempt.objects.filter(success=False).count()
             return JsonResponse({'status': 'ok', 'failed_logins': fails})
         elif engine_id == 'orchestration':
-            from apps.agreements.models import Agreement, STATUS_CODES
+            from apps.agreements.models import Agreement
+            from apps.constants import STATUS_CODES
             counts = {}
             for s in STATUS_CODES:
                 c = Agreement.objects.filter(status=s).count()

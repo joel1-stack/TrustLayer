@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum, Count
@@ -174,7 +174,7 @@ def portal_home(request):
     else:
         qs = Agreement.objects.all()
     total_agreements = qs.count()
-    from apps.agreements.models import STATUS_CATEGORIES
+    from apps.constants import STATUS_CATEGORIES
     terminal_states = [s for s, c in STATUS_CATEGORIES.items() if c == 'terminal']
     active = qs.exclude(status__in=terminal_states).count()
     settled = qs.filter(status='SETTLED').count()
@@ -250,30 +250,29 @@ def portal_agreement_create(request):
                 v_split = None
 
             if not error:
-                platform_split = Decimal('5')
+                platform_pct = Decimal(str(settings.TRUSTLAYER_PLATFORM_FEE_PERCENT))
                 delivery_split = Decimal(delivery_split_raw) if delivery_name else Decimal('0')
-                total = platform_split + delivery_split + v_split
+                total = platform_pct + delivery_split + v_split
                 if total != 100:
                     error = f'Splits must total 100% (currently {total}%)'
                 else:
-                    agreement = Agreement.objects.create(
+                    from apps.agreements.services import AgreementService
+                    from apps.state_machine.services import StateMachine
+                    from apps.payments.services import PaymentService
+
+                    agreement = AgreementService.create_agreement(
                         title=title,
-                        description=description,
                         amount=amount_dec,
                         creator_id=cust.name,
+                        description=description,
                         creator_type='customer',
                     )
                     agreement_id = agreement.agreement_id[:12]
 
-                    agreement.parties.create(role='BUYER', name=buyer_name, identifier=buyer_phone)
-                    agreement.parties.create(role='VENDOR', name=vendor_name, identifier=vendor_phone, split_percentage=v_split)
+                    AgreementService.add_party(agreement, role='BUYER', name=buyer_name, identifier=buyer_phone)
+                    AgreementService.add_party(agreement, role='VENDOR', name=vendor_name, identifier=vendor_phone, split_percentage=v_split)
                     if delivery_name:
-                        agreement.parties.create(role='DELIVERY_AGENT', name=delivery_name, identifier=delivery_phone, split_percentage=delivery_split)
-                    platform_phone = getattr(settings, 'TRUSTLAYER_PLATFORM_PHONE', cust.admin_phone)
-                    agreement.parties.create(role='PLATFORM', name=cust.name, identifier=platform_phone, split_percentage=platform_split)
-
-                    from apps.state_machine.services import StateMachine
-                    from apps.payments.services import PaymentService
+                        AgreementService.add_party(agreement, role='DELIVERY_AGENT', name=delivery_name, identifier=delivery_phone, split_percentage=delivery_split)
 
                     ip = request.META.get('REMOTE_ADDR', '')
 
@@ -391,7 +390,8 @@ def portal_engines(request):
     providers = []
     for p in list_providers():
         providers.append({'name': p.replace('_', ' ').title(), 'id': p})
-    from apps.agreements.models import Agreement, STATUS_CODES
+    from apps.agreements.models import Agreement
+    from apps.constants import STATUS_CODES
     customer_name = request.session.get('customer_name', '')
     state_counts = {}
     for s in ['CREATED', 'AVAILABLE', 'HELD', 'SETTLED']:

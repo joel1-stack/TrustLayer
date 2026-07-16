@@ -20,7 +20,7 @@ def dashboard(request):
     agreements_month = Agreement.objects.filter(created_at__date__gte=month_start).count()
     total_agreements = Agreement.objects.count()
 
-    from apps.agreements.models import STATUS_CATEGORIES, STATUS_CODES
+    from apps.constants import STATUS_CATEGORIES, STATUS_CODES
     active_agreements = Agreement.objects.filter(
         status_code_value__gte=10000, status_code_value__lte=17999
     ).exclude(

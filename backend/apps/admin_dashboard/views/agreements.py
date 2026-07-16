@@ -29,7 +29,7 @@ def agreement_list(request):
 
     industries = Agreement.objects.values('metadata__industry').annotate(c=Count('id')).order_by('-c')[:10]
 
-    from apps.agreements.models import STATUS_CODES
+    from apps.constants import STATUS_CODES
     statuses = list(STATUS_CODES.keys())
 
     return render(request, 'admin_dashboard/agreements.html', {

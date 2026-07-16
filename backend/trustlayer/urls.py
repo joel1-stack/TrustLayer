@@ -16,7 +16,7 @@ def home(request):
     today = timezone.now().date()
     total_agreements = Agreement.objects.count()
     settled_today = Agreement.objects.filter(status='SETTLED', updated_at__date=today).count()
-    from apps.agreements.models import STATUS_CATEGORIES
+    from apps.constants import STATUS_CATEGORIES
     terminal_states = [s for s, c in STATUS_CATEGORIES.items() if c == 'terminal']
     active = Agreement.objects.exclude(status__in=terminal_states).count()
     fees = LedgerEntry.objects.filter(

@@ -1,4 +1,5 @@
 import json
+import fnmatch
 from django.shortcuts import redirect
 from django.http import HttpResponseForbidden, JsonResponse
 from django.conf import settings
@@ -13,14 +14,14 @@ class IPWhitelistMiddleware:
     def __call__(self, request):
         if request.path.startswith('/admin/'):
             ip = request.META.get('REMOTE_ADDR', '')
-            # In DEBUG mode, allow all IPs for easier testing with ngrok
             if settings.DEBUG:
                 request.session['admin_ip_whitelist_passed'] = True
                 return self.get_response(request)
-            
+
             allowed = getattr(settings, 'ADMIN_ALLOWED_IPS', ['127.0.0.1'])
             if not request.session.get('admin_ip_whitelist_passed'):
-                if ip not in allowed and '127.0.0.1' not in allowed:
+                matched = any(fnmatch.fnmatch(ip, pattern) for pattern in allowed)
+                if not matched:
                     return HttpResponseForbidden(json.dumps({'error': 'Access denied'}), content_type='application/json')
                 request.session['admin_ip_whitelist_passed'] = True
         return self.get_response(request)

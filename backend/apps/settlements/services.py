@@ -89,12 +89,11 @@ class SettlementService:
                 )
                 logger.warning(f"Settlement {settlement.settlement_id} failed: {result.get('error')}")
         except Exception as e:
-            logger.warning(f"Settlement adapter failed, falling back to simulation: {e}")
-            import uuid
-            settlement = SettlementService.mark_completed(
+            logger.error(f"Settlement adapter failed: {e}")
+            settlement = SettlementService.mark_failed(
                 settlement,
-                provider_tx_id=f"SIM_{uuid.uuid4().hex[:12].upper()}",
-                provider_response={'mode': 'simulated_fallback', 'amount': str(amount)},
+                error=str(e),
+                provider_response={'error': str(e)},
             )
 
         return settlement
