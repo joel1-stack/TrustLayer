@@ -209,47 +209,100 @@ def portal_agreement_create(request):
 
     error = ''
     success = ''
-    title = ''
-    description = ''
-    amount = ''
+    payment_url = ''
+    agreement_id = ''
+    title = description = amount = ''
+    buyer_name = buyer_phone = ''
+    vendor_name = vendor_phone = ''
+    delivery_name = delivery_phone = ''
 
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
         description = request.POST.get('description', '').strip()
         amount = request.POST.get('amount', '').strip()
         buyer_name = request.POST.get('buyer_name', '').strip()
+        buyer_phone = request.POST.get('buyer_phone', '').strip()
+        vendor_name = request.POST.get('vendor_name', '').strip()
+        vendor_phone = request.POST.get('vendor_phone', '').strip()
+        vendor_split = request.POST.get('vendor_split', '90').strip()
+        delivery_name = request.POST.get('delivery_name', '').strip()
+        delivery_phone = request.POST.get('delivery_phone', '').strip()
 
         if not title or not amount:
             error = 'Title and amount are required'
+        elif not buyer_name:
+            error = 'Buyer name is required'
+        elif not buyer_phone:
+            error = 'Buyer phone is required'
+        elif not vendor_name:
+            error = 'Vendor name is required'
         else:
             try:
                 from decimal import Decimal, InvalidOperation
                 amount_dec = Decimal(amount)
+                v_split = Decimal(vendor_split)
             except (InvalidOperation, ValueError):
-                error = 'Invalid amount'
+                error = 'Invalid amount or split value'
                 amount_dec = None
+                v_split = None
 
             if not error:
-                agreement = Agreement.objects.create(
-                    title=title,
-                    description=description,
-                    amount=amount_dec,
-                    creator_id=cust.name,
-                    creator_type='customer',
-                )
-                agreement.parties.create(
-                    role='seller', name=cust.name, email=cust.admin_email, phone=cust.admin_phone,
-                )
-                if buyer_name:
-                    agreement.parties.create(role='buyer', name=buyer_name)
-                AuditLogEntry.objects.create(actor=f'customer:{cust.name}',
-                    action='agreement_created', resource_type='agreement', resource_id=agreement.agreement_id)
-                success = f'Agreement {agreement.agreement_id[:12]} created!'
-                title = description = amount = ''
+                platform_split = Decimal('5')
+                delivery_split = Decimal('0')
+                if delivery_name:
+                    delivery_split = Decimal('5')
+                    v_split = v_split - delivery_split
+                total = platform_split + delivery_split + v_split
+                if total != 100:
+                    error = f'Splits must total 100% (currently {total}%)'
+                else:
+                    agreement = Agreement.objects.create(
+                        title=title,
+                        description=description,
+                        amount=amount_dec,
+                        creator_id=cust.name,
+                        creator_type='customer',
+                    )
+                    agreement_id = agreement.agreement_id[:12]
+
+                    agreement.parties.create(role='BUYER', name=buyer_name, identifier=buyer_phone)
+                    agreement.parties.create(role='VENDOR', name=vendor_name, identifier=vendor_phone, split_percentage=v_split)
+                    if delivery_name:
+                        agreement.parties.create(role='DELIVERY_AGENT', name=delivery_name, identifier=delivery_phone, split_percentage=delivery_split)
+                    platform_phone = getattr(settings, 'TRUSTLAYER_PLATFORM_PHONE', cust.admin_phone)
+                    agreement.parties.create(role='PLATFORM', name=cust.name, identifier=platform_phone, split_percentage=platform_split)
+
+                    from apps.state_machine.services import StateMachine
+                    from apps.payments.services import PaymentService
+
+                    ip = request.META.get('REMOTE_ADDR', '')
+
+                    StateMachine.transition(agreement, 'CONFIRMED', triggered_by='portal',
+                        actor_role='customer_user', channel='portal', ip_address=ip,
+                        reason='Agreement created via customer portal')
+
+                    tx, result = PaymentService.generate_payment_link(agreement, phone=buyer_phone, provider='intasend')
+
+                    if result.get('success'):
+                        agreement.payment_url = result.get('payment_url', '')
+                        agreement.save(update_fields=['payment_url'])
+                        payment_url = result['payment_url']
+                        StateMachine.transition(agreement, 'SUBMITTED', triggered_by='system',
+                            actor_role='settlement_engine', channel='system', ip_address=ip,
+                            provider_ref=result.get('provider_reference', ''),
+                            reason=f'IntaSend checkout link generated: {payment_url[:40]}...')
+
+                    AuditLogEntry.objects.create(actor=f'customer:{cust.name}',
+                        action='agreement_created', resource_type='agreement', resource_id=agreement.agreement_id)
+                    success = f'Agreement {agreement_id} created!'
+                    title = description = amount = ''
 
     return render(request, 'customer_portal/agreement_create.html', {
-        'error': error, 'success': success, 'title': title,
-        'description': description, 'amount': amount,
+        'error': error, 'success': success, 'payment_url': payment_url, 'agreement_id': agreement_id,
+        'title': title, 'description': description, 'amount': amount,
+        'buyer_name': buyer_name, 'buyer_phone': buyer_phone,
+        'vendor_name': vendor_name, 'vendor_phone': vendor_phone,
+        'delivery_name': delivery_name, 'delivery_phone': delivery_phone,
     })
 
 
