@@ -47,15 +47,16 @@
       <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:10px;">
         <div><label class="form-label">Name *</label><input type="text" name="vendor_name" class="form-input" value="{{ vendor_name }}" placeholder="Dr. Ochieng" required></div>
         <div><label class="form-label">Phone *</label><input type="tel" name="vendor_phone" class="form-input" value="{{ vendor_phone }}" placeholder="254798765432" required></div>
-        <div><label class="form-label">Split %</label><input type="number" name="vendor_split" class="form-input" value="90" min="0" max="100"></div>
+        <div><label class="form-label">Split %</label><input type="number" name="vendor_split" class="form-input" value="{{ vendor_split|default:'90' }}" min="0" max="100"></div>
       </div>
 
       <h4 style="margin:20px 0 8px;font-size:14px;">Delivery Agent (Optional)</h4>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:10px;">
         <div><label class="form-label">Name</label><input type="text" name="delivery_name" class="form-input" value="{{ delivery_name }}" placeholder="Boda Rider"></div>
         <div><label class="form-label">Phone</label><input type="tel" name="delivery_phone" class="form-input" value="{{ delivery_phone }}" placeholder="254711122233"></div>
+        <div><label class="form-label">Split %</label><input type="number" name="delivery_split" class="form-input" value="{{ delivery_split|default:'5' }}" min="0" max="100"></div>
       </div>
-      <p style="font-size:11px;color:var(--text3);margin-top:6px;">Platform fee (5%) is auto-added. Splits must total 100%.</p>
+      <p style="font-size:11px;color:var(--text3);margin-top:6px;">Platform fee (5%) is auto-added. Vendor + Delivery + Platform must total 100%.</p>
 
       <div style="margin-top:24px;display:flex;gap:12px;">
         <button type="submit" class="btn">Create & Generate Payment Link</button>

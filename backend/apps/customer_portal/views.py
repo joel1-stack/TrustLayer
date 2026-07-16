@@ -215,6 +215,8 @@ def portal_agreement_create(request):
     buyer_name = buyer_phone = ''
     vendor_name = vendor_phone = ''
     delivery_name = delivery_phone = ''
+    vendor_split = '90'
+    delivery_split_raw = '0'
 
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
@@ -227,6 +229,7 @@ def portal_agreement_create(request):
         vendor_split = request.POST.get('vendor_split', '90').strip()
         delivery_name = request.POST.get('delivery_name', '').strip()
         delivery_phone = request.POST.get('delivery_phone', '').strip()
+        delivery_split_raw = request.POST.get('delivery_split', '0').strip()
 
         if not title or not amount:
             error = 'Title and amount are required'
@@ -248,10 +251,7 @@ def portal_agreement_create(request):
 
             if not error:
                 platform_split = Decimal('5')
-                delivery_split = Decimal('0')
-                if delivery_name:
-                    delivery_split = Decimal('5')
-                    v_split = v_split - delivery_split
+                delivery_split = Decimal(delivery_split_raw) if delivery_name else Decimal('0')
                 total = platform_split + delivery_split + v_split
                 if total != 100:
                     error = f'Splits must total 100% (currently {total}%)'
@@ -303,6 +303,9 @@ def portal_agreement_create(request):
         'buyer_name': buyer_name, 'buyer_phone': buyer_phone,
         'vendor_name': vendor_name, 'vendor_phone': vendor_phone,
         'delivery_name': delivery_name, 'delivery_phone': delivery_phone,
+        'delivery_split': delivery_split_raw,
+        'vendor_split': vendor_split,
+
     })
 
 
