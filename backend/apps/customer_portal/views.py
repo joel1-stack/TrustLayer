@@ -125,8 +125,8 @@ def verify_send_email(request):
 
     try:
         from django.core.mail import send_mail
-        send_mail(subject, message, 'help@trustlayer.com', [cust.admin_email],
-                  html_message=html_message, fail_silently=True)
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [cust.admin_email],
+                  html_message=html_message, fail_silently=False)
         AuditLogEntry.objects.create(actor=f'customer:{cust.name}', action='verification_email_sent',
             resource_type='customer', resource_id=cust.customer_id,
             detail={'email': cust.admin_email, 'token': token.token[:16]})
@@ -154,12 +154,15 @@ def verify_confirm(request, token):
     AuditLogEntry.objects.create(actor=f'customer:{cust.name}', action='email_verified',
         resource_type='customer', resource_id=cust.customer_id)
 
-    # If logged in, update session
+    # Log the user in by creating a fresh verified session
+    request.session.flush()
+    request.session['customer_authenticated'] = True
+    request.session['customer_id'] = cust.customer_id
+    request.session['customer_name'] = cust.name
     request.session['customer_email_verified'] = True
+    request.session.set_expiry(1800)
 
-    return render(request, 'customer_portal/verify_result.html', {
-        'success': True, 'message': 'Email verified successfully! Redirecting to your dashboard...',
-    })
+    return redirect('/portal/')
 
 
 def portal_home(request):
@@ -194,6 +197,60 @@ def portal_agreements(request):
     else:
         agreements = Agreement.objects.all().order_by('-created_at')[:50]
     return render(request, 'customer_portal/agreements.html', {'agreements': agreements})
+
+
+def portal_agreement_create(request):
+    if not _check_customer_auth(request):
+        return redirect('/portal/login/')
+    customer_id = request.session.get('customer_id')
+    cust = get_object_or_404(Customer, customer_id=customer_id)
+    if not cust.email_verified:
+        return redirect('/portal/verify/pending/')
+
+    error = ''
+    success = ''
+    title = ''
+    description = ''
+    amount = ''
+
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        amount = request.POST.get('amount', '').strip()
+        buyer_name = request.POST.get('buyer_name', '').strip()
+
+        if not title or not amount:
+            error = 'Title and amount are required'
+        else:
+            try:
+                from decimal import Decimal, InvalidOperation
+                amount_dec = Decimal(amount)
+            except (InvalidOperation, ValueError):
+                error = 'Invalid amount'
+                amount_dec = None
+
+            if not error:
+                agreement = Agreement.objects.create(
+                    title=title,
+                    description=description,
+                    amount=amount_dec,
+                    creator_id=cust.name,
+                    creator_type='customer',
+                )
+                agreement.parties.create(
+                    role='seller', name=cust.name, email=cust.admin_email, phone=cust.admin_phone,
+                )
+                if buyer_name:
+                    agreement.parties.create(role='buyer', name=buyer_name)
+                AuditLogEntry.objects.create(actor=f'customer:{cust.name}',
+                    action='agreement_created', resource_type='agreement', resource_id=agreement.agreement_id)
+                success = f'Agreement {agreement.agreement_id[:12]} created!'
+                title = description = amount = ''
+
+    return render(request, 'customer_portal/agreement_create.html', {
+        'error': error, 'success': success, 'title': title,
+        'description': description, 'amount': amount,
+    })
 
 
 def portal_ledger(request):
@@ -314,7 +371,7 @@ def portal_contact(request):
         from django.core.mail import send_mail
         subject = f'TrustLayer Contact from {name}'
         body = f'From: {name} <{email}>\nMessage:\n{message}'
-        send_mail(subject, body, 'help@trustlayer.com', ['help@trustlayer.com'], fail_silently=True)
+        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, ['help@trustlayer.com'], fail_silently=True)
     except Exception as e:
         print(f'Contact email send failed: {e}')
 

@@ -17,7 +17,7 @@ def require_api_auth(view_func):
         api_key = request.META.get('HTTP_X_API_KEY', '')
         if api_key:
             from apps.customer_portal.models import Customer
-            if Customer.objects.filter(api_key=api_key, is_active=True).exists():
+            if Customer.objects.filter(api_key=api_key, status='active').exists():
                 return view_func(request, *args, **kwargs)
         # Allow valid sessionid cookie (Django admin)
         if request.user.is_authenticated:

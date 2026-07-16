@@ -182,8 +182,13 @@ SMS_USERNAME  = os.environ.get('SMS_USERNAME', 'sandbox')    # Africa's Talking 
 # Admin
 TRUSTLAYER_ADMIN_TOKEN = os.environ.get('TRUSTLAYER_ADMIN_TOKEN', 'change-me-in-production')
 
+# Resend (Transactional Email)
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+EMAIL_BACKEND = 'apps.notifications.resend_backend.ResendEmailBackend'
+DEFAULT_FROM_EMAIL = 'TrustLayer <onboarding@resend.dev>'
+
 # TrustLayer base URL (for email verification links, webhook callbacks)
-TRUSTLAYER_BASE_URL = os.environ.get('TRUSTLAYER_BASE_URL', 'http://localhost:8000')
+TRUSTLAYER_BASE_URL = os.environ.get('TRUSTLAYER_BASE_URL', 'https://miranda-stockish-spacially.ngrok-free.dev')
 
 # TrustLayer Platform Fee — auto-injected into every agreement as a split rule
 TRUSTLAYER_PLATFORM_FEE_PERCENT = Decimal(os.environ.get('TRUSTLAYER_PLATFORM_FEE', '5.00'))

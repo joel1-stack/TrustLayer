@@ -3,9 +3,41 @@
 {% block page_title %}{{ agreement.agreement_id }}{% endblock %}
 {% block content %}
 
-<div style="margin-bottom:16px;">
+<div style="margin-bottom:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
   <a href="/admin/agreements/" class="btn btn-sm btn-ghost">&larr; Back to Agreements</a>
+  {% if can_release %}
+  <form method="post" action="/admin/agreements/{{ agreement.agreement_id }}/action/" style="display:inline;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="release">
+    <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('Release all conditions and move to READY?')">&#10003; Release Conditions</button>
+  </form>
+  {% endif %}
+  {% if can_settle %}
+  <form method="post" action="/admin/agreements/{{ agreement.agreement_id }}/action/" style="display:inline;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="settle">
+    <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('Trigger settlement now?')">&#9654; Trigger Settlement</button>
+  </form>
+  {% endif %}
+  {% if agreement.status == 'HELD' or agreement.status == 'READY' %}
+  <form method="post" action="/admin/agreements/{{ agreement.agreement_id }}/action/" style="display:inline;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="cancel">
+    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this agreement?')">&#10005; Cancel</button>
+  </form>
+  <form method="post" action="/admin/agreements/{{ agreement.agreement_id }}/action/" style="display:inline;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="refund">
+    <button type="submit" class="btn btn-sm btn-ghost" style="color:var(--orange);" onclick="return confirm('Refund to buyer?')">&#8634; Refund</button>
+  </form>
+  {% endif %}
 </div>
+
+{% if messages %}
+{% for m in messages %}
+<div class="alert alert-{{ m.tags }}" style="padding:10px 16px;margin-bottom:12px;border-radius:8px;{% if m.tags == 'success' %}background:rgba(52,211,153,0.1);color:#34d399;border:1px solid rgba(52,211,153,0.3);{% else %}background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);{% endif %}">{{ m }}</div>
+{% endfor %}
+{% endif %}
 
 <div class="grid-2">
   <div class="card">

@@ -29,7 +29,7 @@ def send_security_notification(alert):
 
     try:
         send_mail(
-            subject, message, 'security@trustlayer.com',
+            subject, message, settings.DEFAULT_FROM_EMAIL,
             [ALERT_EMAIL], fail_silently=True
         )
         alert.notified_via_email = True

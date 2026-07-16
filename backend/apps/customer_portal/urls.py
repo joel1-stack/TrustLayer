@@ -9,6 +9,7 @@ urlpatterns = [
     path('verify/confirm/<str:token>/', views.verify_confirm, name='portal-verify-confirm'),
     path('', views.portal_home, name='portal-home'),
     path('agreements/', views.portal_agreements, name='portal-agreements'),
+    path('agreements/create/', views.portal_agreement_create, name='portal-agreement-create'),
     path('ledger/', views.portal_ledger, name='portal-ledger'),
     path('settlements/', views.portal_settlements, name='portal-settlements'),
     path('developers/', views.portal_developers, name='portal-developers'),

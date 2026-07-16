@@ -7,6 +7,7 @@ urlpatterns = [
     path('dashboard/', overview.dashboard, name='admin-dashboard'),
     path('agreements/', agreements.agreement_list, name='admin-agreements'),
     path('agreements/<str:agreement_id>/', agreements.agreement_detail, name='admin-agreement-detail'),
+    path('agreements/<str:agreement_id>/action/', agreements.agreement_action, name='admin-agreement-action'),
     path('ledger/', ledger.ledger_view, name='admin-ledger'),
     path('settlements/', settlements.settlement_view, name='admin-settlements'),
     path('customers/', customers.customer_list, name='admin-customers'),
