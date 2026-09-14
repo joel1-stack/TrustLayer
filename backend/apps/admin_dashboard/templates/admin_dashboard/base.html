@@ -108,25 +108,81 @@
       {% block content %}{% endblock %}
     </main>
   </div>
-  <footer class="footer-curved slide-up">
-    <div class="footer-bottom">
-      <div class="footer-brand">TrustLayer</div>
-      &copy; {% now "Y" %}
+  <footer class="tl-footer" style="margin-left:240px;">
+    <div class="tl-footer-main" style="padding:40px 40px 25px;">
+      <div class="tl-footer-grid" style="grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:40px;">
+        <div class="tl-footer-brand">
+          <div class="tl-logo"><span>Trust</span><strong>Layer</strong></div>
+          <p>Control Center for enterprise operations.</p>
+        </div>
+        <div class="tl-footer-column">
+          <h3>PRODUCT</h3>
+          <div class="tl-orange-line"></div>
+          <a href="/admin/docs/">API Docs</a>
+          <a href="/admin/dashboard/">Dashboard</a>
+          <a href="/admin/constellation/">Constellation</a>
+        </div>
+        <div class="tl-footer-column">
+          <h3>ENGINES</h3>
+          <div class="tl-orange-line"></div>
+          <a href="#">Context</a>
+          <a href="#">Diagnosis</a>
+          <a href="#">Policy</a>
+          <a href="#">Action</a>
+          <a href="#">Verification</a>
+        </div>
+        <div class="tl-footer-column">
+          <h3>INTEGRATIONS</h3>
+          <div class="tl-orange-line"></div>
+          <a href="#">Safaricom Daraja</a>
+          <a href="#">OpenAI Realtime</a>
+          <a href="#">Africa's Talking</a>
+        </div>
+      </div>
+      <div class="tl-footer-bottom">
+        <p><span class="tl-copyright">&copy;</span> 2026 TrustLayer. Built in Kenya.</p>
+        <div class="tl-socials">
+          <a href="#" title="GitHub">GH</a>
+          <a href="#" title="X">X</a>
+          <a href="#" title="LinkedIn">in</a>
+        </div>
+      </div>
     </div>
   </footer>
   {% else %}
   <div class="login-container">
     <div class="login-overlay"></div>
     {% block login_content %}{% endblock %}
-    <div class="login-footer">
-      <div class="login-footer-inner">
-        <div class="login-footer-brand"><span>Trust</span>Layer</div>
-        <div class="login-footer-links">
-          <a href="/">Home</a>
-          <a href="/admin/docs/">API Docs</a>
-          <a href="/admin/dashboard/">Dashboard</a>
+    <div class="tl-login-footer">
+      <div class="tl-login-footer-wave"></div>
+      <div class="tl-login-footer-inner">
+        <div class="tl-login-footer-grid">
+          <div class="tl-login-footer-brand">
+            <div class="tl-logo"><span>Trust</span><strong>Layer</strong></div>
+            <p>System of Action for enterprise operations.</p>
+          </div>
+          <div class="tl-login-footer-col">
+            <h3>PRODUCT</h3>
+            <div class="tl-orange-line"></div>
+            <a href="/admin/docs/">API Docs</a>
+            <a href="/admin/dashboard/">Dashboard</a>
+          </div>
+          <div class="tl-login-footer-col">
+            <h3>INTEGRATIONS</h3>
+            <div class="tl-orange-line"></div>
+            <a href="#">Safaricom Daraja</a>
+            <a href="#">OpenAI Realtime</a>
+            <a href="#">Africa's Talking</a>
+          </div>
         </div>
-        <div class="login-footer-copy">&copy; 2026 TrustLayer. Built in Kenya.</div>
+        <div class="tl-login-footer-bottom">
+          <p><span class="tl-copyright">&copy;</span> 2026 TrustLayer. Built in Kenya.</p>
+          <div class="tl-socials">
+            <a href="#" title="GitHub">GH</a>
+            <a href="#" title="X">X</a>
+            <a href="#" title="LinkedIn">in</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -124,31 +124,72 @@
     .docs-cta .btns .primary { background: var(--accent); color: #fff; }
     .docs-cta .btns .secondary { background: transparent; color: #fff; border: 1px solid #333; }
 
-    /* FOOTER */
-    .footer-wave {
-      position: relative; background: var(--dark); padding-top: 80px;
+    /* PREMIUM CTA + FOOTER */
+    .tl-footer { position: relative; background: #111; color: #fff; overflow: hidden; }
+    .tl-footer-cta {
+      position: relative; min-height: 420px; display: flex; align-items: center; justify-content: center;
+      text-align: center; overflow: hidden;
+      background: radial-gradient(circle at 50% 0%, rgba(255,84,47,0.15), transparent 45%), #111;
     }
-    .footer-wave::before {
-      content: '';
-      position: absolute; top: -60px; left: 0; right: 0; height: 80px;
-      background: var(--bg);
-      clip-path: ellipse(55% 100% at 50% 100%);
+    .tl-cta-content { position: relative; z-index: 2; padding: 80px 20px 120px; }
+    .tl-footer-cta h2 { margin: 0; font-size: clamp(48px, 6vw, 82px); line-height: 1; font-weight: 800; letter-spacing: -4px; }
+    .tl-footer-cta h2 span { color: #ff542f; }
+    .tl-footer-cta p { margin: 28px 0 38px; color: #9b9b9b; font-size: 18px; line-height: 1.6; }
+    .tl-cta-buttons { display: flex; justify-content: center; align-items: center; gap: 16px; }
+    .tl-btn-primary, .tl-btn-secondary {
+      height: 58px; padding: 0 30px; display: inline-flex; align-items: center; justify-content: center;
+      gap: 12px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 16px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
     }
-    .footer-wave .footer-inner {
-      max-width: 1200px; margin: 0 auto; padding: 0 32px 40px;
+    .tl-btn-primary { background: #ff542f; color: #fff; box-shadow: 0 10px 35px rgba(255,84,47,0.25); }
+    .tl-btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 45px rgba(255,84,47,0.35); }
+    .tl-btn-secondary { background: transparent; color: #fff; border: 1px solid #333; }
+    .tl-btn-secondary:hover { transform: translateY(-3px); border-color: #555; background: #181818; }
+
+    .tl-wave { position: relative; height: 100px; margin-top: -1px; background: #111; overflow: hidden; }
+    .tl-wave::before {
+      content: ""; position: absolute; width: 120%; height: 180px; left: -10%; top: -100px;
+      background: var(--bg); border-radius: 50% 50% 0 0 / 100% 100% 0 0;
     }
-    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px; margin-bottom: 40px; }
-    .footer-brand .logo { font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 12px; }
-    .footer-brand .logo span { color: var(--accent); }
-    .footer-brand p { font-size: 14px; color: #666; line-height: 1.7; max-width: 280px; }
-    .footer-col h4 { font-size: 12px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; }
-    .footer-col a { display: block; font-size: 14px; color: #666; text-decoration: none; padding: 4px 0; transition: color 0.2s; }
-    .footer-col a:hover { color: var(--accent); }
-    .footer-bottom-bar { border-top: 1px solid #222; padding-top: 24px; display: flex; align-items: center; justify-content: space-between; }
-    .footer-bottom-bar .copy { font-size: 13px; color: #555; }
-    .footer-bottom-bar .links { display: flex; gap: 16px; }
-    .footer-bottom-bar .links a { font-size: 13px; color: #555; text-decoration: none; transition: color 0.2s; }
-    .footer-bottom-bar .links a:hover { color: var(--accent); }
+    .tl-wave-orange {
+      position: absolute; z-index: 3; width: 120%; height: 180px; left: -10%; top: -106px;
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0; border-top: 3px solid #ff542f; opacity: 0.9;
+    }
+
+    .tl-footer-main { position: relative; background: #111; padding: 80px max(7vw,40px) 35px; }
+    .tl-footer-main::after {
+      content: ""; position: absolute; width: 500px; height: 300px; right: -250px; bottom: -220px;
+      background: rgba(255,84,47,0.12); filter: blur(100px); pointer-events: none;
+    }
+    .tl-footer-grid {
+      position: relative; z-index: 2; max-width: 1240px; margin: 0 auto;
+      display: grid; grid-template-columns: 1.6fr 1fr 1fr 1.2fr; gap: 70px;
+    }
+    .tl-logo { font-size: 30px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 24px; }
+    .tl-logo span { color: #ff542f; }
+    .tl-logo strong { color: #fff; }
+    .tl-footer-brand p { max-width: 330px; margin: 0; color: #777; font-size: 15px; line-height: 1.8; }
+    .tl-footer-column h3 { margin: 5px 0 12px; font-size: 14px; font-weight: 800; letter-spacing: 1.5px; }
+    .tl-orange-line { width: 40px; height: 3px; background: #ff542f; border-radius: 999px; margin-bottom: 22px; }
+    .tl-footer-column a {
+      display: block; width: fit-content; margin-bottom: 14px; color: #737373;
+      text-decoration: none; font-size: 15px; transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .tl-footer-column a:hover { color: #fff; transform: translateX(4px); }
+    .tl-footer-bottom {
+      position: relative; z-index: 2; max-width: 1240px; margin: 70px auto 0; padding-top: 25px;
+      border-top: 1px solid #292929; display: flex; align-items: center; justify-content: space-between;
+    }
+    .tl-footer-bottom p { margin: 0; color: #666; font-size: 14px; }
+    .tl-copyright { color: #ff542f; font-size: 18px; margin-right: 10px; }
+    .tl-socials { display: flex; gap: 12px; }
+    .tl-socials a {
+      width: 46px; height: 46px; display: flex; align-items: center; justify-content: center;
+      border-radius: 14px; background: #191919; border: 1px solid #252525; color: #fff;
+      text-decoration: none; font-size: 13px; font-weight: 700;
+      transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+    }
+    .tl-socials a:hover { transform: translateY(-4px); background: #ff542f; border-color: #ff542f; }
 
     /* SIDEBAR NAV */
     .docs-nav { position: fixed; top: 80px; left: 0; width: 240px; padding: 24px; overflow-y: auto; height: calc(100vh - 80px); border-right: 1px solid var(--border); background: var(--bg); }
@@ -624,39 +665,64 @@
       </div>
     </section>
 
-    <!-- CURVED FOOTER -->
-    <div class="footer-wave">
-      <div class="footer-inner">
-        <div class="footer-grid">
-          <div class="footer-brand">
-            <div class="logo"><span>Trust</span>Layer</div>
+    <!-- CTA + CURVED FOOTER -->
+    <footer class="tl-footer">
+      <section class="tl-footer-cta">
+        <div class="tl-cta-content">
+          <h2>Ready to <span>build?</span></h2>
+          <p>Start with the API docs or open the operations dashboard.</p>
+          <div class="tl-cta-buttons">
+            <a href="/api/docs/schema/" class="tl-btn-primary"><span>&lt;/&gt;</span> OpenAPI Schema</a>
+            <a href="/admin/dashboard/" class="tl-btn-secondary"><span>&#9673;</span> Dashboard</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="tl-wave"><div class="tl-wave-orange"></div></div>
+
+      <section class="tl-footer-main">
+        <div class="tl-footer-grid">
+          <div class="tl-footer-brand">
+            <div class="tl-logo"><span>Trust</span><strong>Layer</strong></div>
             <p>System of Action for enterprise operations. Assemble context, diagnose problems, execute actions, verify outcomes.</p>
           </div>
-          <div class="footer-col">
-            <h4>Product</h4>
+          <div class="tl-footer-column">
+            <h3>PRODUCT</h3>
+            <div class="tl-orange-line"></div>
             <a href="/admin/docs/">API Docs</a>
-            <a href="/api/docs/schema/">OpenAPI Schema</a>
+            <a href="/api/docs/schema/">Swagger</a>
             <a href="/admin/dashboard/">Dashboard</a>
             <a href="/admin/constellation/">Constellation</a>
           </div>
-          <div class="footer-col">
-            <h4>Integrations</h4>
+          <div class="tl-footer-column">
+            <h3>ENGINES</h3>
+            <div class="tl-orange-line"></div>
+            <a href="#">Context</a>
+            <a href="#">Diagnosis</a>
+            <a href="#">Policy</a>
+            <a href="#">Action</a>
+            <a href="#">Verification</a>
+          </div>
+          <div class="tl-footer-column">
+            <h3>INTEGRATIONS</h3>
+            <div class="tl-orange-line"></div>
             <a href="#">Safaricom Daraja</a>
             <a href="#">OpenAI Realtime</a>
             <a href="#">Africa's Talking</a>
             <a href="#">TM Forum</a>
+            <a href="#">GSMA Open Gateway</a>
           </div>
         </div>
-        <div class="footer-bottom-bar">
-          <div class="copy">&copy; 2026 TrustLayer. Built in Kenya.</div>
-          <div class="links">
-            <a href="/">Home</a>
-            <a href="/admin/dashboard/">Dashboard</a>
-            <a href="/admin/docs/">Docs</a>
+        <div class="tl-footer-bottom">
+          <p><span class="tl-copyright">&copy;</span> 2026 TrustLayer. Built in Kenya.</p>
+          <div class="tl-socials">
+            <a href="#" title="GitHub">GH</a>
+            <a href="#" title="X">X</a>
+            <a href="#" title="LinkedIn">in</a>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </footer>
   </div>
 
   <script>
