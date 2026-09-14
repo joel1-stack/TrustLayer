@@ -35,7 +35,7 @@
     nav .links .cta:hover { background: var(--accent-hover); }
 
     /* ===== HERO ===== */
-    .hero { padding: 140px 32px 60px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; min-height: 100vh; position: relative; }
+    .hero { padding: 140px 32px 60px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; min-height: 100vh; position: relative; }
     .hero::before { content: ''; position: absolute; top: -100px; right: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,85,34,0.06) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
     .hero-text .badge { display: inline-flex; align-items: center; gap: 8px; background: var(--accent-light); color: var(--accent); padding: 8px 18px; border-radius: 100px; font-size: 13px; font-weight: 700; margin-bottom: 28px; border: 1px solid rgba(255,85,34,0.15); }
     .hero-text .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
@@ -51,29 +51,19 @@
     .hero-text .btns .secondary:hover { background: var(--border); }
 
     /* ===== REAL PHONE IMAGE ===== */
-    .phone-wrap { display: flex; justify-content: center; align-items: center; perspective: 1200px; position: relative; }
-    .phone-scene { position: relative; animation: phoneFloat 6s ease-in-out infinite; }
-    @keyframes phoneFloat {
-      0%, 100% { transform: translateY(0) rotateY(-5deg) rotateX(3deg); }
-      50% { transform: translateY(-15px) rotateY(5deg) rotateX(-2deg); }
-    }
-    .phone-scene:hover { animation-play-state: paused; }
+    .phone-wrap { display: flex; justify-content: center; align-items: center; position: relative; width: 100%; }
+    .phone-scene { position: relative; width: 100%; }
     .phone-img {
-      width: 260px; height: auto;
-      filter: drop-shadow(0 30px 60px rgba(0,0,0,0.35)) drop-shadow(0 15px 30px rgba(0,0,0,0.2));
-      border-radius: 30px;
-      transition: transform 0.4s ease;
+      width: 100%; height: auto; display: block;
+      border-radius: 16px;
     }
-    .phone-scene:hover .phone-img { transform: scale(1.03); }
 
     /* Floating glow orbs */
-    .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.35; z-index: -1; }
-    .orb-1 { width: 250px; height: 250px; background: var(--accent); top: -60px; right: -80px; animation: orbFloat1 10s ease-in-out infinite; }
-    .orb-2 { width: 180px; height: 180px; background: #8b5cf6; bottom: -40px; left: -60px; animation: orbFloat2 12s ease-in-out infinite; }
-    .orb-3 { width: 120px; height: 120px; background: #f59e0b; top: 50%; left: -40px; animation: orbFloat3 9s ease-in-out infinite; }
-    @keyframes orbFloat1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-30px, 25px) scale(1.1); } }
-    @keyframes orbFloat2 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(20px, -20px) scale(1.05); } }
-    @keyframes orbFloat3 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(15px, -10px); } }
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; z-index: -1; }
+    .orb-1 { width: 300px; height: 300px; background: var(--accent); top: -40px; right: -60px; animation: orbFloat1 10s ease-in-out infinite; }
+    .orb-2 { width: 200px; height: 200px; background: #8b5cf6; bottom: -30px; left: -40px; animation: orbFloat2 12s ease-in-out infinite; }
+    @keyframes orbFloat1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-20px, 15px) scale(1.08); } }
+    @keyframes orbFloat2 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(15px, -15px) scale(1.05); } }
 
     /* ===== STATS ===== */
     .stats { padding: 60px 32px; background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
@@ -164,7 +154,7 @@
       .hero-text p { margin: 0 auto 40px; }
       .hero-text .btns { justify-content: center; }
       .phone-wrap { margin-top: 40px; }
-      .phone-img { width: 200px; }
+      .phone-scene { max-width: 400px; margin: 0 auto; }
       .flow-steps { grid-template-columns: repeat(3, 1fr); }
       .int-grid { grid-template-columns: 1fr; }
       .engines-grid { grid-template-columns: 1fr; }
@@ -175,7 +165,7 @@
     @media (max-width: 600px) {
       .flow-steps { grid-template-columns: 1fr 1fr; }
       .hero-text .btns { flex-direction: column; align-items: center; }
-      .phone-img { width: 170px; }
+      .phone-scene { max-width: 300px; }
       .footer-grid { grid-template-columns: 1fr; gap: 32px; }
       .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
     }
