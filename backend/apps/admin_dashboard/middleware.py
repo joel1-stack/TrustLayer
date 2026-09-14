@@ -33,6 +33,10 @@ class AdminAuthMiddleware:
 
     def __call__(self, request):
         if request.path.startswith('/admin/') and request.path != '/admin/login/' and request.path != '/admin/static/' and not request.path.startswith('/admin/static/'):
+            # Public pages - no auth required
+            public_paths = ['/admin/docs/', '/admin/constellation/']
+            if request.path in public_paths or request.path.startswith('/admin/constellation/'):
+                return self.get_response(request)
             if not request.session.get('admin_authenticated'):
                 return redirect('/admin/login/')
         return self.get_response(request)

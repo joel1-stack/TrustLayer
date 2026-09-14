@@ -50,130 +50,21 @@
     .hero-text .btns .secondary { background: var(--bg-alt); color: var(--text); border: 1px solid var(--border); }
     .hero-text .btns .secondary:hover { background: var(--border); }
 
-    /* ===== REALISTIC 3D PHONE ===== */
-    .phone-wrap { display: flex; justify-content: center; align-items: center; perspective: 1200px; }
-    .phone-scene { width: 300px; height: 620px; position: relative; transform-style: preserve-3d; animation: phoneRotate 8s ease-in-out infinite; }
-    @keyframes phoneRotate {
-      0%   { transform: rotateY(-12deg) rotateX(5deg) rotateZ(-1deg); }
-      25%  { transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg); }
-      50%  { transform: rotateY(12deg) rotateX(-3deg) rotateZ(1deg); }
-      75%  { transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg); }
-      100% { transform: rotateY(-12deg) rotateX(5deg) rotateZ(-1deg); }
+    /* ===== REAL PHONE IMAGE ===== */
+    .phone-wrap { display: flex; justify-content: center; align-items: center; perspective: 1200px; position: relative; }
+    .phone-scene { position: relative; animation: phoneFloat 6s ease-in-out infinite; }
+    @keyframes phoneFloat {
+      0%, 100% { transform: translateY(0) rotateY(-5deg) rotateX(3deg); }
+      50% { transform: translateY(-15px) rotateY(5deg) rotateX(-2deg); }
     }
     .phone-scene:hover { animation-play-state: paused; }
-
-    /* Phone body - realistic proportions */
-    .phone-body {
-      width: 300px; height: 620px; position: absolute; top: 0; left: 0;
-      background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-      border-radius: 52px; padding: 8px;
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.08),
-        0 0 0 1px rgba(0,0,0,0.3),
-        0 20px 60px rgba(0,0,0,0.3),
-        0 40px 100px rgba(0,0,0,0.15),
-        -5px 0 15px rgba(0,0,0,0.1) inset,
-        5px 0 15px rgba(255,255,255,0.02) inset;
-      transform-style: preserve-3d;
+    .phone-img {
+      width: 340px; height: auto;
+      filter: drop-shadow(0 30px 60px rgba(0,0,0,0.35)) drop-shadow(0 15px 30px rgba(0,0,0,0.2));
+      border-radius: 40px;
+      transition: transform 0.4s ease;
     }
-
-    /* Side buttons */
-    .phone-body::before {
-      content: '';
-      position: absolute;
-      right: -3px; top: 140px;
-      width: 4px; height: 40px;
-      background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
-      border-radius: 0 2px 2px 0;
-      box-shadow: 0 50px 0 0 #2a2a2a, 0 90px 0 0 #2a2a2a;
-    }
-    .phone-body::after {
-      content: '';
-      position: absolute;
-      left: -3px; top: 120px;
-      width: 4px; height: 60px;
-      background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
-      border-radius: 2px 0 0 2px;
-    }
-
-    /* Phone screen bezel */
-    .phone-bezel {
-      width: 100%; height: 100%;
-      background: #000;
-      border-radius: 46px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* Dynamic Island */
-    .dynamic-island {
-      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      width: 100px; height: 28px;
-      background: #000;
-      border-radius: 20px;
-      z-index: 20;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .dynamic-island::before {
-      content: '';
-      width: 10px; height: 10px;
-      background: radial-gradient(circle, #1a1a2e 40%, #000 60%);
-      border-radius: 50%;
-      box-shadow: 0 0 4px rgba(0,0,0,0.5);
-    }
-
-    /* Screen content */
-    .phone-screen {
-      width: 100%; height: 100%;
-      background: linear-gradient(180deg, var(--accent) 0%, var(--accent) 8%, #fff 8%);
-      border-radius: 46px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* Screen glass reflection */
-    .phone-screen::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.04) 100%);
-      pointer-events: none; z-index: 18;
-    }
-
-    .phone-statusbar {
-      height: 52px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px;
-    }
-    .phone-statusbar .time { font-size: 13px; font-weight: 700; color: #fff; }
-    .phone-statusbar .icons { position: absolute; right: 28px; bottom: 10px; display: flex; gap: 5px; }
-    .phone-statusbar .icons span { font-size: 11px; color: rgba(255,255,255,0.9); }
-
-    .phone-ui { padding: 16px 18px; }
-    .phone-ui .greeting { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
-    .phone-ui .name { font-size: 20px; font-weight: 900; color: var(--text); margin-bottom: 16px; letter-spacing: -0.5px; }
-
-    .phone-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    .phone-stat { background: var(--bg-alt); border-radius: 14px; padding: 14px; }
-    .phone-stat .val { font-size: 20px; font-weight: 900; color: var(--text); }
-    .phone-stat .lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-    .phone-stat.accent { background: var(--accent); }
-    .phone-stat.accent .val { color: #fff; }
-    .phone-stat.accent .lbl { color: rgba(255,255,255,0.8); }
-
-    .phone-card { background: var(--bg-alt); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
-    .phone-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .phone-card-header .title { font-size: 12px; font-weight: 800; color: var(--text); }
-    .phone-card-header .badge { font-size: 9px; font-weight: 800; padding: 3px 10px; border-radius: 8px; background: var(--accent-light); color: var(--accent); }
-    .phone-card-header .badge.green { background: #dcfce7; color: #166534; }
-    .phone-card-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); }
-    .phone-card-item .left { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
-    .phone-card-item .right { font-size: 11px; font-weight: 700; }
-
-    /* Home indicator */
-    .home-indicator {
-      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
-      width: 120px; height: 5px;
-      background: #ccc; border-radius: 3px;
-      z-index: 20;
-    }
+    .phone-scene:hover .phone-img { transform: scale(1.03); }
 
     /* Floating glow orbs */
     .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.35; z-index: -1; }
@@ -272,7 +163,8 @@
       .hero { grid-template-columns: 1fr; text-align: center; padding-top: 120px; min-height: auto; }
       .hero-text p { margin: 0 auto 40px; }
       .hero-text .btns { justify-content: center; }
-      .phone-wrap { margin-top: 40px; perspective: 900px; }
+      .phone-wrap { margin-top: 40px; }
+      .phone-img { width: 260px; }
       .flow-steps { grid-template-columns: repeat(3, 1fr); }
       .int-grid { grid-template-columns: 1fr; }
       .engines-grid { grid-template-columns: 1fr; }
@@ -283,11 +175,7 @@
     @media (max-width: 600px) {
       .flow-steps { grid-template-columns: 1fr 1fr; }
       .hero-text .btns { flex-direction: column; align-items: center; }
-      .phone-scene { width: 260px; height: 540px; }
-      .phone-body { width: 260px; height: 540px; border-radius: 46px; }
-      .phone-bezel { border-radius: 40px; }
-      .phone-screen { border-radius: 40px; }
-      .dynamic-island { width: 85px; height: 24px; }
+      .phone-img { width: 220px; }
       .footer-grid { grid-template-columns: 1fr; gap: 32px; }
       .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
     }
@@ -321,63 +209,7 @@
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
-        <div class="phone-body">
-          <div class="phone-bezel">
-            <div class="phone-screen">
-              <div class="dynamic-island"></div>
-              <div class="phone-statusbar">
-                <span class="time">9:41</span>
-                <div class="icons">
-                  <span>&#9679;&#9679;&#9679;&#9679;</span>
-                  <span>&#128267;</span>
-                </div>
-              </div>
-              <div class="phone-ui">
-                <div class="greeting">Good morning</div>
-                <div class="name">Operations</div>
-                <div class="phone-stat-row">
-                  <div class="phone-stat accent">
-                    <div class="val">{{ total_cases }}</div>
-                    <div class="lbl">Cases</div>
-                  </div>
-                  <div class="phone-stat">
-                    <div class="val">{{ active_cases }}</div>
-                    <div class="lbl">Active</div>
-                  </div>
-                </div>
-                <div class="phone-stat-row">
-                  <div class="phone-stat">
-                    <div class="val">{{ settled_today }}</div>
-                    <div class="lbl">Resolved</div>
-                  </div>
-                  <div class="phone-stat">
-                    <div class="val" style="font-size:15px;">KES {{ platform_fees|floatformat:0 }}</div>
-                    <div class="lbl">Fees</div>
-                  </div>
-                </div>
-                <div class="phone-card">
-                  <div class="phone-card-header">
-                    <span class="title">Recent Cases</span>
-                    <span class="badge green">Live</span>
-                  </div>
-                  <div class="phone-card-item">
-                    <span class="left">Data failure - Nairobi</span>
-                    <span class="right" style="color:var(--accent);">Active</span>
-                  </div>
-                  <div class="phone-card-item">
-                    <span class="left">Billing dispute - Mombasa</span>
-                    <span class="right" style="color:#16a34a;">Resolved</span>
-                  </div>
-                  <div class="phone-card-item">
-                    <span class="left">SIM swap fraud</span>
-                    <span class="right" style="color:#ca8a04;">Pending</span>
-                  </div>
-                </div>
-              </div>
-              <div class="home-indicator"></div>
-            </div>
-          </div>
-        </div>
+        <img src="{% static 'hero-phones.png' %}" alt="TrustLayer Operations Dashboard" class="phone-img">
       </div>
     </div>
   </section>
