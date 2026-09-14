@@ -3,7 +3,7 @@ TrustLayer Root URL Configuration — V1 API + Swagger + Admin + Internal.
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Sum, Count
 from django.utils import timezone
 from apps.admin_dashboard.views.infrastructure import health_json, containers_json
@@ -12,6 +12,7 @@ from apps.core.marketplace import manifest_view
 from apps.agreements.models import Case as Agreement, CaseParty as AgreementParty
 from apps.ledger.models import LedgerEntry
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from apps.admin_dashboard.views.docs import docs_view
 
 
 def home(request):
@@ -30,6 +31,10 @@ def home(request):
         'active_cases': active,
         'platform_fees': float(fees),
     })
+
+
+def docs_redirect(request):
+    return redirect('/admin/docs/')
 
 
 urlpatterns = [
@@ -59,8 +64,9 @@ urlpatterns = [
 
     # === API Docs (custom branded page) ===
     path('api/docs/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', lambda request: __import__('django.shortcuts', fromlist=['redirect']).redirect('/admin/docs/')),
     path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/docs/', docs_redirect, name='docs-redirect'),
+    path('docs/', docs_redirect, name='docs-redirect-alt'),
 
     # Engine Test APIs (no auth required — designed for testing)
     path('api/engines/<str:engine_id>/test/', engine_test, name='api-engine-test'),
