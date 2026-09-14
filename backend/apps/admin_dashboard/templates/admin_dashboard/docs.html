@@ -1,0 +1,639 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustLayer API Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #FF5522;
+      --accent-hover: #E04418;
+      --accent-light: #FFF4F0;
+      --dark: #111111;
+      --text: #111111;
+      --text-secondary: #555555;
+      --text-muted: #999999;
+      --bg: #FFFFFF;
+      --bg-alt: #F8F8F8;
+      --border: #EEEEEE;
+      --code-bg: #1a1a1a;
+      --code-text: #e2e8f0;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* NAV */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+    nav .inner { max-width: 1200px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+    nav .brand { font-size: 20px; font-weight: 900; color: var(--text); text-decoration: none; }
+    nav .brand span { color: var(--accent); }
+    nav .links { display: flex; gap: 24px; align-items: center; }
+    nav .links a { font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; }
+    nav .links a:hover { color: var(--text); }
+    nav .links .cta { background: var(--accent); color: #fff; padding: 10px 24px; border-radius: 10px; font-weight: 600; }
+
+    /* HERO */
+    .docs-hero { padding: 140px 32px 80px; background: linear-gradient(180deg, #fff 0%, var(--bg-alt) 100%); border-bottom: 1px solid var(--border); }
+    .docs-hero .inner { max-width: 900px; margin: 0 auto; }
+    .docs-hero .badge { display: inline-flex; align-items: center; gap: 8px; background: var(--accent-light); color: var(--accent); padding: 8px 18px; border-radius: 100px; font-size: 13px; font-weight: 700; margin-bottom: 24px; border: 1px solid rgba(255,85,34,0.15); }
+    .docs-hero h1 { font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; letter-spacing: -2px; margin-bottom: 16px; }
+    .docs-hero h1 .accent { color: var(--accent); }
+    .docs-hero p { font-size: 18px; color: var(--text-secondary); max-width: 640px; line-height: 1.7; margin-bottom: 32px; }
+    .docs-hero .btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .docs-hero .btns a { padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
+    .docs-hero .btns .primary { background: var(--accent); color: #fff; }
+    .docs-hero .btns .primary:hover { background: var(--accent-hover); }
+    .docs-hero .btns .secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+
+    /* SECTIONS */
+    .docs-section { padding: 80px 32px; max-width: 900px; margin: 0 auto; }
+    .docs-section.alt { background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); max-width: 100%; }
+    .docs-section.alt .inner { max-width: 900px; margin: 0 auto; }
+    .section-label { font-size: 12px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+    .section-title { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 16px; }
+    .section-desc { font-size: 16px; color: var(--text-secondary); max-width: 600px; line-height: 1.7; margin-bottom: 40px; }
+
+    /* FLOW */
+    .flow-diagram { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; margin: 40px 0; }
+    .flow-node { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; text-align: center; min-width: 140px; transition: all 0.3s; }
+    .flow-node:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,85,34,0.08); }
+    .flow-node .icon { font-size: 24px; margin-bottom: 8px; }
+    .flow-node h4 { font-size: 13px; font-weight: 800; margin-bottom: 4px; }
+    .flow-node p { font-size: 11px; color: var(--text-muted); }
+    .flow-arrow { font-size: 24px; color: var(--accent); padding: 0 8px; font-weight: 800; }
+
+    /* CODE BLOCKS */
+    .code-block { background: var(--code-bg); border-radius: 12px; overflow: hidden; margin: 24px 0; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .code-header { background: #222; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #333; }
+    .code-header .lang { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+    .code-header .dots { display: flex; gap: 6px; }
+    .code-header .dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .code-header .dots .r { background: #ff5f57; }
+    .code-header .dots .y { background: #ffbd2e; }
+    .code-header .dots .g { background: #28ca42; }
+    .code-block pre { padding: 20px; overflow-x: auto; }
+    .code-block code { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--code-text); line-height: 1.7; }
+    .code-block .comment { color: #666; }
+    .code-block .keyword { color: #c792ea; }
+    .code-block .string { color: #c3e88d; }
+    .code-block .number { color: #f78c6c; }
+    .code-block .property { color: #82aaff; }
+
+    /* METHOD BADGES */
+    .method { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; }
+    .method.get { background: #dcfce7; color: #166534; }
+    .method.post { background: #dbeafe; color: #1e40af; }
+    .method.put { background: #fef3c7; color: #92400e; }
+    .method.delete { background: #fce4ec; color: #9b1c1c; }
+
+    /* ENDPOINT CARDS */
+    .endpoint-list { display: flex; flex-direction: column; gap: 12px; }
+    .endpoint { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; gap: 16px; transition: all 0.2s; }
+    .endpoint:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(255,85,34,0.06); }
+    .endpoint .path { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+    .endpoint .desc { font-size: 13px; color: var(--text-muted); max-width: 300px; }
+
+    /* INTEGRATION CARDS */
+    .int-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .int-card { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 28px; transition: all 0.3s; position: relative; overflow: hidden; }
+    .int-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), #f59e0b); transform: scaleX(0); transition: transform 0.3s; transform-origin: left; }
+    .int-card:hover { border-color: rgba(255,85,34,0.2); box-shadow: 0 8px 24px rgba(255,85,34,0.06); }
+    .int-card:hover::before { transform: scaleX(1); }
+    .int-card .tag { display: inline-block; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 4px 10px; border-radius: 6px; margin-bottom: 14px; }
+    .int-card .tag.live { background: #dcfce7; color: #166534; }
+    .int-card .tag.soon { background: #FEF3C7; color: #92400E; }
+    .int-card h3 { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+    .int-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* TABLE */
+    .docs-table { width: 100%; border-collapse: collapse; margin: 24px 0; }
+    .docs-table th { text-align: left; padding: 12px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; border-bottom: 2px solid var(--border); }
+    .docs-table td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
+    .docs-table tr:hover td { background: var(--bg-alt); }
+    .docs-table code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-alt); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
+
+    /* CTA */
+    .docs-cta { padding: 80px 32px; background: var(--dark); text-align: center; }
+    .docs-cta h2 { font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 900; color: #fff; letter-spacing: -1.5px; margin-bottom: 12px; }
+    .docs-cta p { font-size: 16px; color: #888; margin-bottom: 32px; }
+    .docs-cta .btns { display: flex; gap: 16px; justify-content: center; }
+    .docs-cta .btns a { padding: 14px 32px; border-radius: 12px; font-size: 15px; font-weight: 700; text-decoration: none; }
+    .docs-cta .btns .primary { background: var(--accent); color: #fff; }
+    .docs-cta .btns .secondary { background: transparent; color: #fff; border: 1px solid #333; }
+
+    /* FOOTER */
+    footer { padding: 32px; border-top: 1px solid var(--border); text-align: center; }
+    footer .copy { font-size: 13px; color: var(--text-muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* SIDEBAR NAV */
+    .docs-nav { position: fixed; top: 80px; left: 0; width: 240px; padding: 24px; overflow-y: auto; height: calc(100vh - 80px); border-right: 1px solid var(--border); background: var(--bg); }
+    .docs-nav a { display: block; padding: 8px 12px; font-size: 13px; color: var(--text-secondary); text-decoration: none; border-radius: 8px; margin-bottom: 2px; transition: all 0.15s; }
+    .docs-nav a:hover { background: var(--bg-alt); color: var(--text); }
+    .docs-nav a.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+    .docs-nav .nav-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); padding: 16px 12px 8px; }
+    .docs-content { margin-left: 240px; }
+
+    @media (max-width: 900px) {
+      .docs-nav { display: none; }
+      .docs-content { margin-left: 0; }
+      .flow-diagram { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="inner">
+      <a href="/" class="brand"><span>Trust</span>Layer</a>
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="/admin/dashboard/">Dashboard</a>
+        <a href="/api/docs/" class="cta">API Docs</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="docs-nav">
+    <div class="nav-label">Getting Started</div>
+    <a href="#overview" class="active">Overview</a>
+    <a href="#authentication">Authentication</a>
+    <a href="#flow">How It Works</a>
+    <div class="nav-label">API Endpoints</div>
+    <a href="#cases">Cases</a>
+    <a href="#create-case">Create Case</a>
+    <a href="#case-detail">Case Detail</a>
+    <div class="nav-label">Architecture</div>
+    <a href="#engines">Core Engines</a>
+    <a href="#integrations">Integrations</a>
+    <a href="#adapters">Enterprise Adapters</a>
+    <div class="nav-label">Reference</div>
+    <a href="#status-codes">Status Codes</a>
+    <a href="#webhooks">Webhooks</a>
+    <a href="#errors">Errors</a>
+  </div>
+
+  <div class="docs-content">
+    <!-- HERO -->
+    <section class="docs-hero" id="overview">
+      <div class="inner">
+        <div class="badge">API Reference v1.0</div>
+        <h1>TrustLayer <span class="accent">API</span></h1>
+        <p>System of Action for enterprise operations. Assemble context, diagnose problems, execute authorized actions, verify outcomes, and maintain complete operational truth.</p>
+        <div class="btns">
+          <a href="#cases" class="primary">Explore Endpoints</a>
+          <a href="/api/docs/schema/" class="secondary">OpenAPI Schema (JSON)</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- AUTHENTICATION -->
+    <section class="docs-section" id="authentication">
+      <div class="section-label">Getting Started</div>
+      <h2 class="section-title">Authentication</h2>
+      <p class="section-desc">All API requests require authentication via HTTP Basic Auth or token-based auth. Each request must include your API credentials.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+          <span class="lang">HTTP Header</span>
+        </div>
+        <pre><code><span class="keyword">Authorization</span>: Bearer YOUR_API_KEY
+<span class="keyword">Content-Type</span>: application/json</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+          <span class="lang">cURL</span>
+        </div>
+        <pre><code><span class="keyword">curl</span> -X GET https://api.trustlayer.co.ke/api/v1/cases/ \
+  -H <span class="string">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="string">"Content-Type: application/json"</span></code></pre>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="docs-section alt" id="flow">
+      <div class="inner">
+        <div class="section-label">Architecture</div>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-desc">Every case follows the same lifecycle: intake, context assembly, diagnosis, policy check, action execution, and verification.</p>
+
+        <div class="flow-diagram">
+          <div class="flow-node">
+            <div class="icon">📞</div>
+            <h4>Voice / SMS / API</h4>
+            <p>Customer intake</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">
+            <div class="icon">🔗</div>
+            <h4>Context Engine</h4>
+            <p>Assemble data</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">
+            <div class="icon">🔍</div>
+            <h4>Diagnosis</h4>
+            <p>Find root cause</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">
+            <div class="icon">⚖️</div>
+            <h4>Policy</h4>
+            <p>Authorize action</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">
+            <div class="icon">⚡</div>
+            <h4>Action</h4>
+            <p>Execute fix</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">
+            <div class="icon">✅</div>
+            <h4>Verification</h4>
+            <p>Confirm outcome</p>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+            <span class="lang">Lifecycle Flow</span>
+          </div>
+          <pre><code><span class="comment">// Every case flows through these stages:</span>
+
+<span class="number">1.</span> <span class="property">INTAKE</span>      → Customer reports issue (Voice/SMS/API)
+<span class="number">2.</span> <span class="property">CONTEXT</span>     → System assembles subscriber, billing, network data
+<span class="number">3.</span> <span class="property">DIAGNOSIS</span>   → Root cause identified from assembled context
+<span class="number">4.</span> <span class="property">POLICY</span>      → Action authorized based on rules and risk level
+<span class="number">5.</span> <span class="property">ACTION</span>      → Remediation executed across enterprise systems
+<span class="number">6.</span> <span class="property">VERIFICATION</span> → Service recovery confirmed, truth recorded
+
+<span class="comment">// AI understands and classifies.</span>
+<span class="comment">// Policy Engine decides.</span>
+<span class="comment">// Action Engine executes.</span>
+<span class="comment">// Truth Engine records everything.</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- CASES ENDPOINT -->
+    <section class="docs-section" id="cases">
+      <div class="section-label">API Endpoints</div>
+      <h2 class="section-title">Cases</h2>
+      <p class="section-desc">Cases are the core resource. Each case represents one customer issue flowing through the System of Action lifecycle.</p>
+
+      <div class="endpoint-list">
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/api/v1/cases/</span>
+          <span class="desc">List all cases with status, amount, and metadata</span>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <span class="path">/api/v1/cases/create/</span>
+          <span class="desc">Create a new case and initiate payment flow</span>
+        </div>
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/api/v1/cases/{case_id}/</span>
+          <span class="desc">Get full case detail including parties and status</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CREATE CASE -->
+    <section class="docs-section alt" id="create-case">
+      <div class="inner">
+        <div class="section-label">Endpoint</div>
+        <h2 class="section-title">Create a Case</h2>
+        <p class="section-desc">Create a new case with parties, amount, and conditions. Returns a payment link for the buyer to complete payment.</p>
+
+        <div style="margin-bottom:16px;">
+          <span class="method post">POST</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;margin-left:12px;">/api/v1/cases/create/</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+            <span class="lang">Request Body</span>
+          </div>
+          <pre><code>{
+  <span class="property">"title"</span>: <span class="string">"Data service failure - Nairobi"</span>,
+  <span class="property">"amount"</span>: <span class="number">2500.00</span>,
+  <span class="property">"currency"</span>: <span class="string">"KES"</span>,
+  <span class="property">"provider"</span>: <span class="string">"mpesa"</span>,
+  <span class="property">"external_id"</span>: <span class="string">"CASE-8839"</span>,
+  <span class="property">"webhook_url"</span>: <span class="string">"https://yourapp.com/webhooks/trustlayer"</span>,
+  <span class="property">"parties"</span>: [
+    {
+      <span class="property">"role"</span>: <span class="string">"BUYER"</span>,
+      <span class="property">"name"</span>: <span class="string">"John Mwangi"</span>,
+      <span class="property">"identifier"</span>: <span class="string">"+254712345678"</span>,
+      <span class="property">"split_share"</span>: <span class="number">0.93</span>
+    },
+    {
+      <span class="property">"role"</span>: <span class="string">"VENDOR"</span>,
+      <span class="property">"name"</span>: <span class="string">"Safaricom PLC"</span>,
+      <span class="property">"identifier"</span>: <span class="string">"safaricom@trustlayer.co.ke"</span>,
+      <span class="property">"split_share"</span>: <span class="number">0.07</span>
+    }
+  ],
+  <span class="property">"conditions"</span>: [
+    {
+      <span class="property">"condition_type"</span>: <span class="string">"delivery_confirmation"</span>,
+      <span class="property">"required"</span>: <span class="keyword">true</span>
+    }
+  ]
+}</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+            <span class="lang">Response — 201 Created</span>
+          </div>
+          <pre><code>{
+  <span class="property">"case_id"</span>: <span class="string">"c8a3f2e1-7b4d-4e9a-a1f2-3c5d6e7f8a9b"</span>,
+  <span class="property">"status"</span>: <span class="string">"SUBMITTED"</span>,
+  <span class="property">"status_code"</span>: <span class="number">12000</span>,
+  <span class="property">"payment_link"</span>: <span class="string">"https://checkout.trustlayer.co.ke/pay/c8a3f2e1"</span>,
+  <span class="property">"next_step"</span>: <span class="string">"Send the payment_link to the BUYER to complete payment."</span>
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- CASE DETAIL -->
+    <section class="docs-section" id="case-detail">
+      <div class="section-label">Endpoint</div>
+      <h2 class="section-title">Get Case Detail</h2>
+      <p class="section-desc">Retrieve full case details including parties, status history, and current state.</p>
+
+      <div style="margin-bottom:16px;">
+        <span class="method get">GET</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;margin-left:12px;">/api/v1/cases/{case_id}/</span>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+          <span class="lang">Response — 200 OK</span>
+        </div>
+        <pre><code>{
+  <span class="property">"case_id"</span>: <span class="string">"c8a3f2e1-7b4d-4e9a-a1f2-3c5d6e7f8a9b"</span>,
+  <span class="property">"title"</span>: <span class="string">"Data service failure - Nairobi"</span>,
+  <span class="property">"status"</span>: <span class="string">"HELD"</span>,
+  <span class="property">"status_code"</span>: <span class="number">15000</span>,
+  <span class="property">"amount"</span>: <span class="string">"2500.00"</span>,
+  <span class="property">"currency"</span>: <span class="string">"KES"</span>,
+  <span class="property">"parties"</span>: [
+    {
+      <span class="property">"role"</span>: <span class="string">"BUYER"</span>,
+      <span class="property">"name"</span>: <span class="string">"John Mwangi"</span>,
+      <span class="property">"identifier"</span>: <span class="string">"+254712345678"</span>
+    }
+  ],
+  <span class="property">"created_at"</span>: <span class="string">"2026-09-14T10:30:00Z"</span>,
+  <span class="property">"updated_at"</span>: <span class="string">"2026-09-14T10:30:00Z"</span>
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- ENGINES -->
+    <section class="docs-section alt" id="engines">
+      <div class="inner">
+        <div class="section-label">Architecture</div>
+        <h2 class="section-title">Core Engines</h2>
+        <p class="section-desc">Six modular engines power the System of Action. Each is testable, replaceable, and designed for operator integration.</p>
+
+        <table class="docs-table">
+          <thead>
+            <tr><th>Engine</th><th>Purpose</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Context Engine</strong></td><td>Assembles subscriber, billing, network, device data from enterprise adapters</td><td><span style="color:#16a34a;">● Running</span></td></tr>
+            <tr><td><strong>Diagnosis Engine</strong></td><td>Identifies root cause using rule-based and ML-powered analysis</td><td><span style="color:#16a34a;">● Running</span></td></tr>
+            <tr><td><strong>Policy Engine</strong></td><td>Authorizes actions based on rules, risk level, and clearance</td><td><span style="color:#16a34a;">● Running</span></td></tr>
+            <tr><td><strong>Action Engine</strong></td><td>Executes authorized remediation across enterprise systems</td><td><span style="color:#16a34a;">● Running</span></td></tr>
+            <tr><td><strong>Verification Engine</strong></td><td>Confirms service recovery and validates expected outcomes</td><td><span style="color:#16a34a;">● Running</span></td></tr>
+            <tr><td><strong>Truth Engine</strong></td><td>Immutable audit trail with SHA-256 hash chains</td><td><span style="color:#16a34a;">● Running</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- INTEGRATIONS -->
+    <section class="docs-section" id="integrations">
+      <div class="section-label">Integrations</div>
+      <h2 class="section-title">Built for Real Operator Systems</h2>
+      <p class="section-desc">Accessible APIs now, TM Forum and GSMA adapters designed from day one.</p>
+
+      <div class="int-grid">
+        <div class="int-card">
+          <div class="tag live">Live</div>
+          <h3>Safaricom Daraja</h3>
+          <p>M-Pesa payment processing, STK push, transaction status, reconciliation.</p>
+        </div>
+        <div class="int-card">
+          <div class="tag live">Live</div>
+          <h3>OpenAI Realtime</h3>
+          <p>Voice-to-voice customer interaction, intent classification, natural language.</p>
+        </div>
+        <div class="int-card">
+          <div class="tag live">Live</div>
+          <h3>Africa's Talking</h3>
+          <p>SMS notifications, USSD menus, voice callbacks for case updates.</p>
+        </div>
+        <div class="int-card">
+          <div class="tag soon">Design Phase</div>
+          <h3>TM Forum Open APIs</h3>
+          <p>TMF629 Customer, TMF678 Billing, TMF638 Service, TMF656 Problem.</p>
+        </div>
+        <div class="int-card">
+          <div class="tag soon">Design Phase</div>
+          <h3>GSMA Open Gateway</h3>
+          <p>Number verification, SIM swap, device location, quality of demand.</p>
+        </div>
+        <div class="int-card">
+          <div class="tag soon">Design Phase</div>
+          <h3>Firebase FCM</h3>
+          <p>Push notifications to agent devices for approvals and case assignments.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADAPTERS -->
+    <section class="docs-section alt" id="adapters">
+      <div class="inner">
+        <div class="section-label">Architecture</div>
+        <h2 class="section-title">Enterprise Adapters</h2>
+        <p class="section-desc">Mock adapters for development. Production adapters connect to real operator systems via TM Forum and GSMA standards.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+            <span class="lang">Adapter Contract</span>
+          </div>
+          <pre><code><span class="comment">// Every adapter implements this interface:</span>
+
+<span class="keyword">class</span> <span class="property">SubscriberAdapter</span>:
+    <span class="keyword">def</span> get_subscriber(id)     → Subscriber
+    <span class="keyword">def</span> get_service(id)        → Service
+    <span class="keyword">def</span> get_balance(id)        → Balance
+    <span class="keyword">def</span> get_bundle(id)         → Bundle
+
+<span class="keyword">class</span> <span class="property">BillingAdapter</span>:
+    <span class="keyword">def</span> get_account(id)        → Account
+    <span class="keyword">def</span> get_transactions(id)   → [Transaction]
+    <span class="keyword">def</span> get_balance(id)        → Balance
+
+<span class="keyword">class</span> <span class="property">NetworkAdapter</span>:
+    <span class="keyword">def</span> get_device(id)         → Device
+    <span class="keyword">def</span> get_network_state(id)  → NetworkState
+    <span class="keyword">def</span> get_incidents(area)    → [Incident]
+    <span class="keyword">def</span> activate_service(id)   → Result
+    <span class="keyword">def</span> verify_service(id)     → VerificationResult
+
+<span class="comment">// Today: MockSubscriberAdapter, MockBillingAdapter, MockNetworkAdapter</span>
+<span class="comment">// Tomorrow: SafaricomSubscriberAdapter, TMFCustomerAdapter, CAMARADeviceAdapter</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATUS CODES -->
+    <section class="docs-section" id="status-codes">
+      <div class="section-label">Reference</div>
+      <h2 class="section-title">Status Codes</h2>
+      <p class="section-desc">Every case has a numeric status code indicating its position in the lifecycle.</p>
+
+      <table class="docs-table">
+        <thead>
+          <tr><th>Code</th><th>Status</th><th>Category</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>10000</code></td><td>SUBMITTED</td><td>Active</td><td>Case created, awaiting payment</td></tr>
+          <tr><td><code>12000</code></td><td>SUBMITTED</td><td>Active</td><td>Case submitted with payment initiated</td></tr>
+          <tr><td><code>13000</code></td><td>CONFIRMED</td><td>Active</td><td>Payment confirmed, processing</td></tr>
+          <tr><td><code>15000</code></td><td>HELD</td><td>Active</td><td>Funds held in escrow, conditions pending</td></tr>
+          <tr><td><code>15500</code></td><td>DISPUTED</td><td>Active</td><td>Dispute raised, under review</td></tr>
+          <tr><td><code>18000</code></td><td>SETTLED</td><td>Terminal</td><td>Case settled, funds distributed</td></tr>
+          <tr><td><code>21000</code></td><td>CANCELLED</td><td>Terminal</td><td>Case cancelled by user</td></tr>
+          <tr><td><code>22000</code></td><td>REFUNDED</td><td>Terminal</td><td>Funds refunded to buyer</td></tr>
+          <tr><td><code>24000</code></td><td>FAILED</td><td>Terminal</td><td>Payment or processing failed</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- WEBHOOKS -->
+    <section class="docs-section alt" id="webhooks">
+      <div class="inner">
+        <div class="section-label">Reference</div>
+        <h2 class="section-title">Webhooks</h2>
+        <p class="section-desc">TrustLayer sends POST requests to your webhook_url on state changes. Verify the signature to ensure authenticity.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+            <span class="lang">Webhook Payload</span>
+          </div>
+          <pre><code>{
+  <span class="property">"event"</span>: <span class="string">"case.state_changed"</span>,
+  <span class="property">"case_id"</span>: <span class="string">"c8a3f2e1-7b4d-4e9a-a1f2-3c5d6e7f8a9b"</span>,
+  <span class="property">"from_status"</span>: <span class="string">"HELD"</span>,
+  <span class="property">"to_status"</span>: <span class="string">"SETTLED"</span>,
+  <span class="property">"status_code"</span>: <span class="number">18000</span>,
+  <span class="property">"timestamp"</span>: <span class="string">"2026-09-14T12:00:00Z"</span>,
+  <span class="property">"signature"</span>: <span class="string">"sha256=a1b2c3d4e5f6..."</span>
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ERRORS -->
+    <section class="docs-section" id="errors">
+      <div class="section-label">Reference</div>
+      <h2 class="section-title">Error Handling</h2>
+      <p class="section-desc">The API uses standard HTTP status codes. Errors return a JSON body with details.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+          <span class="lang">Error Response</span>
+        </div>
+        <pre><code>{
+  <span class="property">"error"</span>: <span class="string">"Invalid request"</span>,
+  <span class="property">"details"</span>: {
+    <span class="property">"amount"</span>: [<span class="string">"This field is required."</span>],
+    <span class="property">"parties"</span>: [<span class="string">"At least one party is required."</span>]
+  }
+}</code></pre>
+      </div>
+
+      <table class="docs-table">
+        <thead>
+          <tr><th>Code</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>400</code></td><td>Bad Request — Invalid parameters</td></tr>
+          <tr><td><code>401</code></td><td>Unauthorized — Missing or invalid API key</td></tr>
+          <tr><td><code>403</code></td><td>Forbidden — Insufficient permissions</td></tr>
+          <tr><td><code>404</code></td><td>Not Found — Resource does not exist</td></tr>
+          <tr><td><code>429</code></td><td>Rate Limited — Too many requests</td></tr>
+          <tr><td><code>500</code></td><td>Server Error — Internal failure</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- CTA -->
+    <section class="docs-cta">
+      <h2>Ready to integrate?</h2>
+      <p>Start building with the TrustLayer API today.</p>
+      <div class="btns">
+        <a href="/api/docs/schema/" class="primary">OpenAPI Schema</a>
+        <a href="/admin/dashboard/" class="secondary">Dashboard</a>
+      </div>
+    </section>
+
+    <footer>
+      <div class="copy">&copy; 2026 TrustLayer. Built in Kenya. <a href="/">Home</a> · <a href="/admin/dashboard/">Dashboard</a></div>
+    </footer>
+  </div>
+
+  <script>
+    // Smooth scroll for nav links
+    document.querySelectorAll('.docs-nav a').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.querySelectorAll('.docs-nav a').forEach(l => l.classList.remove('active'));
+        a.classList.add('active');
+      });
+    });
+
+    // Active nav on scroll
+    const sections = document.querySelectorAll('[id]');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(s => {
+        if (window.scrollY >= s.offsetTop - 120) current = s.id;
+      });
+      document.querySelectorAll('.docs-nav a').forEach(a => {
+        a.classList.remove('active');
+        if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>

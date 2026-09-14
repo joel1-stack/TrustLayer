@@ -57,9 +57,9 @@ urlpatterns = [
     # Customer Portal
     path('portal/', include('apps.customer_portal.urls')),
 
-    # === Swagger / OpenAPI Docs ===
+    # === API Docs (custom branded page) ===
     path('api/docs/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/', lambda request: __import__('django.shortcuts', fromlist=['redirect']).redirect('/admin/docs/')),
     path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
     # Engine Test APIs (no auth required — designed for testing)

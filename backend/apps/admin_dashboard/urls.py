@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import auth, overview, agreements, ledger, settlements, customers, security, infrastructure, audit, evidence, backups, analytics, notifications, settings_view, forensics, team, engines, constellation
+from .views import auth, overview, agreements, ledger, settlements, customers, security, infrastructure, audit, evidence, backups, analytics, notifications, settings_view, forensics, team, engines, constellation, docs
 
 urlpatterns = [
     path('login/', auth.login_view, name='admin-login'),
@@ -39,4 +39,6 @@ urlpatterns = [
     # Constellation
     path('constellation/', constellation.constellation_view, name='admin-constellation'),
     path('constellation/api/', constellation.constellation_api, name='admin-constellation-api'),
+    # Docs
+    path('docs/', docs.docs_view, name='admin-docs'),
 ]
