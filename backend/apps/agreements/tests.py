@@ -3,6 +3,7 @@ from django.test import TestCase
 from .models import Agreement, AgreementParty
 from .services import AgreementService
 
+
 class AgreementServiceTests(TestCase):
 
     def setUp(self):
@@ -18,17 +19,23 @@ class AgreementServiceTests(TestCase):
         self.assertEqual(self.agreement.status, Agreement.Status.CREATED)
         self.assertTrue(self.agreement.agreement_id.startswith('AGR'))
 
+    def test_platform_party_auto_injected(self):
+        platform = self.agreement.parties.filter(role='PLATFORM').first()
+        self.assertIsNotNone(platform)
+        self.assertEqual(platform.name, 'TrustLayer Platform')
+        self.assertEqual(platform.split_percentage, Decimal('5.00'))
+
     def test_add_parties_and_calculate_splits(self):
         payer = AgreementService.add_party(
-            self.agreement, AgreementParty.Role.PAYER, 'payer@test.com', 'Payer One',
+            self.agreement, 'PAYER', 'payer@test.com', 'Payer One',
             split_percentage=Decimal('60.00'),
         )
         payee = AgreementService.add_party(
-            self.agreement, AgreementParty.Role.PAYEE, 'payee@test.com', 'Payee One',
+            self.agreement, 'PAYEE', 'payee@test.com', 'Payee One',
             split_fixed=Decimal('400.00'),
         )
         splits = AgreementService.calculate_splits(self.agreement)
-        self.assertEqual(len(splits), 2)
+        self.assertGreaterEqual(len(splits), 2)
         payer_split = next(s for s in splits if s['party'].role == 'PAYER')
         payee_split = next(s for s in splits if s['party'].role == 'PAYEE')
         self.assertEqual(payer_split['amount'], Decimal('600.00'))

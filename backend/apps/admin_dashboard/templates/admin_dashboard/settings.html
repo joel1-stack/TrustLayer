@@ -115,7 +115,6 @@
               {% if not status.configured %}
                 <small>
                   {% if name == 'mpesa' %}Set MPESA_CONSUMER_KEY in env
-                  {% elif name == 'intasend' %}Set INTASEND_SECRET_KEY in env — <em>Under Construction</em>
                   {% elif name == 'stripe' %}Set STRIPE_API_KEY in env
                   {% elif name == 'bank_transfer' %}Enter bank details above
                   {% endif %}

@@ -1,13 +1,23 @@
+# Environment
 .env
-__pycache__/
-*.pyc
 
-celerybeat-schedule
-celerybeat-schedule
-debug.log
+# Python
 __pycache__/
 *.pyc
+*.egg-info/
+
+# Django
+db.sqlite3
+staticfiles/
 media/
+
+# Celery
+celerybeat-schedule*
+
+# Logs
+debug.log
+
+# Project-specific
 scripts/
 config/
 utils/

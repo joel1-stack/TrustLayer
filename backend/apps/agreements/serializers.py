@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Agreement, AgreementParty
+from .models import Case as Agreement, CaseParty as AgreementParty
 
 class AgreementPartySerializer(serializers.ModelSerializer):
     class Meta:

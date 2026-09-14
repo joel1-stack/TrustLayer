@@ -53,7 +53,7 @@ def platform_settings(request):
     try:
         providers = adapter_registry.list_providers()
     except Exception:
-        providers = ['intasend', 'mpesa', 'stripe', 'bank_transfer']
+        providers = ['mpesa', 'stripe', 'bank_transfer']
 
     return render(request, 'admin_dashboard/settings.html', {
         'all_settings': all_settings,
@@ -76,8 +76,6 @@ def _check_provider(provider_name):
 def _is_configured(provider_name):
     if provider_name == 'mpesa':
         return bool(getattr(settings, 'MPESA_CONSUMER_KEY', ''))
-    elif provider_name == 'intasend':
-        return bool(getattr(settings, 'INTASEND_SECRET_KEY', ''))
     elif provider_name == 'stripe':
         return bool(getattr(settings, 'STRIPE_API_KEY', ''))
     elif provider_name == 'bank_transfer':

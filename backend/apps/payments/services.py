@@ -5,7 +5,7 @@ from .adapters.registry import get_adapter
 class PaymentService:
 
     @staticmethod
-    def generate_payment_link(agreement, phone='', provider='intasend'):
+    def generate_payment_link(agreement, phone='', provider='mpesa'):
         """Generate a payment link for an agreement using the given provider."""
         adapter = get_adapter(provider)
         reference = agreement.agreement_id
@@ -32,7 +32,7 @@ class PaymentService:
         adapter = get_adapter(provider)
         standard = adapter.handle_webhook(raw_payload)
 
-        from apps.agreements.models import Agreement
+        from apps.agreements.models import Case as Agreement
         agreement = Agreement.objects.filter(agreement_id=standard['internal_reference']).first()
         if not agreement:
             return standard, None

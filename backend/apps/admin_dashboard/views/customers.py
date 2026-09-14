@@ -2,7 +2,7 @@ import secrets
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count, Sum
 from django.contrib import messages
-from apps.agreements.models import Agreement
+from apps.agreements.models import Case as Agreement
 from apps.customer_portal.models import Customer
 
 

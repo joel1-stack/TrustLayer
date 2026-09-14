@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from django.conf import settings
-from apps.agreements.models import Agreement
+from apps.agreements.models import Case as Agreement
 from apps.ledger.models import LedgerEntry
 from apps.settlements.models import Settlement
 from apps.payments.models import WebhookEvent
@@ -20,7 +20,7 @@ def dashboard(request):
     agreements_month = Agreement.objects.filter(created_at__date__gte=month_start).count()
     total_agreements = Agreement.objects.count()
 
-    from apps.constants import STATUS_CATEGORIES, STATUS_CODES
+    from apps.core.constants import STATUS_CATEGORIES, STATUS_CODES
     active_agreements = Agreement.objects.filter(
         status_code_value__gte=10000, status_code_value__lte=17999
     ).exclude(

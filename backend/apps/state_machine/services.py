@@ -1,6 +1,6 @@
 from .models import StateTransition
-from apps.constants import STATUS_CODES, VALID_TRANSITIONS, TERMINAL_STATES
-from apps.agreements.models import Agreement
+from apps.core.constants import STATUS_CODES, VALID_TRANSITIONS, TERMINAL_STATES
+from apps.agreements.models import Case as Agreement
 
 
 class StateMachine:

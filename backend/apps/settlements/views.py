@@ -1,14 +1,14 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from apps.auth_decorator import require_api_auth
+from apps.core.auth_decorator import require_api_auth
 from .services import SettlementService
 from .models import Settlement
 
 @require_http_methods(["GET"])
 @require_api_auth
 def list_settlements(request, agreement_id):
-    from apps.agreements.models import Agreement
+    from apps.agreements.models import Case as Agreement
     agreement = Agreement.objects.filter(agreement_id=agreement_id).first()
     if not agreement:
         return JsonResponse({'error': 'Agreement not found'}, status=404)
@@ -22,7 +22,7 @@ def list_settlements(request, agreement_id):
 @require_http_methods(["POST"])
 @require_api_auth
 def trigger_settlement(request, agreement_id):
-    from apps.agreements.models import Agreement
+    from apps.agreements.models import Case as Agreement
     from apps.orchestration.services import Orchestrator
     agreement = Agreement.objects.filter(agreement_id=agreement_id).first()
     if not agreement:

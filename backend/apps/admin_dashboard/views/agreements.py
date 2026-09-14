@@ -3,7 +3,7 @@ from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils import timezone
-from apps.agreements.models import Agreement, AgreementParty
+from apps.agreements.models import Case as Agreement, CaseParty as AgreementParty
 from apps.conditions.models import Condition
 from apps.state_machine.models import StateTransition
 from apps.state_machine.services import StateMachine
@@ -29,7 +29,7 @@ def agreement_list(request):
 
     industries = Agreement.objects.values('metadata__industry').annotate(c=Count('id')).order_by('-c')[:10]
 
-    from apps.constants import STATUS_CODES
+    from apps.core.constants import STATUS_CODES
     statuses = list(STATUS_CODES.keys())
 
     return render(request, 'admin_dashboard/agreements.html', {

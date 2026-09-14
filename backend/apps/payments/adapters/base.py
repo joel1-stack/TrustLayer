@@ -47,7 +47,7 @@ class PaymentProviderAdapter(ABC):
         
         Returns:
             dict with standard fields:
-                - 'provider': str (e.g. 'intasend')
+                - 'provider': str (e.g. 'mpesa')
                 - 'provider_transaction_id': str
                 - 'internal_reference': str (the agreement_id you sent)
                 - 'amount': Decimal

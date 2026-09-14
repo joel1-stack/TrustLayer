@@ -1,13 +1,13 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from apps.auth_decorator import require_api_auth
+from apps.core.auth_decorator import require_api_auth
 from .services import LedgerService
 from .models import LedgerEntry
 
 @require_http_methods(["GET"])
 @require_api_auth
 def get_entries(request, agreement_id):
-    from apps.agreements.models import Agreement
+    from apps.agreements.models import Case as Agreement
     agreement = Agreement.objects.filter(agreement_id=agreement_id).first()
     if not agreement:
         return JsonResponse({'error': 'Agreement not found'}, status=404)
@@ -20,7 +20,7 @@ def get_entries(request, agreement_id):
 @require_http_methods(["GET"])
 @require_api_auth
 def get_balance(request, party_id):
-    from apps.agreements.models import AgreementParty
+    from apps.agreements.models import CaseParty as AgreementParty
     party = AgreementParty.objects.filter(id=party_id).first()
     if not party:
         return JsonResponse({'error': 'Party not found'}, status=404)

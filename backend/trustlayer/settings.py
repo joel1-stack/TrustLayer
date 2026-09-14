@@ -22,7 +22,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'drf_spectacular',
+    'django_filters',
     'corsheaders',
     # TrustLayer Core Engines
     'apps.agreements',
@@ -37,6 +40,13 @@ INSTALLED_APPS = [
     'apps.admin_dashboard',
     'apps.customer_portal',
     'apps.api_v1',
+    # New Engines
+    'apps.context_engine',
+    'apps.diagnosis_engine',
+    'apps.policy_engine',
+    'apps.action_engine',
+    'apps.verification_engine',
+    'apps.enterprise_adapters',
 ]
 
 MIDDLEWARE = [
@@ -67,6 +77,7 @@ TEMPLATES = [{
             'django.template.context_processors.request',
             'django.contrib.auth.context_processors.auth',
             'django.contrib.messages.context_processors.messages',
+            'apps.customer_portal.context_processors.portal_verified',
         ],
     },
 }]
@@ -109,14 +120,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
+    'MAX_PAGINATE_BY': 200,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
@@ -176,12 +193,6 @@ MPESA_INITIATOR_NAME     = os.environ.get('MPESA_INITIATOR_NAME', 'testinitiator
 MPESA_INITIATOR_PASSWORD = os.environ.get('MPESA_INITIATOR_PASSWORD', '')
 MPESA_B2C_RESULT_URL     = os.environ.get('MPESA_B2C_RESULT_URL', '')
 MPESA_B2C_TIMEOUT_URL    = os.environ.get('MPESA_B2C_TIMEOUT_URL', '')
-
-# IntaSend (Collect + Payout — live wallet)
-INTASEND_PUBLIC_KEY   = os.environ.get('INTASEND_PUBLIC_KEY', '')
-INTASEND_SECRET_KEY   = os.environ.get('INTASEND_SECRET_KEY', '')
-INTASEND_BASE_URL     = os.environ.get('INTASEND_BASE_URL', 'https://payment.intasend.com/api/v1')
-INTASEND_CALLBACK_URL = os.environ.get('INTASEND_CALLBACK_URL', '')
 
 # SMS Notifications
 SMS_PROVIDER  = os.environ.get('SMS_PROVIDER', 'generic')   # 'africastalking' or 'generic'

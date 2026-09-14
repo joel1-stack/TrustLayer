@@ -46,7 +46,7 @@ ENGINE_DEFINITIONS = {
     'settlement': {
         'name': 'Settlement Engine',
         'icon': '💸',
-        'desc': 'Pays out parties via M-Pesa, bank transfer, IntaSend, or Stripe. Tracks status.',
+        'desc': 'Pays out parties via M-Pesa, bank transfer, or Stripe. Tracks status.',
         'fields': [
             {'key': 'engine_settlement_retry_max', 'label': 'Max Retries on Failure', 'type': 'text', 'default': '3'},
             {'key': 'engine_settlement_auto_settle', 'label': 'Auto-Settle When Ready', 'type': 'bool', 'default': 'true'},
@@ -109,9 +109,6 @@ for p in PROVIDER_DEFINITIONS:
     if p == 'mpesa':
         PROVIDER_DEFINITIONS[p]['configured'] = bool(getattr(settings, 'MPESA_CONSUMER_KEY', ''))
         PROVIDER_DEFINITIONS[p]['fields'] = ['MPESA_CONSUMER_KEY', 'MPESA_CONSUMER_SECRET', 'MPESA_SHORTCODE', 'MPESA_PASSKEY', 'MPESA_ENVIRONMENT']
-    elif p == 'intasend':
-        PROVIDER_DEFINITIONS[p]['configured'] = bool(getattr(settings, 'INTASEND_SECRET_KEY', ''))
-        PROVIDER_DEFINITIONS[p]['fields'] = ['INTASEND_PUBLIC_KEY', 'INTASEND_SECRET_KEY', 'INTASEND_BASE_URL']
     elif p == 'stripe':
         PROVIDER_DEFINITIONS[p]['configured'] = bool(getattr(settings, 'STRIPE_API_KEY', ''))
         PROVIDER_DEFINITIONS[p]['fields'] = ['STRIPE_API_KEY', 'STRIPE_WEBHOOK_SECRET']
@@ -203,7 +200,7 @@ def engine_test(request, engine_id):
     try:
         import urllib.request, json
         if engine_id == 'agreement':
-            from apps.agreements.models import Agreement
+            from apps.agreements.models import Case as Agreement
             count = Agreement.objects.count()
             return JsonResponse({'status': 'ok', 'agreements': count})
         elif engine_id == 'ledger':
@@ -211,10 +208,10 @@ def engine_test(request, engine_id):
             entries = LedgerEntry.objects.count()
             return JsonResponse({'status': 'ok', 'ledger_entries': entries})
         elif engine_id == 'rule':
-            from apps.agreements.models import Agreement, AgreementParty
+            from apps.agreements.models import Case as Agreement, CaseParty as AgreementParty
             a = Agreement.objects.filter(status='SETTLED').first()
             if a:
-                from apps.agreements.services import AgreementService
+                from apps.agreements.services import CaseService as AgreementService
                 splits = AgreementService.calculate_splits(a)
                 return JsonResponse({'status': 'ok', 'splits': [(s['party'].name, str(s['amount'])) for s in splits]})
             return JsonResponse({'status': 'ok', 'note': 'No SETTLED agreement to test splits'})
@@ -233,8 +230,8 @@ def engine_test(request, engine_id):
             fails = LoginAttempt.objects.filter(success=False).count()
             return JsonResponse({'status': 'ok', 'failed_logins': fails})
         elif engine_id == 'orchestration':
-            from apps.agreements.models import Agreement
-            from apps.constants import STATUS_CODES
+            from apps.agreements.models import Case as Agreement
+            from apps.core.constants import STATUS_CODES
             counts = {}
             for s in STATUS_CODES:
                 c = Agreement.objects.filter(status=s).count()

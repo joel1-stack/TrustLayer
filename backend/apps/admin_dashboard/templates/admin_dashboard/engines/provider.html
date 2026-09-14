@@ -29,7 +29,6 @@
     </h3>
     <p style="color:#64748b;font-size:14px;margin-bottom:20px;">
       {% if provider_id == 'mpesa' %}Enter your Safaricom Daraja API credentials for M-Pesa STK Push and B2C payouts.
-      {% elif provider_id == 'intasend' %}Enter your IntaSend live API keys for collections and payouts.
       {% elif provider_id == 'stripe' %}Enter your Stripe API keys for card payments and Connect payouts.
       {% elif provider_id == 'bank_transfer' %}Configure your bank account details for local bank transfer payouts.
       {% endif %}
@@ -39,7 +38,7 @@
       {% csrf_token %}
       {% for key, val in settings.items %}
       <div class="form-group">
-        <label>{{ key|cut:"PLATFORM_"|cut:"INTASEND_"|cut:"MPESA_"|cut:"STRIPE_"|cut:"BANK_"|title }}</label>
+        <label>{{ key|cut:"PLATFORM_"|cut:"MPESA_"|cut:"STRIPE_"|cut:"BANK_"|title }}</label>
         <input type="text" name="{{ key }}" class="form-input" value="{{ val }}" placeholder="{{ key }}">
         <div class="help-text">{{ key }}</div>
       </div>

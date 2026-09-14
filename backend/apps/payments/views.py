@@ -2,7 +2,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from apps.auth_decorator import require_api_auth
+from apps.core.auth_decorator import require_api_auth
 from .services import PaymentService
 from apps.orchestration.services import Orchestrator
 
@@ -19,7 +19,7 @@ def generate_payment_link(request):
     Body:
         agreement_id: str (required)
         phone: str (optional, for STK push)
-        provider: str (optional, default 'intasend')
+        provider: str (optional, default 'mpesa')
     
     Returns:
         payment_url: str
@@ -33,12 +33,12 @@ def generate_payment_link(request):
 
     agreement_id = data.get('agreement_id', '').strip()
     phone = data.get('phone', '').strip()
-    provider = data.get('provider', 'intasend').strip()
+    provider = data.get('provider', 'mpesa').strip()
 
     if not agreement_id:
         return JsonResponse({'error': 'agreement_id is required'}, status=400)
 
-    from apps.agreements.models import Agreement
+    from apps.agreements.models import Case as Agreement
     agreement = Agreement.objects.filter(agreement_id=agreement_id).first()
     if not agreement:
         return JsonResponse({'error': 'Agreement not found'}, status=404)

@@ -11,9 +11,8 @@ class BankTransferAdapter(PaymentProviderAdapter):
 
     Processes payouts to local bank accounts (e.g. ABSA, Equity, KCB, Co-op).
     For now, creates a pending settlement record and logs the transfer.
-    When a real banking API is integrated (e.g. IntaSend bank payouts,
-    Africa's Talking Payments, or direct bank API), replace the simulated
-    payout with a real API call.
+    When a real banking API is integrated (e.g. Africa's Talking Payments,
+    or direct bank API), replace the simulated payout with a real API call.
 
     Bank account details are stored in the AgreementParty.payout_details
     JSON field with the following structure:
@@ -35,7 +34,7 @@ class BankTransferAdapter(PaymentProviderAdapter):
         """Bank transfers don't use payment links."""
         return {
             'success': False,
-            'error': 'Bank transfers do not support payment links. Use M-Pesa or IntaSend for collections.',
+            'error': 'Bank transfers do not support payment links. Use M-Pesa for collections.',
         }
 
     def send_payout(self, amount, phone, reference, **kwargs):

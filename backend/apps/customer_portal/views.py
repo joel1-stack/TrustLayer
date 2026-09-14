@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.http import JsonResponse
 from django.contrib import messages
-from apps.agreements.models import Agreement
+from apps.agreements.models import Case as Agreement
 from apps.ledger.models import LedgerEntry
 from apps.settlements.models import Settlement
 from apps.admin_dashboard.models import LoginAttempt, AuditLogEntry
@@ -123,6 +123,7 @@ def verify_send_email(request):
     <p>This link expires in 24 hours.</p>
     '''
 
+    email_sent = False
     try:
         from django.core.mail import send_mail
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [cust.admin_email],
@@ -130,10 +131,17 @@ def verify_send_email(request):
         AuditLogEntry.objects.create(actor=f'customer:{cust.name}', action='verification_email_sent',
             resource_type='customer', resource_id=cust.customer_id,
             detail={'email': cust.admin_email, 'token': token.token[:16]})
+        email_sent = True
     except Exception as e:
-        print(f'Email send failed (configure email backend): {e}')
+        import logging
+        logging.getLogger('trustlayer').warning(f'Email send failed: {e}')
 
-    return redirect('/portal/verify/pending/?sent=1')
+    return render(request, 'customer_portal/verify_pending.html', {
+        'customer': cust,
+        'sent': email_sent,
+        'verify_url': verify_url,
+        'email_fallback': not email_sent,
+    })
 
 
 def verify_confirm(request, token):
@@ -174,7 +182,7 @@ def portal_home(request):
     else:
         qs = Agreement.objects.all()
     total_agreements = qs.count()
-    from apps.constants import STATUS_CATEGORIES
+    from apps.core.constants import STATUS_CATEGORIES
     terminal_states = [s for s, c in STATUS_CATEGORIES.items() if c == 'terminal']
     active = qs.exclude(status__in=terminal_states).count()
     settled = qs.filter(status='SETTLED').count()
@@ -256,7 +264,7 @@ def portal_agreement_create(request):
                 if total != 100:
                     error = f'Splits must total 100% (currently {total}%)'
                 else:
-                    from apps.agreements.services import AgreementService
+                    from apps.agreements.services import CaseService as AgreementService
                     from apps.state_machine.services import StateMachine
                     from apps.payments.services import PaymentService
 
@@ -280,7 +288,7 @@ def portal_agreement_create(request):
                         actor_role='customer_user', channel='portal', ip_address=ip,
                         reason='Agreement created via customer portal')
 
-                    tx, result = PaymentService.generate_payment_link(agreement, phone=buyer_phone, provider='intasend')
+                    tx, result = PaymentService.generate_payment_link(agreement, phone=buyer_phone, provider='mpesa')
 
                     if result.get('success'):
                         agreement.payment_url = result.get('payment_url', '')
@@ -289,7 +297,7 @@ def portal_agreement_create(request):
                         StateMachine.transition(agreement, 'SUBMITTED', triggered_by='system',
                             actor_role='settlement_engine', channel='system', ip_address=ip,
                             provider_ref=result.get('provider_reference', ''),
-                            reason=f'IntaSend checkout link generated: {payment_url[:40]}...')
+                            reason=f'Payment checkout link generated: {payment_url[:40]}...')
 
                     AuditLogEntry.objects.create(actor=f'customer:{cust.name}',
                         action='agreement_created', resource_type='agreement', resource_id=agreement.agreement_id)
@@ -390,8 +398,8 @@ def portal_engines(request):
     providers = []
     for p in list_providers():
         providers.append({'name': p.replace('_', ' ').title(), 'id': p})
-    from apps.agreements.models import Agreement
-    from apps.constants import STATUS_CODES
+    from apps.agreements.models import Case as Agreement
+    from apps.core.constants import STATUS_CODES
     customer_name = request.session.get('customer_name', '')
     state_counts = {}
     for s in ['CREATED', 'AVAILABLE', 'HELD', 'SETTLED']:

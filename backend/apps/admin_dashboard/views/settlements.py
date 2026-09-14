@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.db.models import Sum, Count, Q
 from apps.settlements.models import Settlement
-from apps.agreements.models import Agreement
+from apps.agreements.models import Case as Agreement
 
 
 def settlement_view(request):

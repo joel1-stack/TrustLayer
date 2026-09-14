@@ -11,12 +11,11 @@ class Settlement(models.Model):
     class Provider(models.TextChoices):
         MPESA_B2C = 'mpesa_b2c', 'M-Pesa B2C'
         BANK_TRANSFER = 'bank_transfer', 'Bank Transfer'
-        INTASEND = 'intasend', 'IntaSend'
         STRIPE = 'stripe', 'Stripe'
     
     settlement_id = models.CharField(max_length=24, unique=True, editable=False)
-    agreement = models.ForeignKey('agreements.Agreement', on_delete=models.CASCADE, related_name='settlements')
-    party = models.ForeignKey('agreements.AgreementParty', on_delete=models.CASCADE, related_name='settlements')
+    agreement = models.ForeignKey('agreements.Case', on_delete=models.CASCADE, related_name='settlements')
+    party = models.ForeignKey('agreements.CaseParty', on_delete=models.CASCADE, related_name='settlements')
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=3, default='KES')
     provider = models.CharField(max_length=16, choices=Provider.choices)

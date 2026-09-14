@@ -34,7 +34,6 @@ def health_json(request):
     health = {
         'engines': {},
         'database': {'status': 'unknown'},
-        'intasend': {'status': 'unknown'},
         'timestamp': time.time(),
     }
     try:

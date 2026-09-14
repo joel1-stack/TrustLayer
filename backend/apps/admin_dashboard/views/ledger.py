@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.db.models import Sum, Q
 from decimal import Decimal
 from apps.ledger.models import LedgerEntry, LedgerAccount
-from apps.agreements.models import Agreement
+from apps.agreements.models import Case as Agreement
 
 
 def ledger_view(request):

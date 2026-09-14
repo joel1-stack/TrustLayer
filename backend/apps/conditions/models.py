@@ -18,7 +18,7 @@ class Condition(models.Model):
         SKIPPED = 'SKIPPED', 'Skipped'
     
     condition_id = models.CharField(max_length=24, unique=True, editable=False)
-    agreement = models.ForeignKey('agreements.Agreement', on_delete=models.CASCADE, related_name='conditions')
+    agreement = models.ForeignKey('agreements.Case', on_delete=models.CASCADE, related_name='conditions')
     condition_type = models.CharField(max_length=32, choices=Type.choices)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     label = models.CharField(max_length=255, help_text='Human-readable description')

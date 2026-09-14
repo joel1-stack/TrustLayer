@@ -1,3 +1,4 @@
+from celery import shared_task
 from django.utils import timezone
 from .models import Condition
 
@@ -87,3 +88,8 @@ class ConditionService:
             'held_expired': held_expired,
             'settled_locked': locked_settled,
         }
+
+
+@shared_task
+def check_condition_timeouts():
+    return ConditionService.check_timeouts()

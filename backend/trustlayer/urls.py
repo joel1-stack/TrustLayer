@@ -8,7 +8,8 @@ from django.db.models import Sum, Count
 from django.utils import timezone
 from apps.admin_dashboard.views.infrastructure import health_json, containers_json
 from apps.admin_dashboard.views.engines import engine_test, provider_test
-from apps.agreements.models import Agreement, AgreementParty
+from apps.core.marketplace import manifest_view
+from apps.agreements.models import Case as Agreement, CaseParty as AgreementParty
 from apps.ledger.models import LedgerEntry
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
@@ -17,7 +18,7 @@ def home(request):
     today = timezone.now().date()
     total_agreements = Agreement.objects.count()
     settled_today = Agreement.objects.filter(status='SETTLED', updated_at__date=today).count()
-    from apps.constants import STATUS_CATEGORIES
+    from apps.core.constants import STATUS_CATEGORIES
     terminal_states = [s for s, c in STATUS_CATEGORIES.items() if c == 'terminal']
     active = Agreement.objects.exclude(status__in=terminal_states).count()
     fees = LedgerEntry.objects.filter(
@@ -64,6 +65,10 @@ urlpatterns = [
     # Engine Test APIs (no auth required — designed for testing)
     path('api/engines/<str:engine_id>/test/', engine_test, name='api-engine-test'),
     path('api/engines/provider/<str:provider_id>/test/', provider_test, name='api-provider-test'),
+
+    # AT Marketplace (no auth)
+    path('health/', health_json, name='health'),
+    path('manifest/', manifest_view, name='manifest'),
 
     # Internal Health / Infrastructure (IP-whitelisted)
     path('internal/health/', health_json, name='internal-health'),

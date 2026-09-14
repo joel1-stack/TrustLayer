@@ -2,7 +2,7 @@
 Payment Provider Webhook Receiver.
 
 Direction 2: Payment Provider -> TrustLayer (Incoming)
-IntaSend/M-Pesa/Stripe POST here when a payment or payout completes.
+M-Pesa/Stripe POST here when a payment or payout completes.
 
 Always return 200 immediately. Process in background.
 """
@@ -15,18 +15,13 @@ from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from .models import WebhookEvent, PaymentTransaction
 from .services import PaymentService
+from .adapters.registry import get_adapter
 from apps.orchestration.services import Orchestrator
 from apps.state_machine.services import StateMachine
 from apps.notifications.services import NotificationService
 from apps.ledger.models import LedgerEntry
 
 logger = logging.getLogger(__name__)
-
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def intasend_webhook(request):
-    return _handle_webhook(request, 'intasend')
 
 
 @csrf_exempt
@@ -50,9 +45,7 @@ def _handle_webhook(request, provider):
     
     # Get provider-specific signature header
     signature = None
-    if provider == 'intasend':
-        signature = request.META.get('HTTP_X_INTASEND_SIGNATURE', '')
-    elif provider == 'stripe':
+    if provider == 'stripe':
         signature = request.META.get('HTTP_STRIPE_SIGNATURE', '')
     
     # Create webhook event record (but don't save yet - we'll save after verification)

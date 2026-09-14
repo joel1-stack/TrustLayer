@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.shortcuts import render
 from django.db.models import Sum, Count
 from django.utils import timezone
-from apps.agreements.models import Agreement
+from apps.agreements.models import Case as Agreement
 from apps.ledger.models import LedgerEntry
 from apps.settlements.models import Settlement
 

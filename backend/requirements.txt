@@ -1,15 +1,34 @@
+# === CORE FRAMEWORK ===
 Django>=4.2,<5.0
-djangorestframework
-drf-spectacular
-django-cors-headers
-psycopg2-binary
-redis
-django-redis
-celery
-django-celery-beat
-python-dotenv
-whitenoise
-gunicorn
-requests
-PyJWT>=2.8.0
-dj-database-url>=2.0
+djangorestframework>=3.15,<3.16
+python-dotenv>=1.0,<2.0
+
+# === DATABASE ===
+psycopg2-binary>=2.9,<3.0
+dj-database-url>=2.0,<3.0
+
+# === API INFRASTRUCTURE (CTO Stack) ===
+drf-spectacular>=0.27,<1.0
+djangorestframework-simplejwt>=5.3,<6.0
+django-filter>=24,<25
+
+# === ASYNC & QUEUEING ===
+celery>=5.4,<6.0
+redis>=5.0,<6.0
+django-redis>=5.0,<6.0
+django-celery-beat>=2.6,<3.0
+
+# === SECURITY & NETWORKING ===
+django-cors-headers>=4.4,<5.0
+cryptography>=42.0,<43.0
+PyJWT>=2.8,<3.0
+
+# === TRANSACTIONAL EMAIL (Resend) ===
+resend>=2.40,<3.0
+
+# === OUTGOING WEBHOOKS ===
+requests>=2.32,<3.0
+
+# === PRODUCTION SERVER ===
+gunicorn>=22.0,<23.0
+whitenoise>=6.7,<7.0

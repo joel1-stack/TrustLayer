@@ -6,7 +6,7 @@ class LedgerEntry(models.Model):
         CREDIT = 'CREDIT', 'Credit'
     
     entry_id = models.CharField(max_length=24, unique=True, editable=False)
-    agreement = models.ForeignKey('agreements.Agreement', on_delete=models.CASCADE, related_name='ledger_entries')
+    agreement = models.ForeignKey('agreements.Case', on_delete=models.CASCADE, related_name='ledger_entries')
     entry_type = models.CharField(max_length=6, choices=EntryType.choices)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=3, default='KES')
@@ -17,7 +17,7 @@ class LedgerEntry(models.Model):
     metadata = models.JSONField(default=dict, blank=True)
     
     # Who
-    party = models.ForeignKey('agreements.AgreementParty', on_delete=models.SET_NULL, null=True, blank=True, related_name='ledger_entries')
+    party = models.ForeignKey('agreements.CaseParty', on_delete=models.SET_NULL, null=True, blank=True, related_name='ledger_entries')
     
     # SHA-256 Chain (immutability)
     previous_hash = models.CharField(max_length=64, blank=True, default='', help_text='SHA-256 of previous ledger entry')
@@ -53,7 +53,7 @@ class LedgerEntry(models.Model):
 
 class LedgerAccount(models.Model):
     """Running balance for each agreement-party combination."""
-    party = models.OneToOneField('agreements.AgreementParty', on_delete=models.CASCADE, related_name='ledger_account')
+    party = models.OneToOneField('agreements.CaseParty', on_delete=models.CASCADE, related_name='ledger_account')
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     currency = models.CharField(max_length=3, default='KES')
     updated_at = models.DateTimeField(auto_now=True)

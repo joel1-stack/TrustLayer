@@ -2,8 +2,8 @@ from django.db import models
 
 class PaymentTransaction(models.Model):
     transaction_id = models.CharField(max_length=24, unique=True, editable=False)
-    agreement = models.ForeignKey('agreements.Agreement', on_delete=models.CASCADE, related_name='payment_transactions')
-    provider = models.CharField(max_length=32, help_text='intasend, mpesa, stripe')
+    agreement = models.ForeignKey('agreements.Case', on_delete=models.CASCADE, related_name='payment_transactions')
+    provider = models.CharField(max_length=32, help_text='mpesa, stripe, bank_transfer')
     provider_tx_id = models.CharField(max_length=128, blank=True, default='')
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=3, default='KES')

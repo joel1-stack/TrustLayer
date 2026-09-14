@@ -3,7 +3,7 @@ from datetime import datetime
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Sum
-from apps.agreements.models import Agreement, AgreementParty
+from apps.agreements.models import Case as Agreement, CaseParty as AgreementParty
 from apps.ledger.models import LedgerEntry
 from apps.settlements.models import Settlement
 from apps.state_machine.models import StateTransition

@@ -20,7 +20,7 @@ class NotificationEvent(models.Model):
         AGREEMENT_CANCELLED = 'agreement.cancelled', 'Agreement Cancelled'
     
     event_id = models.CharField(max_length=24, unique=True, editable=False)
-    agreement = models.ForeignKey('agreements.Agreement', on_delete=models.CASCADE, related_name='notifications')
+    agreement = models.ForeignKey('agreements.Case', on_delete=models.CASCADE, related_name='notifications')
     event = models.CharField(max_length=32, choices=Event.choices)
     channel = models.CharField(max_length=32, default='log', help_text='sms, email, webhook, push, log')
     recipient = models.CharField(max_length=255, blank=True, default='')

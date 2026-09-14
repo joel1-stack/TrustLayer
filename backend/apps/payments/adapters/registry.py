@@ -1,4 +1,3 @@
-from .intasend import IntaSendAdapter
 from .mpesa import MpesaAdapter
 from .stripe import StripeAdapter
 from .bank_transfer import BankTransferAdapter
@@ -18,7 +17,6 @@ def list_providers():
     return list(_adapter_registry.keys())
 
 # Register built-in adapters
-register_adapter(IntaSendAdapter())
 register_adapter(MpesaAdapter())
 register_adapter(StripeAdapter())
 register_adapter(BankTransferAdapter())

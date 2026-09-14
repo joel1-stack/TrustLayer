@@ -1,8 +1,8 @@
 from django.db import models
-from apps.constants import STATUS_CODES, STATUS_CATEGORIES
+from apps.core.constants import STATUS_CODES, STATUS_CATEGORIES
 
 
-class Agreement(models.Model):
+class Case(models.Model):
     class Status(models.TextChoices):
         CREATED = 'CREATED', 'Created'
         PENDING_KYC = 'PENDING_KYC', 'Pending KYC'
@@ -26,12 +26,11 @@ class Agreement(models.Model):
         FAILED = 'FAILED', 'Failed'
         RETRYING = 'RETRYING', 'Retrying'
         FAILED_PERMANENT = 'FAILED_PERMANENT', 'Failed Permanent'
-        # Legacy states — still valid for existing records
         PAYMENT_PENDING = 'PAYMENT_PENDING', 'Payment Pending (legacy)'
         COLLECTED = 'COLLECTED', 'Collected (legacy)'
         WAITING = 'WAITING', 'Waiting (legacy)'
 
-    agreement_id = models.CharField(max_length=24, unique=True, editable=False)
+    case_id = models.CharField(max_length=24, unique=True, editable=False, db_column='agreement_id')
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.CREATED)
     status_code_value = models.IntegerField(default=10000, db_index=True, help_text='Numeric status code for fast range queries')
     title = models.CharField(max_length=255)
@@ -53,9 +52,9 @@ class Agreement(models.Model):
         ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
-        if not self.agreement_id:
+        if not self.case_id:
             import secrets, string
-            self.agreement_id = 'AGR' + ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+            self.case_id = 'CASE' + ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(16))
         if not self.status_code_value or self.status_code_value == 10000:
             self.status_code_value = STATUS_CODES.get(self.status, 10000)
         super().save(*args, **kwargs)
@@ -74,11 +73,11 @@ class Agreement(models.Model):
         return f"{self.status} ({code})" if code else self.status
 
     def __str__(self):
-        return f"{self.agreement_id} [{self.status}] {self.title}"
+        return f"{self.case_id} [{self.status}] {self.title}"
 
 
-class AgreementParty(models.Model):
-    agreement = models.ForeignKey(Agreement, on_delete=models.CASCADE, related_name='parties')
+class CaseParty(models.Model):
+    agreement = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='parties')
     role = models.CharField(max_length=32, db_index=True,
         help_text='Party role: BUYER, SELLER, VENDOR, DELIVERY_AGENT, MARKETPLACE, CUSTOMER, PLATFORM, PAYER, PAYEE, PARTNER, AGENT')
     identifier = models.CharField(max_length=128, help_text='Email, phone, or org ID')
@@ -93,4 +92,4 @@ class AgreementParty(models.Model):
         db_table = 'agreement_parties'
 
     def __str__(self):
-        return f"{self.agreement.agreement_id} {self.role} {self.name}"
+        return f"{self.agreement.case_id} {self.role} {self.name}"

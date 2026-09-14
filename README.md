@@ -5,14 +5,13 @@
 <h1 align="center">TrustLayer</h1>
 
 <p align="center">
-  <b>Trust orchestration platform for African commerce.</b><br>
+  <b>System of Action for Enterprise Operations.</b><br>
   6 interoperable engines — Agreement, State Machine, Condition, Ledger, Settlement, Notification.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.12-2ea043?logo=python">
   <img src="https://img.shields.io/badge/django-4.2-0c4b33?logo=django">
-  <img src="https://img.shields.io/badge/IntaSend-integrated-0066cc">
   <img src="https://img.shields.io/badge/M--Pesa-integrated-00a859">
   <img src="https://img.shields.io/badge/Stripe-integrated-6772e5">
 </p>
@@ -21,7 +20,7 @@
 
 ## What it solves
 
-African commerce runs on trust. Buyers pay, sellers deliver — but when something goes wrong, there's no middle layer. TrustLayer is that layer. It holds payment instructions in a conditional state machine, releases only when conditions are met, and settles through M-Pesa, IntaSend, or Stripe.
+African commerce runs on trust. Buyers pay, sellers deliver — but when something goes wrong, there's no middle layer. TrustLayer is that layer. It holds payment instructions in a conditional state machine, releases only when conditions are met, and settles through M-Pesa or Stripe.
 
 Built for SACCOS, hospitals, e-commerce platforms, land companies, and any marketplace that needs programmable trust.
 
@@ -39,13 +38,13 @@ Built for SACCOS, hospitals, e-commerce platforms, land companies, and any marke
               └───────┬───────┘     │      │      │      │      │              │
          ┌────────────┴──────────────────────────────────────┴──────────────┐
          │              Payment Provider Adapters (pluggable)               │
-         │    IntaSend    │    M-Pesa (Daraja)    │    Stripe    │    ...    │
+         │    M-Pesa (Daraja)    │    Stripe    │    ...    │
          └──────────────────────────────────────────────────────────────────┘
 ```
 
 **Two webhook directions:**
 1. **TrustLayer → Developer**: Outgoing POST to `agreement.developer_webhook_url` for lifecycle events
-2. **Provider → TrustLayer**: Incoming POST to `/webhooks/{intasend,mpesa,stripe}/`
+2. **Provider → TrustLayer**: Incoming POST to `/webhooks/{mpesa,stripe}/`
 
 ---
 
@@ -59,7 +58,7 @@ Built for SACCOS, hospitals, e-commerce platforms, land companies, and any marke
 | **Settlement** | POST `/api/settlements/<agreement_id>/trigger/` — trigger |
 | **Notification** | GET `/api/notifications/<agreement_id>/` — list events |
 | **Payments** | POST `/api/payments/link/` — generate payment link |
-| **Webhooks** | POST `/webhooks/intasend/`, `/webhooks/mpesa/`, `/webhooks/stripe/` |
+| **Webhooks** | POST `/webhooks/mpesa/`, `/webhooks/stripe/` |
 
 ---
 

@@ -99,7 +99,7 @@
       </div>
       {% for key, val in provider.settings.items %}
       <div class="config-row">
-        <span class="config-key">{{ key|cut:"PLATFORM_"|cut:"INTASEND_"|cut:"MPESA_"|title }}</span>
+        <span class="config-key">{{ key|cut:"PLATFORM_"|cut:"MPESA_"|title }}</span>
         <span>{{ val|truncatechars:20 }}</span>
       </div>
       {% endfor %}

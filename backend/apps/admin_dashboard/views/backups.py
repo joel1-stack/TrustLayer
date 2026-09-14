@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Count
 from ..models import BackupRecord, AuditLogEntry
-from apps.agreements.models import Agreement
+from apps.agreements.models import Case as Agreement
 from apps.settlements.models import Settlement
 from apps.ledger.models import LedgerEntry
 
