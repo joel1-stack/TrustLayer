@@ -13,7 +13,6 @@
       --accent-hover: #E04418;
       --accent-light: #FFF4F0;
       --dark: #111111;
-      --dark2: #1a1a1a;
       --text: #111111;
       --text-secondary: #555555;
       --text-muted: #999999;
@@ -21,12 +20,11 @@
       --bg-alt: #F8F8F8;
       --border: #EEEEEE;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
 
     /* ===== NAV ===== */
-    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
     nav .inner { max-width: 1200px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
     nav .brand { font-size: 20px; font-weight: 900; color: var(--text); text-decoration: none; letter-spacing: -0.5px; }
     nav .brand span { color: var(--accent); }
@@ -37,7 +35,7 @@
     nav .links .cta:hover { background: var(--accent-hover); }
 
     /* ===== HERO ===== */
-    .hero { padding: 140px 32px 80px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; min-height: 100vh; }
+    .hero { padding: 140px 32px 60px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; min-height: 100vh; }
     .hero-text .badge { display: inline-flex; align-items: center; gap: 8px; background: var(--accent-light); color: var(--accent); padding: 8px 18px; border-radius: 100px; font-size: 13px; font-weight: 700; margin-bottom: 28px; border: 1px solid rgba(255,85,34,0.15); }
     .hero-text .badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -51,31 +49,139 @@
     .hero-text .btns .secondary { background: var(--bg-alt); color: var(--text); border: 1px solid var(--border); }
     .hero-text .btns .secondary:hover { background: var(--border); }
 
-    /* ===== PHONE MOCKUP ===== */
-    .phone-wrap { display: flex; justify-content: center; align-items: center; }
-    .phone { width: 280px; height: 560px; background: #111; border-radius: 40px; padding: 12px; box-shadow: 0 40px 80px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05); position: relative; }
-    .phone-notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #111; border-radius: 0 0 16px 16px; z-index: 10; }
-    .phone-screen { width: 100%; height: 100%; background: #fff; border-radius: 30px; overflow: hidden; position: relative; }
-    .phone-statusbar { height: 44px; background: var(--accent); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; }
-    .phone-statusbar span { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.9); letter-spacing: 1px; }
-    .phone-content { padding: 16px; }
-    .phone-content .greeting { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
-    .phone-content .name { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 16px; }
-    .phone-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-    .phone-stat { background: var(--bg-alt); border-radius: 12px; padding: 12px; }
-    .phone-stat .val { font-size: 18px; font-weight: 800; color: var(--text); }
-    .phone-stat .lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    /* ===== REALISTIC 3D PHONE ===== */
+    .phone-wrap { display: flex; justify-content: center; align-items: center; perspective: 1200px; }
+    .phone-scene { width: 300px; height: 620px; position: relative; transform-style: preserve-3d; animation: phoneRotate 8s ease-in-out infinite; }
+    @keyframes phoneRotate {
+      0%   { transform: rotateY(-12deg) rotateX(5deg) rotateZ(-1deg); }
+      25%  { transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg); }
+      50%  { transform: rotateY(12deg) rotateX(-3deg) rotateZ(1deg); }
+      75%  { transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg); }
+      100% { transform: rotateY(-12deg) rotateX(5deg) rotateZ(-1deg); }
+    }
+    .phone-scene:hover { animation-play-state: paused; }
+
+    /* Phone body - realistic proportions */
+    .phone-body {
+      width: 300px; height: 620px; position: absolute; top: 0; left: 0;
+      background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+      border-radius: 52px; padding: 8px;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.08),
+        0 0 0 1px rgba(0,0,0,0.3),
+        0 20px 60px rgba(0,0,0,0.3),
+        0 40px 100px rgba(0,0,0,0.15),
+        -5px 0 15px rgba(0,0,0,0.1) inset,
+        5px 0 15px rgba(255,255,255,0.02) inset;
+      transform-style: preserve-3d;
+    }
+
+    /* Side buttons */
+    .phone-body::before {
+      content: '';
+      position: absolute;
+      right: -3px; top: 140px;
+      width: 4px; height: 40px;
+      background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
+      border-radius: 0 2px 2px 0;
+      box-shadow: 0 50px 0 0 #2a2a2a, 0 90px 0 0 #2a2a2a;
+    }
+    .phone-body::after {
+      content: '';
+      position: absolute;
+      left: -3px; top: 120px;
+      width: 4px; height: 60px;
+      background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
+      border-radius: 2px 0 0 2px;
+    }
+
+    /* Phone screen bezel */
+    .phone-bezel {
+      width: 100%; height: 100%;
+      background: #000;
+      border-radius: 46px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Dynamic Island */
+    .dynamic-island {
+      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      width: 100px; height: 28px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 20;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .dynamic-island::before {
+      content: '';
+      width: 10px; height: 10px;
+      background: radial-gradient(circle, #1a1a2e 40%, #000 60%);
+      border-radius: 50%;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    /* Screen content */
+    .phone-screen {
+      width: 100%; height: 100%;
+      background: linear-gradient(180deg, var(--accent) 0%, var(--accent) 8%, #fff 8%);
+      border-radius: 46px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Screen glass reflection */
+    .phone-screen::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.04) 100%);
+      pointer-events: none; z-index: 18;
+    }
+
+    .phone-statusbar {
+      height: 52px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px;
+    }
+    .phone-statusbar .time { font-size: 13px; font-weight: 700; color: #fff; }
+    .phone-statusbar .icons { position: absolute; right: 28px; bottom: 10px; display: flex; gap: 5px; }
+    .phone-statusbar .icons span { font-size: 11px; color: rgba(255,255,255,0.9); }
+
+    .phone-ui { padding: 16px 18px; }
+    .phone-ui .greeting { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
+    .phone-ui .name { font-size: 20px; font-weight: 900; color: var(--text); margin-bottom: 16px; letter-spacing: -0.5px; }
+
+    .phone-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .phone-stat { background: var(--bg-alt); border-radius: 14px; padding: 14px; }
+    .phone-stat .val { font-size: 20px; font-weight: 900; color: var(--text); }
+    .phone-stat .lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
     .phone-stat.accent { background: var(--accent); }
     .phone-stat.accent .val { color: #fff; }
     .phone-stat.accent .lbl { color: rgba(255,255,255,0.8); }
-    .phone-card { background: var(--bg-alt); border-radius: 12px; padding: 12px; margin-bottom: 8px; }
-    .phone-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .phone-card-header .title { font-size: 11px; font-weight: 700; color: var(--text); }
-    .phone-card-header .badge { font-size: 8px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: var(--accent-light); color: var(--accent); }
+
+    .phone-card { background: var(--bg-alt); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+    .phone-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .phone-card-header .title { font-size: 12px; font-weight: 800; color: var(--text); }
+    .phone-card-header .badge { font-size: 9px; font-weight: 800; padding: 3px 10px; border-radius: 8px; background: var(--accent-light); color: var(--accent); }
     .phone-card-header .badge.green { background: #dcfce7; color: #166534; }
-    .phone-card-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-top: 1px solid var(--border); }
-    .phone-card-item .left { font-size: 10px; color: var(--text-secondary); }
-    .phone-card-item .right { font-size: 10px; font-weight: 600; color: var(--text); }
+    .phone-card-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); }
+    .phone-card-item .left { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+    .phone-card-item .right { font-size: 11px; font-weight: 700; }
+
+    /* Home indicator */
+    .home-indicator {
+      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 5px;
+      background: #ccc; border-radius: 3px;
+      z-index: 20;
+    }
+
+    /* Floating glow orbs */
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.35; z-index: -1; }
+    .orb-1 { width: 250px; height: 250px; background: var(--accent); top: -60px; right: -80px; animation: orbFloat1 10s ease-in-out infinite; }
+    .orb-2 { width: 180px; height: 180px; background: #8b5cf6; bottom: -40px; left: -60px; animation: orbFloat2 12s ease-in-out infinite; }
+    .orb-3 { width: 120px; height: 120px; background: #f59e0b; top: 50%; left: -40px; animation: orbFloat3 9s ease-in-out infinite; }
+    @keyframes orbFloat1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-30px, 25px) scale(1.1); } }
+    @keyframes orbFloat2 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(20px, -20px) scale(1.05); } }
+    @keyframes orbFloat3 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(15px, -10px); } }
 
     /* ===== STATS ===== */
     .stats { padding: 60px 32px; background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
@@ -89,7 +195,7 @@
     .section-label { font-size: 12px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; text-align: center; }
     .section-title { font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 900; text-align: center; letter-spacing: -1.5px; margin-bottom: 64px; }
     .flow-steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-    .flow-step { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 28px 16px; text-align: center; transition: all 0.3s; position: relative; }
+    .flow-step { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 28px 16px; text-align: center; transition: all 0.3s; }
     .flow-step:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(255,85,34,0.08); }
     .flow-step .num { width: 32px; height: 32px; background: var(--accent); color: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; margin: 0 auto 14px; }
     .flow-step h3 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
@@ -128,32 +234,55 @@
     .cta-section .btns .secondary { background: transparent; color: #fff; border: 1px solid #333; }
     .cta-section .btns .secondary:hover { border-color: #555; }
 
-    /* ===== FOOTER ===== */
-    footer { padding: 40px 32px; border-top: 1px solid var(--border); background: var(--bg); }
-    footer .inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-    footer .brand { font-size: 16px; font-weight: 900; color: var(--text); }
-    footer .brand span { color: var(--accent); }
-    footer .copy { font-size: 13px; color: var(--text-muted); }
-    footer .links { display: flex; gap: 24px; }
-    footer .links a { font-size: 13px; color: var(--text-muted); text-decoration: none; }
-    footer .links a:hover { color: var(--text); }
+    /* ===== CURVED FOOTER ===== */
+    .footer-wave {
+      position: relative; background: var(--dark); padding-top: 80px;
+    }
+    .footer-wave::before {
+      content: '';
+      position: absolute; top: -60px; left: 0; right: 0; height: 80px;
+      background: var(--bg);
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+    .footer-wave .footer-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 32px 40px;
+    }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 60px; }
+    .footer-brand .logo { font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 12px; }
+    .footer-brand .logo span { color: var(--accent); }
+    .footer-brand p { font-size: 14px; color: #666; line-height: 1.7; max-width: 280px; }
+    .footer-col h4 { font-size: 12px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; }
+    .footer-col a { display: block; font-size: 14px; color: #666; text-decoration: none; padding: 4px 0; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--accent); }
+    .footer-bottom { border-top: 1px solid #222; padding-top: 24px; display: flex; align-items: center; justify-content: space-between; }
+    .footer-bottom .copy { font-size: 13px; color: #555; }
+    .footer-bottom .socials { display: flex; gap: 16px; }
+    .footer-bottom .socials a { width: 36px; height: 36px; border-radius: 10px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; color: #666; text-decoration: none; font-size: 14px; transition: all 0.2s; border: 1px solid #222; }
+    .footer-bottom .socials a:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 900px) {
       .hero { grid-template-columns: 1fr; text-align: center; padding-top: 120px; min-height: auto; }
       .hero-text p { margin: 0 auto 40px; }
       .hero-text .btns { justify-content: center; }
-      .phone-wrap { margin-top: 40px; }
+      .phone-wrap { margin-top: 40px; perspective: 900px; }
       .flow-steps { grid-template-columns: repeat(3, 1fr); }
       .int-grid { grid-template-columns: 1fr; }
       .engines-grid { grid-template-columns: 1fr; }
       .stats .inner { gap: 32px; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
       nav .links { gap: 16px; }
     }
     @media (max-width: 600px) {
       .flow-steps { grid-template-columns: 1fr 1fr; }
       .hero-text .btns { flex-direction: column; align-items: center; }
-      .phone { width: 240px; height: 480px; }
+      .phone-scene { width: 260px; height: 540px; }
+      .phone-body { width: 260px; height: 540px; border-radius: 46px; }
+      .phone-bezel { border-radius: 40px; }
+      .phone-screen { border-radius: 40px; }
+      .dynamic-island { width: 85px; height: 24px; }
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
     }
   </style>
 </head>
@@ -181,52 +310,64 @@
       </div>
     </div>
     <div class="phone-wrap">
-      <div class="phone">
-        <div class="phone-notch"></div>
-        <div class="phone-screen">
-          <div class="phone-statusbar">
-            <span>TRUSTLAYER</span>
-          </div>
-          <div class="phone-content">
-            <div class="greeting">Good morning</div>
-            <div class="name">Operations</div>
-            <div class="phone-stat-row">
-              <div class="phone-stat accent">
-                <div class="val">{{ total_cases }}</div>
-                <div class="lbl">Cases</div>
+      <div class="phone-scene">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="phone-body">
+          <div class="phone-bezel">
+            <div class="phone-screen">
+              <div class="dynamic-island"></div>
+              <div class="phone-statusbar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                  <span>&#9679;&#9679;&#9679;&#9679;</span>
+                  <span>&#128267;</span>
+                </div>
               </div>
-              <div class="phone-stat">
-                <div class="val">{{ active_cases }}</div>
-                <div class="lbl">Active</div>
+              <div class="phone-ui">
+                <div class="greeting">Good morning</div>
+                <div class="name">Operations</div>
+                <div class="phone-stat-row">
+                  <div class="phone-stat accent">
+                    <div class="val">{{ total_cases }}</div>
+                    <div class="lbl">Cases</div>
+                  </div>
+                  <div class="phone-stat">
+                    <div class="val">{{ active_cases }}</div>
+                    <div class="lbl">Active</div>
+                  </div>
+                </div>
+                <div class="phone-stat-row">
+                  <div class="phone-stat">
+                    <div class="val">{{ settled_today }}</div>
+                    <div class="lbl">Resolved</div>
+                  </div>
+                  <div class="phone-stat">
+                    <div class="val" style="font-size:15px;">KES {{ platform_fees|floatformat:0 }}</div>
+                    <div class="lbl">Fees</div>
+                  </div>
+                </div>
+                <div class="phone-card">
+                  <div class="phone-card-header">
+                    <span class="title">Recent Cases</span>
+                    <span class="badge green">Live</span>
+                  </div>
+                  <div class="phone-card-item">
+                    <span class="left">Data failure - Nairobi</span>
+                    <span class="right" style="color:var(--accent);">Active</span>
+                  </div>
+                  <div class="phone-card-item">
+                    <span class="left">Billing dispute - Mombasa</span>
+                    <span class="right" style="color:#16a34a;">Resolved</span>
+                  </div>
+                  <div class="phone-card-item">
+                    <span class="left">SIM swap fraud</span>
+                    <span class="right" style="color:#ca8a04;">Pending</span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="phone-stat-row">
-              <div class="phone-stat">
-                <div class="val">{{ settled_today }}</div>
-                <div class="lbl">Resolved</div>
-              </div>
-              <div class="phone-stat">
-                <div class="val" style="font-size:14px;">KES {{ platform_fees|floatformat:0 }}</div>
-                <div class="lbl">Fees</div>
-              </div>
-            </div>
-            <div class="phone-card">
-              <div class="phone-card-header">
-                <span class="title">Recent Cases</span>
-                <span class="badge green">Live</span>
-              </div>
-              <div class="phone-card-item">
-                <span class="left">Data failure - Nairobi</span>
-                <span class="right" style="color:var(--accent);">Active</span>
-              </div>
-              <div class="phone-card-item">
-                <span class="left">Billing dispute - Mombasa</span>
-                <span class="right" style="color:#16a34a;">Resolved</span>
-              </div>
-              <div class="phone-card-item">
-                <span class="left">SIM swap fraud</span>
-                <span class="right" style="color:#ca8a04;">Pending</span>
-              </div>
+              <div class="home-indicator"></div>
             </div>
           </div>
         </div>
@@ -247,36 +388,12 @@
     <div class="section-label">How It Works</div>
     <h2 class="section-title">One case. One verified outcome.</h2>
     <div class="flow-steps">
-      <div class="flow-step">
-        <div class="num">1</div>
-        <h3>Voice / SMS / API</h3>
-        <p>Customer reports an issue through any channel</p>
-      </div>
-      <div class="flow-step">
-        <div class="num">2</div>
-        <h3>Context</h3>
-        <p>Assembles subscriber, billing, and network data</p>
-      </div>
-      <div class="flow-step">
-        <div class="num">3</div>
-        <h3>Diagnosis</h3>
-        <p>Identifies root cause from assembled context</p>
-      </div>
-      <div class="flow-step">
-        <div class="num">4</div>
-        <h3>Policy</h3>
-        <p>Authorizes actions based on rules and risk</p>
-      </div>
-      <div class="flow-step">
-        <div class="num">5</div>
-        <h3>Action</h3>
-        <p>Executes remediation across enterprise systems</p>
-      </div>
-      <div class="flow-step">
-        <div class="num">6</div>
-        <h3>Verification</h3>
-        <p>Confirms recovery and logs immutable truth</p>
-      </div>
+      <div class="flow-step"><div class="num">1</div><h3>Voice / SMS / API</h3><p>Customer reports an issue through any channel</p></div>
+      <div class="flow-step"><div class="num">2</div><h3>Context</h3><p>Assembles subscriber, billing, and network data</p></div>
+      <div class="flow-step"><div class="num">3</div><h3>Diagnosis</h3><p>Identifies root cause from assembled context</p></div>
+      <div class="flow-step"><div class="num">4</div><h3>Policy</h3><p>Authorizes actions based on rules and risk</p></div>
+      <div class="flow-step"><div class="num">5</div><h3>Action</h3><p>Executes remediation across enterprise systems</p></div>
+      <div class="flow-step"><div class="num">6</div><h3>Verification</h3><p>Confirms recovery and logs immutable truth</p></div>
     </div>
   </section>
 
@@ -286,36 +403,12 @@
       <h2 class="section-title">Built for real operator systems</h2>
       <p class="sub">Accessible APIs now, TM Forum and GSMA adapters designed from day one.</p>
       <div class="int-grid">
-        <div class="int-card">
-          <div class="tag live">Live</div>
-          <h3>Safaricom Daraja</h3>
-          <p>M-Pesa payment processing, STK push, transaction status, reconciliation.</p>
-        </div>
-        <div class="int-card">
-          <div class="tag live">Live</div>
-          <h3>OpenAI Realtime</h3>
-          <p>Voice-to-voice customer interaction, intent classification, natural language.</p>
-        </div>
-        <div class="int-card">
-          <div class="tag live">Live</div>
-          <h3>Africa's Talking</h3>
-          <p>SMS notifications, USSD menus, voice callbacks for case updates.</p>
-        </div>
-        <div class="int-card">
-          <div class="tag soon">Design Phase</div>
-          <h3>TM Forum Open APIs</h3>
-          <p>TMF629 Customer, TMF678 Billing, TMF638 Service, TMF656 Problem.</p>
-        </div>
-        <div class="int-card">
-          <div class="tag soon">Design Phase</div>
-          <h3>GSMA Open Gateway</h3>
-          <p>Number verification, SIM swap, device location, quality of demand.</p>
-        </div>
-        <div class="int-card">
-          <div class="tag soon">Design Phase</div>
-          <h3>Firebase FCM</h3>
-          <p>Push notifications to agent devices for approvals and case assignments.</p>
-        </div>
+        <div class="int-card"><div class="tag live">Live</div><h3>Safaricom Daraja</h3><p>M-Pesa payment processing, STK push, transaction status, reconciliation.</p></div>
+        <div class="int-card"><div class="tag live">Live</div><h3>OpenAI Realtime</h3><p>Voice-to-voice customer interaction, intent classification, natural language.</p></div>
+        <div class="int-card"><div class="tag live">Live</div><h3>Africa's Talking</h3><p>SMS notifications, USSD menus, voice callbacks for case updates.</p></div>
+        <div class="int-card"><div class="tag soon">Design Phase</div><h3>TM Forum Open APIs</h3><p>TMF629 Customer, TMF678 Billing, TMF638 Service, TMF656 Problem.</p></div>
+        <div class="int-card"><div class="tag soon">Design Phase</div><h3>GSMA Open Gateway</h3><p>Number verification, SIM swap, device location, quality of demand.</p></div>
+        <div class="int-card"><div class="tag soon">Design Phase</div><h3>Firebase FCM</h3><p>Push notifications to agent devices for approvals and case assignments.</p></div>
       </div>
     </div>
   </section>
@@ -324,36 +417,12 @@
     <div class="section-label">Core Engines</div>
     <h2 class="section-title">Modular. Testable. Replaceable.</h2>
     <div class="engines-grid">
-      <div class="engine-card">
-        <div class="icon">🔗</div>
-        <h3>Context Engine</h3>
-        <p>Assembles operational context from enterprise adapters — subscriber, billing, network, device.</p>
-      </div>
-      <div class="engine-card">
-        <div class="icon">🔍</div>
-        <h3>Diagnosis Engine</h3>
-        <p>Identifies root cause from assembled context using rule-based and ML-powered analysis.</p>
-      </div>
-      <div class="engine-card">
-        <div class="icon">⚖️</div>
-        <h3>Policy Engine</h3>
-        <p>Authorizes actions based on rules, risk level, and clearance. AI does not have authority.</p>
-      </div>
-      <div class="engine-card">
-        <div class="icon">⚡</div>
-        <h3>Action Engine</h3>
-        <p>Executes authorized remediation across enterprise systems with full audit trail.</p>
-      </div>
-      <div class="engine-card">
-        <div class="icon">✅</div>
-        <h3>Verification Engine</h3>
-        <p>Confirms service recovery and validates that actions produced the expected outcome.</p>
-      </div>
-      <div class="engine-card">
-        <div class="icon">📋</div>
-        <h3>Truth Engine</h3>
-        <p>Immutable audit trail with SHA-256 chains. Every action and outcome recorded.</p>
-      </div>
+      <div class="engine-card"><div class="icon">🔗</div><h3>Context Engine</h3><p>Assembles operational context from enterprise adapters — subscriber, billing, network, device.</p></div>
+      <div class="engine-card"><div class="icon">🔍</div><h3>Diagnosis Engine</h3><p>Identifies root cause from assembled context using rule-based and ML-powered analysis.</p></div>
+      <div class="engine-card"><div class="icon">⚖️</div><h3>Policy Engine</h3><p>Authorizes actions based on rules, risk level, and clearance. AI does not have authority.</p></div>
+      <div class="engine-card"><div class="icon">⚡</div><h3>Action Engine</h3><p>Executes authorized remediation across enterprise systems with full audit trail.</p></div>
+      <div class="engine-card"><div class="icon">✅</div><h3>Verification Engine</h3><p>Confirms service recovery and validates that actions produced the expected outcome.</p></div>
+      <div class="engine-card"><div class="icon">📋</div><h3>Truth Engine</h3><p>Immutable audit trail with SHA-256 chains. Every action and outcome recorded.</p></div>
     </div>
   </section>
 
@@ -366,16 +435,47 @@
     </div>
   </section>
 
-  <footer>
-    <div class="inner">
-      <div class="brand"><span>Trust</span>Layer</div>
-      <div class="copy">&copy; 2026 TrustLayer. Built in Kenya.</div>
-      <div class="links">
-        <a href="/api/docs/">Docs</a>
-        <a href="/admin/dashboard/">Dashboard</a>
+  <div class="footer-wave">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo"><span>Trust</span>Layer</div>
+          <p>System of Action for enterprise operations. Assemble context, diagnose problems, execute actions, verify outcomes.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="/api/docs/">API Docs</a>
+          <a href="/api/docs/">Swagger</a>
+          <a href="/admin/dashboard/">Dashboard</a>
+          <a href="/admin/constellation/">Constellation</a>
+        </div>
+        <div class="footer-col">
+          <h4>Engines</h4>
+          <a href="#">Context</a>
+          <a href="#">Diagnosis</a>
+          <a href="#">Policy</a>
+          <a href="#">Action</a>
+          <a href="#">Verification</a>
+        </div>
+        <div class="footer-col">
+          <h4>Integrations</h4>
+          <a href="#">Safaricom Daraja</a>
+          <a href="#">OpenAI Realtime</a>
+          <a href="#">Africa's Talking</a>
+          <a href="#">TM Forum</a>
+          <a href="#">GSMA Open Gateway</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="copy">&copy; 2026 TrustLayer. Built in Kenya.</div>
+        <div class="socials">
+          <a href="#" title="GitHub">&#9879;</a>
+          <a href="#" title="Twitter">&#120143;</a>
+          <a href="#" title="LinkedIn">&#105;</a>
+        </div>
       </div>
     </div>
-  </footer>
+  </div>
 
 </body>
 </html>
