@@ -206,6 +206,20 @@ tr:last-child td { border-bottom: none; }
 .login-card h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 4px; color: var(--text-primary); }
 .login-card p { color: var(--text-muted); margin-bottom: 28px; font-size: 13px; }
 
+/* Login Footer */
+.login-footer {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  z-index: 2; text-align: center; padding: 24px 32px;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.6));
+}
+.login-footer-inner { max-width: 600px; margin: 0 auto; }
+.login-footer-brand { font-family: 'DM Serif Display', serif; font-size: 18px; color: #fff; margin-bottom: 8px; }
+.login-footer-brand span { color: var(--accent); }
+.login-footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 8px; }
+.login-footer-links a { font-size: 12px; color: #888; text-decoration: none; transition: color 0.2s; }
+.login-footer-links a:hover { color: var(--accent); }
+.login-footer-copy { font-size: 11px; color: #555; }
+
 /* Footer */
 .footer-curved {
   margin-top: 40px;

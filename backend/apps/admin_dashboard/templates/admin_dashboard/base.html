@@ -118,6 +118,17 @@
   <div class="login-container">
     <div class="login-overlay"></div>
     {% block login_content %}{% endblock %}
+    <div class="login-footer">
+      <div class="login-footer-inner">
+        <div class="login-footer-brand"><span>Trust</span>Layer</div>
+        <div class="login-footer-links">
+          <a href="/">Home</a>
+          <a href="/admin/docs/">API Docs</a>
+          <a href="/admin/dashboard/">Dashboard</a>
+        </div>
+        <div class="login-footer-copy">&copy; 2026 TrustLayer. Built in Kenya.</div>
+      </div>
+    </div>
   </div>
   {% endif %}
   <script src="{% static 'admin_dashboard/js/admin.js' %}"></script>
