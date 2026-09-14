@@ -4,14 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TrustLayer — System of Action for Enterprise Operations</title>
+  <title>TrustLayer — System of Action</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #fff; color: #0f172a; line-height: 1.6; }
+    body { font-family: 'Inter', sans-serif; background: #fff; color: #0f172a; line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
 
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; width: 100%; }
 
     /* Nav */
     nav { padding: 20px 0; border-bottom: 1px solid #f1f5f9; }
@@ -19,17 +19,16 @@
     nav .brand { font-size: 18px; font-weight: 700; color: #0f172a; text-decoration: none; }
     nav .brand span { color: #3b82f6; }
     nav .links { display: flex; gap: 24px; align-items: center; }
-    nav .links a { font-size: 14px; color: #64748b; text-decoration: none; transition: color 0.2s; }
+    nav .links a { font-size: 14px; color: #64748b; text-decoration: none; }
     nav .links a:hover { color: #0f172a; }
     nav .links .cta { background: #0f172a; color: #fff; padding: 8px 20px; border-radius: 8px; }
-    nav .links .cta:hover { background: #1e293b; }
 
     /* Hero */
-    .hero { padding: 100px 0 80px; text-align: center; }
+    .hero { padding: 120px 0 80px; text-align: center; flex: 1; }
     .hero .badge { display: inline-block; background: #eff6ff; color: #3b82f6; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; margin-bottom: 24px; }
     .hero h1 { font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 700; color: #0f172a; letter-spacing: -1.5px; margin-bottom: 16px; }
     .hero h1 span { background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .hero p { font-size: 18px; color: #64748b; max-width: 600px; margin: 0 auto 32px; }
+    .hero p { font-size: 18px; color: #64748b; max-width: 500px; margin: 0 auto 32px; }
     .hero .btns { display: flex; gap: 12px; justify-content: center; }
     .hero .btns a { padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
     .hero .btns .primary { background: #3b82f6; color: #fff; }
@@ -37,37 +36,14 @@
     .hero .btns .secondary { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
     .hero .btns .secondary:hover { background: #f1f5f9; }
 
-    /* Architecture diagram */
-    .arch { padding: 60px 0; background: #f8fafc; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; }
-    .arch h2 { text-align: center; font-size: 24px; font-weight: 600; margin-bottom: 8px; }
-    .arch .sub { text-align: center; color: #64748b; font-size: 14px; margin-bottom: 40px; }
-    .arch-flow { display: flex; flex-direction: column; align-items: center; gap: 0; }
-    .arch-layer { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-    .arch-node { padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; border: 1px solid #e2e8f0; background: #fff; text-align: center; min-width: 140px; }
-    .arch-node.input { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
-    .arch-node.engine { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
-    .arch-node.output { background: #fef3c7; border-color: #fde68a; color: #92400e; }
-    .arch-arrow { color: #94a3b8; font-size: 20px; padding: 8px 0; }
-
-    /* Engines grid */
-    .engines { padding: 80px 0; }
-    .engines h2 { text-align: center; font-size: 24px; font-weight: 600; margin-bottom: 8px; }
-    .engines .sub { text-align: center; color: #64748b; font-size: 14px; margin-bottom: 40px; }
-    .engines-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-    .engine-card { padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; transition: all 0.2s; }
-    .engine-card:hover { border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.08); }
-    .engine-card .icon { font-size: 24px; margin-bottom: 8px; }
-    .engine-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-    .engine-card p { font-size: 13px; color: #64748b; }
-
     /* Stats */
-    .stats { padding: 60px 0; border-top: 1px solid #f1f5f9; }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; text-align: center; }
-    .stat .num { font-size: 2rem; font-weight: 700; color: #3b82f6; }
+    .stats { padding: 40px 0; border-top: 1px solid #f1f5f9; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; text-align: center; }
+    .stat .num { font-size: 1.8rem; font-weight: 700; color: #3b82f6; }
     .stat .lbl { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
 
     /* Footer */
-    footer { padding: 40px 0; border-top: 1px solid #f1f5f9; text-align: center; color: #94a3b8; font-size: 13px; }
+    footer { padding: 30px 0; border-top: 1px solid #f1f5f9; text-align: center; color: #94a3b8; font-size: 13px; margin-top: auto; }
   </style>
 </head>
 <body>
@@ -77,7 +53,6 @@
       <div class="links">
         <a href="/api/docs/">Docs</a>
         <a href="/admin/dashboard/">Operations</a>
-        <a href="/portal/">Portal</a>
         <a href="/admin/dashboard/" class="cta">Get Started</a>
       </div>
     </div>
@@ -90,84 +65,7 @@
       <p>Assemble context. Diagnose problems. Execute authorized actions. Verify outcomes. Maintain complete operational truth.</p>
       <div class="btns">
         <a href="/api/docs/" class="primary">API Docs</a>
-        <a href="/admin/constellation/" class="secondary">View Constellation</a>
-      </div>
-    </div>
-  </section>
-
-  <section class="arch">
-    <div class="container">
-      <h2>Architecture</h2>
-      <p class="sub">One case. One assembled context. One diagnosis. One controlled action. One verified outcome.</p>
-      <div class="arch-flow">
-        <div class="arch-layer">
-          <div class="arch-node input">Voice (OpenAI/Twilio)</div>
-          <div class="arch-node input">Payment (Daraja)</div>
-          <div class="arch-node input">SMS (Africa's Talking)</div>
-        </div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-layer">
-          <div class="arch-node">Context Engine</div>
-        </div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-layer">
-          <div class="arch-node">Diagnosis Engine</div>
-        </div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-layer">
-          <div class="arch-node">Policy Engine</div>
-        </div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-layer">
-          <div class="arch-node">Action Engine</div>
-        </div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-layer">
-          <div class="arch-node">Verification Engine</div>
-        </div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-layer">
-          <div class="arch-node output">Truth / Audit</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="engines">
-    <div class="container">
-      <h2>Five Engines</h2>
-      <p class="sub">Each engine is modular, testable, and replaceable.</p>
-      <div class="engines-grid">
-        <div class="engine-card">
-          <div class="icon">🔗</div>
-          <h3>Context Engine</h3>
-          <p>Assembles operational context from enterprise adapters (HLR, billing, network, device).</p>
-        </div>
-        <div class="engine-card">
-          <div class="icon">🔍</div>
-          <h3>Diagnosis Engine</h3>
-          <p>Identifies root cause from assembled context using rule-based and ML-powered analysis.</p>
-        </div>
-        <div class="engine-card">
-          <div class="icon">⚖️</div>
-          <h3>Policy Engine</h3>
-          <p>Authorizes actions based on rules, risk level, and clearance requirements.</p>
-        </div>
-        <div class="engine-card">
-          <div class="icon">⚡</div>
-          <h3>Action Engine</h3>
-          <p>Executes authorized remediation actions across enterprise systems.</p>
-        </div>
-        <div class="engine-card">
-          <div class="icon">✅</div>
-          <h3>Verification Engine</h3>
-          <p>Confirms service recovery and validates that actions produced the expected outcome.</p>
-        </div>
-        <div class="engine-card">
-          <div class="icon">📋</div>
-          <h3>Truth Engine</h3>
-          <p>Immutable audit trail. Every action, every decision, every outcome recorded with SHA-256 chains.</p>
-        </div>
+        <a href="/admin/dashboard/" class="secondary">Dashboard</a>
       </div>
     </div>
   </section>

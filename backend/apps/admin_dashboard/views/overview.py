@@ -72,7 +72,7 @@ def dashboard(request):
     ).order_by('-count')[:10]
 
     engine_status = {
-        'agreement': 'running', 'state_machine': 'running', 'condition': 'running',
+        'case': 'running', 'state_machine': 'running', 'condition': 'running',
         'ledger': 'running', 'settlement': 'running', 'notification': 'running',
         'webhook_receiver': 'running', 'orchestration': 'running',
     }

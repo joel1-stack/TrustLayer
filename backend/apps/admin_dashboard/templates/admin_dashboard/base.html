@@ -87,9 +87,6 @@
           <span class="icon">&#8635;</span> Backups
         </a>
 
-        <a href="/portal/" class="nav-item portal-link">
-          <span class="icon">&#8594;</span> <span>Customer Portal</span> <span>LIVE</span>
-        </a>
       </nav>
     </aside>
 
@@ -112,35 +109,6 @@
     </main>
   </div>
   <footer class="footer-curved slide-up">
-    <div class="grid">
-      <div>
-        <h3>Contact</h3>
-        <div class="contact-item">
-          <span class="icon">&#9742;</span>
-          <a href="https://wa.me/254715641339" target="_blank">+254 715 641 339</a>
-        </div>
-        <div class="contact-item">
-          <span class="icon">&#9993;</span>
-          <a href="mailto:help@trustlayer.com">help@trustlayer.com</a>
-        </div>
-      </div>
-      <div>
-        <h3>Quick Links</h3>
-        <p><a href="/portal/">Customer Portal</a></p>
-        <p><a href="/admin/dashboard/">Dashboard</a></p>
-        <p><a href="/admin/settings/">Settings</a></p>
-      </div>
-      <div>
-        <h3>Send a Message</h3>
-        <form method="post" action="/portal/contact/">
-          {% csrf_token %}
-          <input type="text" name="name" class="form-input-sm" placeholder="Your name" required>
-          <input type="email" name="email" class="form-input-sm" placeholder="Email" required>
-          <textarea name="message" class="form-input-sm" placeholder="Message" style="min-height:60px;" required></textarea>
-          <button type="submit" class="btn-sm">Send</button>
-        </form>
-      </div>
-    </div>
     <div class="footer-bottom">
       <div class="footer-brand">TrustLayer</div>
       &copy; {% now "Y" %}
