@@ -18,7 +18,7 @@
 <div class="card">
   <h3>Results for "{{ query }}"</h3>
   {% if result %}
-  <div class="row"><span class="key">Agreement</span><span class="val"><a href="/admin/agreements/{{ result.agreement_id }}/">{{ result.agreement_id }}</a></span></div>
+  <div class="row"><span class="key">Case</span><span class="val"><a href="/admin/cases/{{ result.agreement_id }}/">{{ result.agreement_id }}</a></span></div>
   <div class="row"><span class="key">Title</span><span class="val">{{ result.title }}</span></div>
   <div class="row"><span class="key">Amount</span><span class="val">{{ result.amount|currency }}</span></div>
   <div class="row"><span class="key">Status</span><span class="val">{{ result.status|status_badge|safe }}</span></div>

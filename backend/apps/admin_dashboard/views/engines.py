@@ -13,12 +13,12 @@ ENGINE_DEFINITIONS = {
         'icon': '📋',
         'desc': 'Creates and manages agreements, parties, split rules. Routes money flows between buyers and sellers.',
         'fields': [
-            {'key': 'engine_agreement_auto_approve', 'label': 'Auto-Approve Agreements', 'type': 'bool', 'default': 'true'},
-            {'key': 'engine_agreement_max_amount', 'label': 'Max Agreement Amount (KES)', 'type': 'text', 'default': '1000000'},
+            {'key': 'engine_agreement_auto_approve', 'label': 'Auto-Approve Cases', 'type': 'bool', 'default': 'true'},
+            {'key': 'engine_agreement_max_amount', 'label': 'Max Case Amount (KES)', 'type': 'text', 'default': '1000000'},
             {'key': 'engine_agreement_require_verification', 'label': 'Require Email Verification', 'type': 'bool', 'default': 'true'},
         ],
-        'test_action': 'Create and verify a test agreement',
-        'endpoints': ['POST /api/agreements/', 'GET /api/agreements/<id>/'],
+        'test_action': 'Create and verify a test case',
+        'endpoints': ['POST /api/cases/', 'GET /api/cases/<id>/'],
     },
     'ledger': {
         'name': 'Ledger Engine',

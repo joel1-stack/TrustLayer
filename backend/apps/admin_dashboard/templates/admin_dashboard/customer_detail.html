@@ -26,7 +26,7 @@
     <h3>Agreements</h3>
     {% for a in agreements %}
     <div class="row">
-      <span class="key"><a href="/admin/agreements/{{ a.agreement_id }}/">{{ a.agreement_id }}</a></span>
+      <span class="key"><a href="/admin/cases/{{ a.agreement_id }}/">{{ a.agreement_id }}</a></span>
       <span class="val">{{ a.amount|currency }} {{ a.status|status_badge|safe }}</span>
     </div>
     {% empty %}<p style="color:var(--text-muted);">No agreements</p>{% endfor %}

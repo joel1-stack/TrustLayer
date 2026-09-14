@@ -4,28 +4,28 @@
 {% block content %}
 
 <div style="margin-bottom:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-  <a href="/admin/agreements/" class="btn btn-sm btn-ghost">&larr; Back to Agreements</a>
+  <a href="/admin/cases/" class="btn btn-sm btn-ghost">&larr; Back to Cases</a>
   {% if can_release %}
-  <form method="post" action="/admin/agreements/{{ agreement.agreement_id }}/action/" style="display:inline;">
+  <form method="post" action="/admin/cases/{{ agreement.agreement_id }}/action/" style="display:inline;">
     {% csrf_token %}
     <input type="hidden" name="action" value="release">
     <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('Release all conditions and move to READY?')">&#10003; Release Conditions</button>
   </form>
   {% endif %}
   {% if can_settle %}
-  <form method="post" action="/admin/agreements/{{ agreement.agreement_id }}/action/" style="display:inline;">
+  <form method="post" action="/admin/cases/{{ agreement.agreement_id }}/action/" style="display:inline;">
     {% csrf_token %}
     <input type="hidden" name="action" value="settle">
     <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('Trigger settlement now?')">&#9654; Trigger Settlement</button>
   </form>
   {% endif %}
   {% if agreement.status == 'HELD' or agreement.status == 'READY' %}
-  <form method="post" action="/admin/agreements/{{ agreement.agreement_id }}/action/" style="display:inline;">
+  <form method="post" action="/admin/cases/{{ agreement.agreement_id }}/action/" style="display:inline;">
     {% csrf_token %}
     <input type="hidden" name="action" value="cancel">
-    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this agreement?')">&#10005; Cancel</button>
+    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this case?')">&#10005; Cancel</button>
   </form>
-  <form method="post" action="/admin/agreements/{{ agreement.agreement_id }}/action/" style="display:inline;">
+  <form method="post" action="/admin/cases/{{ agreement.agreement_id }}/action/" style="display:inline;">
     {% csrf_token %}
     <input type="hidden" name="action" value="refund">
     <button type="submit" class="btn btn-sm btn-ghost" style="color:var(--orange);" onclick="return confirm('Refund to buyer?')">&#8634; Refund</button>

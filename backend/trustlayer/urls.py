@@ -16,7 +16,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 
 def home(request):
     today = timezone.now().date()
-    total_agreements = Agreement.objects.count()
+    total_cases = Agreement.objects.count()
     settled_today = Agreement.objects.filter(status='SETTLED', updated_at__date=today).count()
     from apps.core.constants import STATUS_CATEGORIES
     terminal_states = [s for s, c in STATUS_CATEGORIES.items() if c == 'terminal']
@@ -25,9 +25,9 @@ def home(request):
         entry_type='CREDIT', description__icontains='Platform'
     ).aggregate(t=Sum('amount'))['t'] or 0
     return render(request, 'landing.html', {
-        'total_agreements': total_agreements,
+        'total_cases': total_cases,
         'settled_today': settled_today,
-        'active_agreements': active,
+        'active_cases': active,
         'platform_fees': float(fees),
     })
 
@@ -41,7 +41,7 @@ urlpatterns = [
     path('api/v1/', include('apps.api_v1.urls')),
 
     # === Core Engine APIs (internal/backward compat) ===
-    path('api/agreements/',  include('apps.agreements.urls')),
+    path('api/cases/',  include('apps.agreements.urls')),
     path('api/conditions/',  include('apps.conditions.urls')),
     path('api/ledger/',     include('apps.ledger.urls')),
     path('api/settlements/', include('apps.settlements.urls')),

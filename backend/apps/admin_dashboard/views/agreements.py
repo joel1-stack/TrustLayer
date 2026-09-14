@@ -73,7 +73,7 @@ def agreement_detail(request, agreement_id):
 
 def agreement_action(request, agreement_id):
     if request.method != 'POST':
-        return redirect('/admin/agreements/')
+        return redirect('/admin/cases/')
     agreement = get_object_or_404(Agreement, agreement_id=agreement_id)
     action = request.POST.get('action', '')
     ip = request.META.get('REMOTE_ADDR', '')
@@ -119,4 +119,4 @@ def agreement_action(request, agreement_id):
     except Exception as e:
         messages.error(request, f'Action failed: {e}')
 
-    return redirect(f'/admin/agreements/{agreement_id}/')
+    return redirect(f'/admin/cases/{agreement_id}/')

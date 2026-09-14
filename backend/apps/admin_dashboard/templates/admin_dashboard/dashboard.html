@@ -17,7 +17,7 @@
   <div class="stat-card fade-in">
     <div class="label">Today Collected</div>
     <div class="value">KES {{ collected_today|floatformat:0 }}</div>
-    <div class="sub">{{ agreements_today }} agreements</div>
+    <div class="sub">{{ agreements_today }} cases</div>
   </div>
   <div class="stat-card fade-in">
     <div class="label">Active</div>
@@ -27,7 +27,7 @@
   <div class="stat-card fade-in">
     <div class="label">This Month</div>
     <div class="value">KES {{ collected_month|floatformat:0 }}</div>
-    <div class="sub">{{ agreements_month }} agreements</div>
+    <div class="sub">{{ agreements_month }} cases</div>
   </div>
   <div class="stat-card fade-in">
     <div class="label">Platform Fees</div>
@@ -80,7 +80,7 @@
         <span class="key">{{ ind.metadata__industry|default:"Unspecified" }}</span>
         <span class="val">{{ ind.count }}</span>
       </div>
-      {% empty %}<p style="color:var(--text-muted);font-size:13px;">No agreements yet</p>{% endfor %}
+      {% empty %}<p style="color:var(--text-muted);font-size:13px;">No cases yet</p>{% endfor %}
     </div>
   </div>
 
@@ -123,21 +123,21 @@
 
 <div class="table-container">
   <div class="table-header">
-    <h3>Recent Agreements</h3>
-    <a href="/admin/agreements/" class="btn btn-sm btn-ghost">View All</a>
+    <h3>Recent Cases</h3>
+    <a href="/admin/cases/" class="btn btn-sm btn-ghost">View All</a>
   </div>
   <table>
     <thead><tr><th>ID</th><th>Title</th><th>Amount</th><th>Status</th><th>Age</th></tr></thead>
     <tbody>
       {% for a in recent_agreements %}
-      <tr onclick="window.location='/admin/agreements/{{ a.agreement_id }}/'" style="cursor:pointer;">
+      <tr onclick="window.location='/admin/cases/{{ a.agreement_id }}/'" style="cursor:pointer;">
         <td style="font-family:monospace;">{{ a.agreement_id }}</td>
         <td>{{ a.title|truncatechars:30 }}</td>
         <td>{{ a.amount|currency }}</td>
         <td>{{ a.status|status_badge|safe }}</td>
         <td>{{ a.created_at|age_from_now }}</td>
       </tr>
-      {% empty %}<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No agreements yet</td></tr>{% endfor %}
+      {% empty %}<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No cases yet</td></tr>{% endfor %}
     </tbody>
   </table>
 </div>
