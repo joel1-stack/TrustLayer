@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     # TrustLayer Core Engines
+    'apps.organizations',
     'apps.agreements',
     'apps.state_machine',
     'apps.conditions',

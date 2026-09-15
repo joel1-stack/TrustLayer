@@ -31,12 +31,20 @@ class Case(models.Model):
         WAITING = 'WAITING', 'Waiting (legacy)'
 
     case_id = models.CharField(max_length=24, unique=True, editable=False, db_column='agreement_id')
+
+    # Organization-agnostic fields
+    organization = models.ForeignKey('organizations.Organization', on_delete=models.SET_NULL, null=True, blank=True, related_name='cases')
+    customer_ref = models.CharField(max_length=128, blank=True, default='', help_text="Organization internal customer reference")
+    intent = models.CharField(max_length=50, blank=True, default='', help_text="Case type: FRAUD_REPORT, DATA_FAILURE, ORDER_NOT_RECEIVED, etc.")
+    channel = models.CharField(max_length=20, blank=True, default='API', help_text="Entry channel: WEB, MOBILE, API, VOICE, SMS, WIDGET")
+
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.CREATED)
     status_code_value = models.IntegerField(default=10000, db_index=True, help_text='Numeric status code for fast range queries')
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=3, default='KES')
+    severity = models.CharField(max_length=20, default='NORMAL', help_text="LOW, NORMAL, HIGH, CRITICAL")
     metadata = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
