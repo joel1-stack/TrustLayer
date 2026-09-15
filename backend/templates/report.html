@@ -1,114 +1,309 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Report a Problem — TrustLayer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --accent: #FF5522;
-      --accent-hover: #E04418;
-      --accent-light: #FFF4F0;
-      --dark: #111111;
-      --text: #111111;
-      --text-secondary: #555;
-      --text-muted: #999;
-      --bg: #FFFFFF;
-      --bg-alt: #F8F8F8;
-      --border: #EEE;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+{% extends "base.html" %}
 
-    .topbar { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
-    .back-btn { font-size: 20px; color: var(--text-secondary); text-decoration: none; }
-    .back-btn:hover { color: var(--accent); }
-    .topbar-title { font-size: 16px; font-weight: 700; }
+{% block title %}Report a Problem — TrustLayer{% endblock %}
 
-    .main { flex: 1; max-width: 560px; width: 100%; margin: 0 auto; padding: 40px 24px; }
-    .step-title { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; }
-    .step-subtitle { font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; }
+{% block extra_css %}
+<style>
+  /* ══════════════════════════════════════════
+     REPORT PAGE STYLES
+  ══════════════════════════════════════════ */
+  .report-wrap {
+    padding: 80px 0 100px;
+  }
+  .report-header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .report-header h1 {
+    font-size: 48px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    letter-spacing: -1px;
+  }
+  .report-header p {
+    font-size: 18px;
+    color: var(--text2);
+    max-width: 560px;
+    margin: 0 auto;
+  }
 
-    .form-group { margin-bottom: 20px; }
-    .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; }
-    .form-input, .form-select, .form-textarea {
-      width: 100%; height: 50px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-alt);
-      padding: 0 16px; font-size: 15px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s;
-    }
-    .form-textarea { height: 120px; padding: 14px 16px; resize: vertical; }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); background: var(--bg); }
-    .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23999' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; }
+  .report-container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
 
-    .submit-btn {
-      width: 100%; height: 54px; border-radius: 14px; background: var(--accent); color: #fff;
-      border: none; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; margin-top: 8px;
-    }
-    .submit-btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,85,34,0.25); }
+  .report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 48px;
+  }
 
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-section {
+    margin-bottom: 36px;
+  }
+  .form-section:last-of-type {
+    margin-bottom: 0;
+  }
+  .form-section-title {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text3);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .form-section-title::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: var(--orange);
+    border-radius: 2px;
+  }
 
-    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
-  </style>
-</head>
-<body>
-  <div class="topbar">
-    <a href="/" class="back-btn">&larr;</a>
-    <span class="topbar-title">Report a Problem</span>
+  .file-upload {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    text-align: center;
+    background: var(--bg2);
+    transition: border-color .2s, background .2s;
+    cursor: pointer;
+  }
+  .file-upload:hover {
+    border-color: var(--orange);
+    background: var(--surface2);
+  }
+  .file-upload-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    background: var(--orange-dim);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--orange);
+  }
+  .file-upload-text {
+    font-size: 15px;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+  .file-upload-hint {
+    font-size: 13px;
+    color: var(--text3);
+  }
+  .file-input {
+    display: none;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  .problem-types {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .problem-type-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .problem-type-option:hover {
+    border-color: var(--orange);
+    background: var(--surface2);
+  }
+  .problem-type-option input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--orange);
+    cursor: pointer;
+  }
+  .problem-type-option label {
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  @media (max-width: 768px) {
+    .report-card { padding: 32px 24px; }
+    .report-header h1 { font-size: 36px; }
+    .form-actions { flex-direction: column; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-wrap">
+  <div class="container-xs">
+    
+    <div class="report-header">
+      <h1>Report a Problem</h1>
+      <p>
+        Tell us what happened. We'll structure the evidence and route it to the right team.
+      </p>
+    </div>
+
+    <div class="report-card">
+      <form method="post" action="/report/submit/" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if error %}
+        <div class="alert alert-error" style="margin-bottom:24px;">{{ error }}</div>
+        {% endif %}
+
+        <!-- Problem Type -->
+        <div class="form-section">
+          <div class="form-section-title">Problem Type</div>
+          <div class="problem-types">
+            <div class="problem-type-option">
+              <input type="radio" name="problem_type" id="type_transaction" value="transaction_dispute" checked>
+              <label for="type_transaction">I don't recognize a transaction</label>
+            </div>
+            <div class="problem-type-option">
+              <input type="radio" name="problem_type" id="type_payment" value="payment_issue">
+              <label for="type_payment">Payment problem</label>
+            </div>
+            <div class="problem-type-option">
+              <input type="radio" name="problem_type" id="type_account" value="account_issue">
+              <label for="type_account">Account security issue</label>
+            </div>
+            <div class="problem-type-option">
+              <input type="radio" name="problem_type" id="type_other" value="other">
+              <label for="type_other">Other issue</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transaction Details -->
+        <div class="form-section">
+          <div class="form-section-title">Transaction Details</div>
+          
+          <div class="form-group">
+            <label class="form-label">Transaction Reference / ID</label>
+            <input type="text" name="transaction_ref" class="form-input" 
+                   placeholder="e.g. TXN-8839201" required>
+            <div class="form-help">The transaction ID from your statement or receipt</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Amount</label>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+              <input type="number" name="amount" class="form-input" 
+                     placeholder="50000" step="0.01" required>
+              <select name="currency" class="form-select" required>
+                <option value="KES" selected>KES</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">When did this happen?</label>
+            <input type="date" name="incident_date" class="form-input" required>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-section">
+          <div class="form-section-title">What Happened?</div>
+          
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-textarea" rows="5" 
+                      placeholder="Describe what happened. Include as much detail as possible..." required></textarea>
+            <div class="form-help">Be specific. This helps us investigate faster.</div>
+          </div>
+        </div>
+
+        <!-- Evidence Upload -->
+        <div class="form-section">
+          <div class="form-section-title">Evidence (Optional)</div>
+          
+          <label for="evidence-file" class="file-upload">
+            <div class="file-upload-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <path d="M17 8l-5-5-5 5"/>
+                <path d="M12 3v12"/>
+              </svg>
+            </div>
+            <div class="file-upload-text">Click to upload screenshot or document</div>
+            <div class="file-upload-hint">PNG, JPG, PDF up to 10MB</div>
+          </label>
+          <input type="file" id="evidence-file" name="evidence" class="file-input" 
+                 accept="image/*,.pdf">
+        </div>
+
+        <!-- Contact Info -->
+        <div class="form-section">
+          <div class="form-section-title">Contact Information</div>
+          
+          <div class="form-group">
+            <label class="form-label">Phone Number or Email</label>
+            <input type="text" name="contact" class="form-input" 
+                   placeholder="+254 712 345 678 or email@example.com" required>
+            <div class="form-help">We'll use this to send case updates</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Your Name (Optional)</label>
+            <input type="text" name="customer_name" class="form-input" 
+                   placeholder="John Doe">
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-full">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+              <path d="M22 4L12 14.01l-3-3"/>
+            </svg>
+            Submit Case
+          </button>
+          <a href="/" class="btn btn-secondary btn-full">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+
   </div>
+</div>
 
-  <div class="main">
-    <h1 class="step-title">What happened?</h1>
-    <p class="step-subtitle">Describe the problem. Include as much detail as possible.</p>
-
-    <form method="post" action="/report/submit/">
-      {% csrf_token %}
-
-      <div class="form-group">
-        <label class="form-label">Your name</label>
-        <input type="text" name="customer_name" class="form-input" placeholder="Full name" required>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input type="email" name="customer_email" class="form-input" placeholder="you@email.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Phone</label>
-          <input type="tel" name="customer_phone" class="form-input" placeholder="+254...">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Transaction ID</label>
-          <input type="text" name="txn_id" class="form-input" placeholder="e.g. TXN-8839201">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Amount</label>
-          <input type="number" name="amount" class="form-input" placeholder="e.g. 5000" step="0.01">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Severity</label>
-        <select name="severity" class="form-select">
-          <option value="LOW">Low — Minor issue</option>
-          <option value="NORMAL" selected>Normal — Needs attention</option>
-          <option value="HIGH">High — Urgent</option>
-          <option value="CRITICAL">Critical — Emergency</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">What happened?</label>
-        <textarea name="description" class="form-textarea" placeholder="Describe the problem in your own words. What did you expect? What actually happened?" required></textarea>
-      </div>
-
-      <button type="submit" class="submit-btn">Submit Case</button>
-    </form>
-  </div>
-</body>
-</html>
+<script>
+  // File upload preview
+  const fileInput = document.getElementById('evidence-file');
+  const fileUpload = fileInput.previousElementSibling;
+  
+  fileInput.addEventListener('change', (e) => {
+    const fileName = e.target.files[0]?.name;
+    if (fileName) {
+      const textEl = fileUpload.querySelector('.file-upload-text');
+      textEl.textContent = `Selected: ${fileName}`;
+      fileUpload.style.borderColor = 'var(--orange)';
+      fileUpload.style.background = 'var(--surface2)';
+    }
+  });
+</script>
+{% endblock %}

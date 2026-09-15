@@ -1,119 +1,538 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TrustLayer — Resolve customer problems without losing context</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --accent: #FF5522;
-      --accent-hover: #E04418;
-      --dark: #111111;
-      --text: #111111;
-      --text-secondary: #555;
-      --text-muted: #999;
-      --bg: #FFFFFF;
-      --bg-alt: #F8F8F8;
-      --border: #EEE;
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}TrustLayer — Report a problem. Track what happens. Verify the resolution.{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* HERO SECTION - BLACK background with orange glow exactly like mockup */
+  .hero {
+    background: #000000;
+    padding: 140px 0 100px;
+    position: relative;
+    margin-top: -64px;
+    padding-top: 204px;
+    overflow: visible;
+  }
+  
+  /* Orange glow from center-right */
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 25%;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(255,87,34,0.4) 0%, rgba(180,40,10,0.2) 40%, transparent 70%);
+    filter: blur(100px);
+    transform: translateY(-50%);
+    z-index: 0;
+  }
+  
+  /* Orange wavy curves at bottom - exactly like mockup */
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background-image: 
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 150' preserveAspectRatio='none'%3E%3Cpath d='M0,80 Q150,40 300,80 T600,80 T900,80 T1200,80' fill='none' stroke='%23ff5722' stroke-width='2' opacity='0.4'/%3E%3Cpath d='M0,110 Q200,60 400,110 T800,110 T1200,110' fill='none' stroke='%23ff5722' stroke-width='3' opacity='0.6'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  .hero-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .hero-left {
+    max-width: 580px;
+  }
+  
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: rgba(255,87,34,0.15);
+    border: 1px solid rgba(255,87,34,0.4);
+    border-radius: 100px;
+    color: var(--orange);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 28px;
+  }
+  
+  .hero h1 {
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    color: #FFFFFF;
+  }
+  
+  .hero .highlight {
+    color: var(--orange);
+  }
+  
+  .hero p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: #D1D5DB;
+    margin-bottom: 36px;
+  }
+  
+  .hero-cta {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  
+  .track-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 280px;
+  }
+  
+  .track-section span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #9CA3AF;
+  }
+  
+  .track-form {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .track-form input {
+    flex: 1;
+    padding: 12px 18px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-size: 15px;
+  }
+  
+  .track-form input::placeholder {
+    color: #9CA3AF;
+  }
+  
+  .track-form button {
+    padding: 12px 20px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .track-form button:hover {
+    background: rgba(255,255,255,0.15);
+  }
+  
+  /* Phone mockup on white card - exactly like mockup */
+  .hero-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .phone-card {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    animation: float 4s ease-in-out infinite;
+    filter: drop-shadow(0 30px 80px rgba(255,87,34,0.35));
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+  
+  .phone-card img {
+    width: 480px;
+    height: auto;
+    display: block;
+  }
+  
+  /* Stats section */
+  .stats-bar {
+    background: var(--bg);
+    padding: 60px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+  }
+  
+  .stat {
+    text-align: center;
+  }
+  
+  .stat-value {
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--orange);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  
+  .stat-label {
+    font-size: 14px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 600;
+  }
+  
+  /* Flow section */
+  .flow-section {
+    padding: 100px 0;
+    background: var(--bg);
+  }
+  
+  .flow-header {
+    text-align: center;
+    margin-bottom: 72px;
+  }
+  
+  .flow-header h2 {
+    font-size: 48px;
+    font-weight: 900;
+    margin-bottom: 20px;
+  }
+  
+  .flow-header h2 .orange-text {
+    color: var(--orange);
+  }
+  
+  .flow-header p {
+    font-size: 18px;
+    color: var(--text2);
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  
+  .flow-cards {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+  }
+  
+  .flow-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 18px 24px;
+    position: relative;
+    transition: all 0.3s;
+    text-align: center;
+  }
+  
+  .flow-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(255,87,34,0.15);
+    border-color: var(--orange);
+  }
+  
+  .flow-number {
+    position: absolute;
+    top: -24px;
+    left: 32px;
+    width: 52px;
+    height: 52px;
+    background: var(--orange);
+    color: #000000;
+    font-size: 28px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(255,87,34,0.4);
+  }
+  
+  .flow-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--orange-dim);
+    color: var(--orange);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  
+  .flow-card h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  
+  .flow-card p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text2);
+  }
+  
+  /* CTA section */
+  .cta-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 80px 60px;
+    text-align: center;
+    margin: 80px 0 0;
+  }
+  
+  .cta-section h2 {
+    font-size: 42px;
+    font-weight: 900;
+    margin-bottom: 20px;
+  }
+  
+  .cta-section p {
+    font-size: 18px;
+    color: var(--text2);
+    margin-bottom: 36px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  @media (max-width: 968px) {
+    .hero-content {
+      grid-template-columns: 1fr;
+      gap: 60px;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-
-    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
-    nav .inner { max-width: 960px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
-    nav .brand { font-size: 20px; font-weight: 900; color: var(--text); text-decoration: none; letter-spacing: -0.5px; }
-    nav .brand span { color: var(--accent); }
-    nav .links { display: flex; gap: 24px; align-items: center; }
-    nav .links a { font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; }
-    nav .links a:hover { color: var(--text); }
-    nav .links .cta { background: var(--accent); color: #fff; padding: 10px 24px; border-radius: 10px; font-weight: 600; }
-    nav .links .cta:hover { background: var(--accent-hover); }
-
-    .hero { padding: 160px 32px 80px; max-width: 960px; margin: 0 auto; text-align: center; }
-    .hero h1 { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 900; letter-spacing: -2px; line-height: 1.1; margin-bottom: 24px; }
-    .hero h1 .accent { color: var(--accent); }
-    .hero p { font-size: 18px; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px; line-height: 1.7; }
-    .hero .btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .hero .btns a { padding: 14px 32px; border-radius: 12px; font-size: 15px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
-    .hero .btns .primary { background: var(--accent); color: #fff; }
-    .hero .btns .primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,85,34,0.25); }
-    .hero .btns .secondary { background: var(--bg-alt); color: var(--text); border: 1px solid var(--border); }
-    .hero .btns .secondary:hover { background: var(--border); }
-
-    .flow { padding: 80px 32px; max-width: 960px; margin: 0 auto; }
-    .flow-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
-    .flow-step { text-align: center; padding: 32px 20px; }
-    .flow-step .num { width: 40px; height: 40px; background: var(--accent); color: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; margin: 0 auto 16px; }
-    .flow-step h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-    .flow-step p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-    .flow-arrow { display: none; }
-
-    .section-label { font-size: 12px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; text-align: center; }
-    .section-title { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 900; text-align: center; letter-spacing: -1.5px; }
-
-    .stats { padding: 60px 32px; background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .stats .inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: center; gap: 64px; flex-wrap: wrap; }
-    .stat { text-align: center; }
-    .stat .num { font-size: 2.5rem; font-weight: 900; color: var(--accent); letter-spacing: -1px; }
-    .stat .lbl { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; font-weight: 600; }
-
-    footer { padding: 48px 32px; text-align: center; border-top: 1px solid var(--border); }
-    footer p { font-size: 14px; color: var(--text-muted); }
-    footer span { color: var(--accent); }
-
-    @media (max-width: 768px) {
-      .flow-steps { grid-template-columns: 1fr 1fr; }
-      .stats .inner { gap: 32px; }
+    .phone-card {
+      padding: 40px 50px;
     }
-    @media (max-width: 480px) {
-      .flow-steps { grid-template-columns: 1fr; }
+    .phone-card img {
+      width: 350px;
     }
-  </style>
-</head>
-<body>
-  <nav>
-    <div class="inner">
-      <a href="/" class="brand"><span>Trust</span>Layer</a>
-      <div class="links">
-        <a href="/agent/">Dashboard</a>
-        <a href="/api/docs/">API</a>
-        <a href="/report/" class="cta">Report a Problem</a>
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+            .flow-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION - BLACK with orange glow -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-content">
+      
+      <div class="hero-left">
+        <div class="hero-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="4"/>
+          </svg>
+          System of Action
+        </div>
+        
+        <h1>
+          Report a problem.<br>
+          <span class="highlight">Track what happens.</span><br>
+          Verify the resolution.
+        </h1>
+        
+        <p>
+          For transaction disputes, payment issues,
+          and account security.
+        </p>
+        
+        <div class="hero-cta">
+          <a href="/report/" class="btn btn-primary btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Report a Problem
+          </a>
+          
+          <div class="track-section">
+            <span>Track a Case</span>
+            <form action="/track/" method="get" class="track-form">
+              <input type="text" name="id" placeholder="Enter case ID (e.g. CASE-9921)" required>
+              <button type="submit">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <div class="hero-right">
+        <div class="phone-card">
+          <img src="{% static 'images/hero-bg.png' %}" alt="TrustLayer Operations">
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-value">{{ total_cases|default:"0" }}</div>
+        <div class="stat-label">Cases Opened</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">{{ active_cases|default:"0" }}</div>
+        <div class="stat-label">Active Now</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">{{ resolved_today|default:"0" }}</div>
+        <div class="stat-label">Resolved Today</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">24/7</div>
+        <div class="stat-label">Always Available</div>
       </div>
     </div>
-  </nav>
+  </div>
+</div>
 
-  <section class="hero">
-    <h1>Resolve customer problems<br><span class="accent">without losing context.</span></h1>
-    <p>A customer reports a problem. TrustLayer builds the case. Your team gets the evidence, context, and timeline. Resolution is verified.</p>
-    <div class="btns">
-      <a href="/report/" class="primary">Report a Problem</a>
-      <a href="/api/docs/" class="secondary">API Docs</a>
+<!-- FLOW SECTION -->
+<div class="flow-section">
+  <div class="container">
+    
+    <div class="flow-header">
+      <h2>How <span class="orange-text">TrustLayer</span> Works</h2>
+      <p>One case. One assembled context. One diagnosis. One controlled action. One verified outcome. Complete operational truth.</p>
     </div>
-  </section>
-
-  <section class="stats">
-    <div class="inner">
-      <div class="stat"><div class="num">{{ total_cases }}</div><div class="lbl">Cases</div></div>
-      <div class="stat"><div class="num">{{ active_cases }}</div><div class="lbl">Active</div></div>
-      <div class="stat"><div class="num">{{ resolved_today }}</div><div class="lbl">Resolved Today</div></div>
+    
+    <div class="flow-cards">
+      
+      <div class="flow-card">
+        <div class="flow-number">1</div>
+        <div class="flow-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+          </svg>
+        </div>
+        <h3>Report</h3>
+        <p>Customer flags a problem through our web portal, app, or other channels.</p>
+      </div>
+      
+      <div class="flow-card">
+        <div class="flow-number">2</div>
+        <div class="flow-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <path d="M14 2v6h6"/>
+          </svg>
+        </div>
+        <h3>Gather</h3>
+        <p>Collect relevant evidence and build a complete context around the case.</p>
+      </div>
+      
+      <div class="flow-card">
+        <div class="flow-number">3</div>
+        <div class="flow-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <h3>Diagnose</h3>
+        <p>AI analyzes the data, identifies the root cause and classifies issue type.</p>
+      </div>
+      
+      <div class="flow-card">
+        <div class="flow-number">4</div>
+        <div class="flow-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <h3>Route</h3>
+        <p>The case is sent to the right team or system based on rules, risk and priority.</p>
+      </div>
+      
+      <div class="flow-card">
+        <div class="flow-number">5</div>
+        <div class="flow-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <h3>Resolve</h3>
+        <p>The right action is executed across integrated systems and partners.</p>
+      </div>
+      
+      <div class="flow-card">
+        <div class="flow-number">6</div>
+        <div class="flow-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+            <path d="M22 4L12 14.01l-3-3"/>
+          </svg>
+        </div>
+        <h3>Verify</h3>
+        <p>We confirm the resolution with all parties and record the complete outcome.</p>
+      </div>
+      
     </div>
-  </section>
-
-  <section class="flow">
-    <div class="section-label">How It Works</div>
-    <div class="section-title">One problem. One case. One resolution.</div>
-    <div class="flow-steps">
-      <div class="flow-step"><div class="num">1</div><h3>Report</h3><p>Tell us what happened. Transaction, amount, description.</p></div>
-      <div class="flow-step"><div class="num">2</div><h3>Assemble</h3><p>Bring the evidence together. Screenshots, references, context.</p></div>
-      <div class="flow-step"><div class="num">3</div><h3>Resolve</h3><p>Route the case to the right team. Investigate and act.</p></div>
-      <div class="flow-step"><div class="num">4</div><h3>Verify</h3><p>Confirm that the problem was actually resolved.</p></div>
+    
+    <div class="cta-section">
+      <h2>Stop waiting. Start tracking.</h2>
+      <p>
+        Transaction disputes shouldn't disappear into email threads. 
+        Create a case and watch every step.
+      </p>
+      <a href="/report/" class="btn btn-primary btn-lg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Create Your First Case
+      </a>
     </div>
-  </section>
-
-  <footer>
-    <p><span>&copy;</span> 2026 TrustLayer. Built in Kenya.</p>
-  </footer>
-</body>
-</html>
+    
+  </div>
+</div>
+{% endblock %}

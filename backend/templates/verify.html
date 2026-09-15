@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Resolution — Case {{ case.case_id }} — TrustLayer{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ══════════════════════════════════════════
+     VERIFY PAGE STYLES
+  ══════════════════════════════════════════ */
+  .verify-wrap {
+    padding: 80px 0 100px;
+  }
+
+  .verify-container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .verify-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 48px;
+    text-align: center;
+  }
+
+  .verify-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 28px;
+    background: var(--orange-dim);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--orange);
+  }
+
+  .verify-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+
+  .verify-subtitle {
+    font-size: 16px;
+    color: var(--text3);
+    margin-bottom: 32px;
+  }
+
+  .case-id-badge {
+    display: inline-block;
+    padding: 8px 18px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 32px;
+  }
+
+  .resolution-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--orange);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 40px;
+    text-align: left;
+  }
+
+  .resolution-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text3);
+    margin-bottom: 12px;
+  }
+
+  .resolution-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .resolution-description {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  .verify-question {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 32px;
+  }
+
+  .verify-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .verify-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 24px;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border);
+    background: var(--bg2);
+    cursor: pointer;
+    transition: all .2s;
+    text-decoration: none;
+  }
+
+  .verify-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+  }
+
+  .verify-btn-yes {
+    border-color: var(--green);
+    background: rgba(34,197,94,0.08);
+  }
+  .verify-btn-yes:hover {
+    border-color: var(--green);
+    background: rgba(34,197,94,0.15);
+    box-shadow: 0 12px 32px rgba(34,197,94,0.25);
+  }
+
+  .verify-btn-no {
+    border-color: var(--red);
+    background: rgba(239,68,68,0.08);
+  }
+  .verify-btn-no:hover {
+    border-color: var(--red);
+    background: rgba(239,68,68,0.15);
+    box-shadow: 0 12px 32px rgba(239,68,68,0.25);
+  }
+
+  .verify-btn-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .2s;
+  }
+
+  .verify-btn-yes .verify-btn-icon {
+    background: rgba(34,197,94,0.2);
+    color: var(--green);
+  }
+
+  .verify-btn-no .verify-btn-icon {
+    background: rgba(239,68,68,0.2);
+    color: var(--red);
+  }
+
+  .verify-btn:hover .verify-btn-icon {
+    transform: scale(1.1);
+  }
+
+  .verify-btn-label {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .verify-btn-yes .verify-btn-label {
+    color: var(--green);
+  }
+
+  .verify-btn-no .verify-btn-label {
+    color: var(--red);
+  }
+
+  .verify-btn-text {
+    font-size: 13px;
+    color: var(--text3);
+    text-align: center;
+  }
+
+  .verify-footer {
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .verify-footer p {
+    font-size: 13px;
+    color: var(--text3);
+    line-height: 1.6;
+  }
+
+  .verify-footer a {
+    color: var(--orange);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .verify-footer a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 640px) {
+    .verify-card { padding: 32px 24px; }
+    .verify-title { font-size: 26px; }
+    .verify-actions { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="verify-wrap">
+  <div class="verify-container">
+    
+    <div class="verify-card">
+      
+      <div class="verify-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+          <path d="M22 4L12 14.01l-3-3"/>
+        </svg>
+      </div>
+
+      <h1 class="verify-title">Resolution Proposed</h1>
+      <p class="verify-subtitle">Please verify the outcome</p>
+
+      <div class="case-id-badge">
+        {{ case.case_id }}
+      </div>
+
+      <!-- Resolution Details -->
+      <div class="resolution-box">
+        <div class="resolution-label">Investigation Result</div>
+        <div class="resolution-title">{{ case.resolution_title }}</div>
+        <div class="resolution-description">
+          {{ case.resolution_note|default:"The organization has recorded a resolution on this case. Confirm whether the problem is actually resolved." }}
+        </div>
+      </div>
+
+      <!-- Verification Question -->
+      <h2 class="verify-question">Did this resolve your problem?</h2>
+
+      <!-- Action Buttons -->
+      <form method="post" action="/case/{{ case.case_id }}/confirm/">
+        {% csrf_token %}
+        <div class="verify-actions">
+          
+          <button type="submit" name="verification" value="resolved" class="verify-btn verify-btn-yes">
+            <div class="verify-btn-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            </div>
+            <span class="verify-btn-label">YES, IT'S RESOLVED</span>
+            <span class="verify-btn-text">Close the case</span>
+          </button>
+
+          <button type="submit" name="verification" value="reopened" class="verify-btn verify-btn-no">
+            <div class="verify-btn-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </div>
+            <span class="verify-btn-label">NO, STILL A PROBLEM</span>
+            <span class="verify-btn-text">Reopen for investigation</span>
+          </button>
+
+        </div>
+      </form>
+
+      <!-- Footer Note -->
+      <div class="verify-footer">
+        <p>
+          Your verification helps us ensure the problem was actually resolved. 
+          If you select "No", the case will be reopened and assigned back to the investigation team.
+          <br><br>
+          Need help? <a href="/case/{{ case.case_id }}/">Return to case details</a>
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

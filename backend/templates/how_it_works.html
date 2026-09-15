@@ -1,0 +1,603 @@
+{% extends "base.html" %}
+
+{% block title %}How It Works — TrustLayer{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ══════════════════════════════════════════
+     HOW IT WORKS PAGE STYLES
+  ══════════════════════════════════════════ */
+  
+  /* Hero section - dark */
+  .page-hero {
+    padding: 140px 0 80px;
+    background: #0F0F0F;
+    text-align: center;
+    position: relative;
+    margin: -64px 0 0 0;
+    padding-top: 204px;
+  }
+  .page-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse 60% 50% at 50% 30%,
+      rgba(255,87,34,0.2) 0%,
+      rgba(255,87,34,0.08) 30%,
+      transparent 70%);
+    z-index: 0;
+  }
+  .page-hero > * {
+    position: relative;
+    z-index: 1;
+  }
+  .page-hero h1 {
+    font-size: 56px;
+    font-weight: 900;
+    color: #FFFFFF;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+  }
+  .page-hero p {
+    font-size: 20px;
+    color: #D1D5DB;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* Process section - light background */
+  .process-section {
+    padding: 100px 0;
+    background: var(--bg);
+  }
+  .process-timeline {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+  }
+  
+  /* Vertical connecting line */
+  .process-timeline::before {
+    content: '';
+    position: absolute;
+    left: 40px;
+    top: 80px;
+    bottom: 80px;
+    width: 3px;
+    background: linear-gradient(180deg, 
+      var(--orange) 0%, 
+      var(--orange-dim) 50%, 
+      var(--border) 100%);
+  }
+  
+  .process-step {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 32px;
+    margin-bottom: 64px;
+    position: relative;
+  }
+  .process-step:last-child {
+    margin-bottom: 0;
+  }
+  
+  .step-number {
+    width: 80px;
+    height: 80px;
+    background: var(--orange);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 900;
+    color: #000;
+    box-shadow: 0 12px 32px rgba(255,87,34,0.3);
+    position: relative;
+    z-index: 2;
+  }
+  
+  .step-content {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .step-content:hover {
+    transform: translateX(4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+  }
+  
+  .step-content h3 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .step-content p {
+    font-size: 16px;
+    color: var(--text2);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+  
+  .step-details {
+    display: grid;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .step-detail {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 15px;
+    color: var(--text2);
+  }
+  .step-detail svg {
+    flex-shrink: 0;
+    color: var(--orange);
+    margin-top: 2px;
+  }
+  
+  /* Key principles section */
+  .principles-section {
+    padding: 100px 0;
+    background: var(--surface);
+  }
+  .principles-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  .principles-header h2 {
+    font-size: 48px;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+  .principles-header p {
+    font-size: 18px;
+    color: var(--text2);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+  }
+  .principle-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .principle-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--orange);
+  }
+  .principle-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--orange-dim);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: var(--orange);
+  }
+  .principle-card h4 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .principle-card p {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  /* CTA section */
+  .cta-box {
+    background: var(--bg);
+    border: 2px solid var(--orange);
+    border-radius: var(--radius-lg);
+    padding: 64px 48px;
+    text-align: center;
+    margin: 80px 0 0;
+  }
+  .cta-box h2 {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+  .cta-box p {
+    font-size: 18px;
+    color: var(--text2);
+    margin-bottom: 32px;
+  }
+
+  @media (max-width: 768px) {
+    .page-hero h1 { font-size: 40px; }
+    .process-timeline::before { display: none; }
+    .process-step { grid-template-columns: 1fr; }
+    .step-number { margin: 0 auto; }
+    .principles-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <h1>How TrustLayer Works</h1>
+    <p>
+      Six steps from problem to verified resolution. Complete visibility at every stage.
+      No black boxes, no mystery queues, no lost tickets.
+    </p>
+  </div>
+</div>
+
+<div class="process-section">
+  <div class="container">
+    <div class="process-timeline">
+      
+      <div class="process-step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+            </svg>
+            You Submit a Report
+          </h3>
+          <p>
+            Describe the problem, provide transaction details, upload evidence (screenshots, receipts, emails).
+            Our form structures your case so nothing gets lost in translation.
+          </p>
+          <div class="step-details">
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>You get a unique Case ID (e.g., CASE-4721) immediately</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Case is tagged with problem type, priority, and routing metadata</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>All evidence is stored securely and attached to your case</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+            </svg>
+            We Route It to the Right Team
+          </h3>
+          <p>
+            Based on case type (fraud, payment dispute, account issue), priority (urgent, high, normal),
+            and merchant metadata, the case is assigned to a specialized investigation team.
+          </p>
+          <div class="step-details">
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Teams are staffed by issue type (Fraud, Payments, Identity, Account)</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Routing happens instantly — no manual triage delays</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Timeline shows "Assigned to [Team Name]" with timestamp</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+            Agent Opens Investigation
+          </h3>
+          <p>
+            An agent picks up your case from their queue. Status changes to "Under Investigation."
+            Timeline and messaging unlock so you can see every update and communicate directly.
+          </p>
+          <div class="step-details">
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>You see agent's name and can send messages in real-time</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Agent can request additional evidence or clarification</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Every action appears on the timeline immediately</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h3>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            Evidence Review & Merchant Contact
+          </h3>
+          <p>
+            Agent reviews all evidence, contacts the merchant or payment processor, and gathers additional
+            data. This stage can take 24-72 hours depending on case complexity.
+          </p>
+          <div class="step-details">
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Agent logs internal notes visible only to the team</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Customer sees updates like "Merchant contacted" or "Evidence reviewed"</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Estimated resolution time is displayed and updated</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number">5</div>
+        <div class="step-content">
+          <h3>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
+            </svg>
+            Agent Records Resolution
+          </h3>
+          <p>
+            Agent documents the outcome (refund processed, dispute won, account corrected, etc.),
+            includes proof or reference numbers, and marks case as "Pending Verification."
+          </p>
+          <div class="step-details">
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Resolution notes are visible to the customer</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Customer receives email/SMS with verification link</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Case does not close until customer verifies</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number">6</div>
+        <div class="step-content">
+          <h3>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+              <path d="M22 4L12 14.01l-3-3"/>
+            </svg>
+            You Verify the Resolution
+          </h3>
+          <p>
+            You confirm the problem is actually solved. Click "Yes, Resolved" to close the case,
+            or "No, Still an Issue" to reopen investigation. No resolution without verification.
+          </p>
+          <div class="step-details">
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Verified cases are permanently marked "Resolved" in your history</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span>Reopened cases go back to the same agent with your feedback</span>
+            </div>
+            <div class="step-detail">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+              <span">You can leave feedback and see aggregate resolution stats</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="principles-section">
+  <div class="container">
+    <div class="principles-header">
+      <h2>Our Core Principles</h2>
+      <p>Every design decision is built on these four pillars.</p>
+    </div>
+    
+    <div class="principles-grid">
+      <div class="principle-card">
+        <div class="principle-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <h4>Complete Visibility</h4>
+        <p>
+          You see every event, every message, every status change. No hidden steps, no mystery queues.
+        </p>
+      </div>
+      
+      <div class="principle-card">
+        <div class="principle-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <h4>Real-Time Updates</h4>
+        <p>
+          Timeline and messages update instantly. No refresh required, no delayed notifications.
+        </p>
+      </div>
+      
+      <div class="principle-card">
+        <div class="principle-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+            <path d="M22 4L12 14.01l-3-3"/>
+          </svg>
+        </div>
+        <h4>Verified Outcomes</h4>
+        <p>
+          Cases don't close until you confirm the problem is solved. Your verification is required.
+        </p>
+      </div>
+      
+      <div class="principle-card">
+        <div class="principle-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+        </div>
+        <h4>Secure & Private</h4>
+        <p>
+          All evidence is encrypted at rest and in transit. Only you and assigned agents see your case.
+        </p>
+      </div>
+    </div>
+
+    <div class="cta-box">
+      <h2>Ready to report a problem?</h2>
+      <p>Create your first case and see how the system works in real-time.</p>
+      <a href="/report/" class="btn btn-primary btn-lg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Create a Case
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

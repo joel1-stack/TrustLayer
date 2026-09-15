@@ -1,38 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Case Submitted — TrustLayer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root { --accent: #FF5522; --text: #111111; --text-secondary: #555; --bg: #FFFFFF; --bg-alt: #F8F8F8; --border: #EEE; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .card { max-width: 440px; width: 100%; text-align: center; padding: 48px 32px; }
-    .check { width: 72px; height: 72px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 24px; }
-    h1 { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; }
-    .case-id { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); background: var(--bg-alt); padding: 8px 16px; border-radius: 8px; display: inline-block; margin: 12px 0 20px; border: 1px solid var(--border); }
-    p { font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; line-height: 1.6; }
-    .btns { display: flex; gap: 12px; justify-content: center; }
-    .btns a { padding: 12px 28px; border-radius: 12px; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
-    .btns .primary { background: var(--accent); color: #fff; }
-    .btns .primary:hover { background: #E04418; }
-    .btns .secondary { background: var(--bg-alt); color: var(--text); border: 1px solid var(--border); }
-    .btns .secondary:hover { background: var(--border); }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="check">&#10003;</div>
-    <h1>Case submitted</h1>
-    <div class="case-id">{{ case_id }}</div>
-    <p>Save this case ID. You can use it to track the status of your case at any time.</p>
-    <div class="btns">
-      <a href="/case/{{ case_id }}/" class="primary">View Case</a>
-      <a href="/" class="secondary">Back to Home</a>
+{% extends "base.html" %}
+{% block title %}Case Submitted — TrustLayer{% endblock %}
+
+{% block content %}
+<div class="section">
+  <div class="container-xs" style="text-align:center; padding:80px 0;">
+    <div class="card card-lg">
+      <div style="width:72px;height:72px;margin:0 auto 20px;border-radius:50%;background:rgba(16,185,129,.15);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:32px;">✓</div>
+      <h1 style="font-size:32px;font-weight:900;margin-bottom:8px;">Case submitted</h1>
+      <p style="color:var(--text2);margin-bottom:20px;">Save this case ID. Use it to track every step until you verify the resolution.</p>
+      <div style="font-size:22px;font-weight:800;letter-spacing:.5px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:28px;">{{ case_id }}</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="/case/{{ case_id }}/" class="btn btn-primary">View case</a>
+        <a href="/track/" class="btn btn-secondary">Track another</a>
+      </div>
     </div>
   </div>
-</body>
-</html>
+</div>
+{% endblock %}

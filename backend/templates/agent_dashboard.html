@@ -1,93 +1,535 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agent Dashboard — TrustLayer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root { --accent: #FF5522; --accent-hover: #E04418; --text: #111111; --text-secondary: #555; --text-muted: #999; --bg: #FFFFFF; --bg-alt: #F8F8F8; --border: #EEE; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-alt); color: var(--text); min-height: 100vh; }
+{% extends "base.html" %}
 
-    .topbar { background: var(--bg); padding: 16px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
-    .brand { font-size: 18px; font-weight: 900; text-decoration: none; color: var(--text); }
-    .brand span { color: var(--accent); }
-    .topbar-right { display: flex; gap: 16px; align-items: center; }
-    .topbar-right a { font-size: 13px; color: var(--text-secondary); text-decoration: none; font-weight: 500; }
-    .topbar-right a:hover { color: var(--accent); }
+{% block title %}Agent Dashboard — TrustLayer{% endblock %}
 
-    .main { max-width: 960px; margin: 0 auto; padding: 24px 32px; }
-    h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 24px; }
+{% block extra_css %}
+<style>
+  /* ══════════════════════════════════════════
+     AGENT DASHBOARD STYLES
+  ══════════════════════════════════════════ */
+  .dashboard-wrap {
+    padding: 60px 0 100px;
+  }
 
-    .filters { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-    .filter-btn { padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.15s; }
-    .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
 
-    .cases-list { display: flex; flex-direction: column; gap: 8px; }
-    .case-row { display: grid; grid-template-columns: 140px 1fr 120px 100px 140px; gap: 16px; align-items: center; padding: 16px 20px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; text-decoration: none; color: var(--text); transition: all 0.15s; }
-    .case-row:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(255,85,34,0.06); }
-    .case-id { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--accent); }
-    .case-desc { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .case-desc span { color: var(--text-muted); font-weight: 400; }
-    .case-severity { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .case-severity.CRITICAL { color: #dc2626; }
-    .case-severity.HIGH { color: #ea580c; }
-    .case-severity.NORMAL { color: #059669; }
-    .case-severity.LOW { color: #6b7280; }
-    .case-status { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; }
-    .dot.OPEN { background: #3b82f6; }
-    .dot.INVESTIGATING { background: #f59e0b; }
-    .dot.RESOLVED { background: #10b981; }
-    .dot.CLOSED { background: #6b7280; }
-    .case-time { font-size: 12px; color: var(--text-muted); text-align: right; }
+  .dashboard-title {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
 
-    .empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 15px; }
+  .dashboard-subtitle {
+    font-size: 15px;
+    color: var(--text3);
+    margin-top: 6px;
+  }
 
-    @media (max-width: 768px) {
-      .case-row { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .case-severity, .case-time { grid-column: span 1; }
-    }
-  </style>
-</head>
-<body>
-  <div class="topbar">
-    <a href="/" class="brand"><span>Trust</span>Layer</a>
-    <div class="topbar-right">
-      <a href="/agent/">Dashboard</a>
-      <a href="/api/docs/">API</a>
-    </div>
-  </div>
+  /* Stats Cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+  }
 
-  <div class="main">
-    <h1>Cases</h1>
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    transition: transform .2s, border-color .2s;
+  }
 
-    <div class="filters">
-      <a href="/agent/" class="filter-btn {% if not status_filter %}active{% endif %}">All</a>
-      <a href="/agent/?status=OPEN" class="filter-btn {% if status_filter == 'OPEN' %}active{% endif %}">Open</a>
-      <a href="/agent/?status=INVESTIGATING" class="filter-btn {% if status_filter == 'INVESTIGATING' %}active{% endif %}">Investigating</a>
-      <a href="/agent/?status=RESOLVED" class="filter-btn {% if status_filter == 'RESOLVED' %}active{% endif %}">Resolved</a>
-      <a href="/agent/?status=CLOSED" class="filter-btn {% if status_filter == 'CLOSED' %}active{% endif %}">Closed</a>
-    </div>
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--orange);
+  }
 
-    {% if cases %}
-    <div class="cases-list">
-      {% for case in cases %}
-      <a href="/agent/case/{{ case.case_id }}/" class="case-row">
-        <div class="case-id">{{ case.case_id }}</div>
-        <div class="case-desc">{{ case.description|truncatewords:10 }} <span>&middot; {{ case.customer_name|default:"Anonymous" }}</span></div>
-        <div class="case-severity {{ case.severity }}">{{ case.severity }}</div>
-        <div class="case-status"><div class="dot {{ case.status }}"></div>{{ case.status }}</div>
-        <div class="case-time">{{ case.created_at|date:"M d, H:i" }}</div>
+  .stat-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .stat-card-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text3);
+  }
+
+  .stat-card-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--orange-dim);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--orange);
+  }
+
+  .stat-card-value {
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .stat-card-change {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text3);
+  }
+
+  .stat-card-change.positive {
+    color: var(--green);
+  }
+
+  .stat-card-change.negative {
+    color: var(--red);
+  }
+
+  /* Filters */
+  .filters-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filter-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text3);
+  }
+
+  .filter-select {
+    padding: 8px 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+
+  .filter-select:hover,
+  .filter-select:focus {
+    border-color: var(--orange);
+    outline: none;
+  }
+
+  .filter-select option {
+    background: var(--surface);
+  }
+
+  /* Cases Table */
+  .cases-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .cases-card-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cases-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .cases-count {
+    font-size: 13px;
+    color: var(--text3);
+    font-weight: 600;
+  }
+
+  .cases-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .cases-table thead {
+    background: var(--bg2);
+  }
+
+  .cases-table th {
+    padding: 14px 28px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cases-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+
+  .cases-table tbody tr:hover {
+    background: var(--bg2);
+  }
+
+  .cases-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .cases-table td {
+    padding: 20px 28px;
+    font-size: 14px;
+    color: var(--text2);
+  }
+
+  .case-id-cell {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .case-id-link {
+    color: var(--orange);
+    text-decoration: none;
+    transition: opacity .15s;
+  }
+
+  .case-id-link:hover {
+    opacity: 0.8;
+  }
+
+  .case-type {
+    font-size: 13px;
+    color: var(--text3);
+    margin-top: 3px;
+  }
+
+  .case-customer {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .case-time {
+    font-size: 13px;
+    color: var(--text3);
+  }
+
+  .case-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .empty-state {
+    padding: 60px 28px;
+    text-align: center;
+  }
+
+  .empty-state-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    background: var(--orange-dim);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--orange);
+  }
+
+  .empty-state-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .empty-state-text {
+    font-size: 14px;
+    color: var(--text3);
+  }
+
+  @media (max-width: 900px) {
+    .dashboard-header { flex-direction: column; align-items: flex-start; }
+    .cases-table { font-size: 13px; }
+    .cases-table th,
+    .cases-table td { padding: 12px 16px; }
+  }
+
+  @media (max-width: 640px) {
+    .filters-bar { flex-direction: column; align-items: stretch; }
+    .filter-group { flex-direction: column; align-items: stretch; }
+    .filter-select { width: 100%; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrap">
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">Agent Dashboard</h1>
+        <p class="dashboard-subtitle">Signed in as {{ agent_name }} · case queue</p>
+      </div>
+      <a href="/admin/logout/" class="btn btn-ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <path d="M16 17l5-5-5-5"/>
+          <path d="M21 12H9"/>
+        </svg>
+        Sign Out
       </a>
-      {% endfor %}
     </div>
-    {% else %}
-    <div class="empty">No cases found.</div>
-    {% endif %}
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-label">Active Cases</span>
+          <div class="stat-card-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-card-value">{{ stats.active_cases|default:0 }}</div>
+        <div class="stat-card-change">Open, investigating, verifying</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-label">Avg Response</span>
+          <div class="stat-card-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-card-value">{{ stats.verifying|default:0 }}</div>
+        <div class="stat-card-change">Waiting on customer</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-label">Resolved Today</span>
+          <div class="stat-card-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+              <path d="M22 4L12 14.01l-3-3"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-card-value">{{ stats.resolved_today|default:0 }}</div>
+        <div class="stat-card-change">Closed or resolved today</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-label">Success Rate</span>
+          <div class="stat-card-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M3 3v18h18"/>
+              <path d="M18 17l-5-5-4 4-6-6"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-card-value">{{ stats.total|default:0 }}</div>
+        <div class="stat-card-change">All cases</div>
+      </div>
+
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-bar">
+      <div class="filter-group">
+        <span class="filter-label">Status:</span>
+        <select class="filter-select" onchange="filterCases(this)">
+          <option value="all">All Cases</option>
+          <option value="OPEN">Open</option>
+          <option value="INVESTIGATING" selected>Investigating</option>
+          <option value="ESCALATED">Escalated</option>
+          <option value="VERIFYING">Verifying</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Priority:</span>
+        <select class="filter-select">
+          <option value="all">All Priorities</option>
+          <option value="CRITICAL">Critical</option>
+          <option value="HIGH">High</option>
+          <option value="NORMAL">Normal</option>
+          <option value="LOW">Low</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Type:</span>
+        <select class="filter-select">
+          <option value="all">All Types</option>
+          <option value="transaction_dispute">Transaction Dispute</option>
+          <option value="payment_issue">Payment Issue</option>
+          <option value="account_issue">Account Issue</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Cases Table -->
+    <div class="cases-card">
+      <div class="cases-card-header">
+        <h2 class="cases-card-title">Case Queue</h2>
+        <span class="cases-count">{{ cases|length|default:"3" }} cases</span>
+      </div>
+
+      <table class="cases-table">
+        <thead>
+          <tr>
+            <th>Case ID</th>
+            <th>Customer</th>
+            <th>Type</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>
+              <div class="case-id-cell">
+                <a href="/admin/case/CASE-9921/" class="case-id-link">CASE-9921</a>
+              </div>
+              <div class="case-type">Transaction not recognized</div>
+            </td>
+            <td>
+              <div class="case-customer">John Doe</div>
+              <div class="case-time">+254 712 345 678</div>
+            </td>
+            <td>Transaction Dispute</td>
+            <td><span class="badge badge-high">High</span></td>
+            <td><span class="badge badge-investigating">Investigating</span></td>
+            <td>
+              <div>14 Sep 2026</div>
+              <div class="case-time">12:03 PM</div>
+            </td>
+            <td class="case-actions">
+              <a href="/admin/case/CASE-9921/" class="btn btn-primary btn-sm">Open</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <div class="case-id-cell">
+                <a href="/admin/case/CASE-9920/" class="case-id-link">CASE-9920</a>
+              </div>
+              <div class="case-type">Payment reversal request</div>
+            </td>
+            <td>
+              <div class="case-customer">Jane Smith</div>
+              <div class="case-time">jane@example.com</div>
+            </td>
+            <td>Payment Issue</td>
+            <td><span class="badge badge-normal">Normal</span></td>
+            <td><span class="badge badge-investigating">Investigating</span></td>
+            <td>
+              <div>14 Sep 2026</div>
+              <div class="case-time">11:45 AM</div>
+            </td>
+            <td class="case-actions">
+              <a href="/admin/case/CASE-9920/" class="btn btn-primary btn-sm">Open</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <div class="case-id-cell">
+                <a href="/admin/case/CASE-9919/" class="case-id-link">CASE-9919</a>
+              </div>
+              <div class="case-type">Account security concern</div>
+            </td>
+            <td>
+              <div class="case-customer">Peter Kamau</div>
+              <div class="case-time">+254 700 123 456</div>
+            </td>
+            <td>Account Issue</td>
+            <td><span class="badge badge-critical">Critical</span></td>
+            <td><span class="badge badge-escalated">Escalated</span></td>
+            <td>
+              <div>14 Sep 2026</div>
+              <div class="case-time">11:20 AM</div>
+            </td>
+            <td class="case-actions">
+              <a href="/admin/case/CASE-9919/" class="btn btn-primary btn-sm">Open</a>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      {% comment %}
+      <!-- Empty State (show when no cases) -->
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+            <path d="M22 4L12 14.01l-3-3"/>
+          </svg>
+        </div>
+        <h3 class="empty-state-title">No cases found</h3>
+        <p class="empty-state-text">All cases have been resolved or match a different filter.</p>
+      </div>
+      {% endcomment %}
+
+    </div>
+
   </div>
-</body>
-</html>
+</div>
+
+<script>
+  function filterCases(select) {
+    // In production, this would filter via AJAX or page reload
+    console.log('Filter changed:', select.value);
+  }
+</script>
+{% endblock %}
