@@ -252,6 +252,7 @@
     <a href="#authentication">Authentication</a>
     <a href="#flow">How It Works</a>
     <div class="nav-label">V2 API (Operational)</div>
+    <a href="#v2-orgs">Organizations</a>
     <a href="#v2-create">Create Case</a>
     <a href="#v2-status">Case Status</a>
     <a href="#v2-timeline">Timeline</a>
@@ -271,7 +272,7 @@
       <div class="inner">
         <div class="badge">API Reference v2.0</div>
         <h1>TrustLayer <span class="accent">API</span></h1>
-        <p>System of Action for enterprise operations. Assemble context, diagnose problems, execute authorized actions, verify outcomes, and maintain complete operational truth.</p>
+        <p>Organization-agnostic System of Action. Banks, telcos, e-commerce -- embed TrustLayer into your existing systems. Assemble context, diagnose problems, execute actions, verify outcomes.</p>
         <div class="btns">
           <a href="#v2-create" class="primary">Explore Endpoints</a>
           <a href="/api/docs/schema/" class="secondary">OpenAPI Schema (JSON)</a>
@@ -376,9 +377,19 @@
     <section class="docs-section" id="cases">
       <div class="section-label">V2 API (Operational)</div>
       <h2 class="section-title">Operational Endpoints</h2>
-      <p class="section-desc">The V2 API exposes the full System of Action pipeline. Create a case, track its lifecycle, view diagnosis and actions, and verify resolution.</p>
+      <p class="section-desc">Organization-agnostic API. Create cases for any bank, telco, or e-commerce partner. The system assembles context, diagnoses, and resolves.</p>
 
       <div class="endpoint-list">
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/api/v1/v2/organizations/</span>
+          <span class="desc">List all active organizations (banks, telcos, e-commerce)</span>
+        </div>
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/api/v1/v2/organizations/detect/?mcc=639&mnc=02</span>
+          <span class="desc">Detect organization by SIM card MCC/MNC codes</span>
+        </div>
         <div class="endpoint">
           <span class="method post">POST</span>
           <span class="path">/api/v1/v2/cases/</span>
@@ -596,40 +607,40 @@
 
     <!-- INTEGRATIONS -->
     <section class="docs-section" id="integrations">
-      <div class="section-label">Integrations</div>
-      <h2 class="section-title">Built for Real Operator Systems</h2>
-      <p class="section-desc">Accessible APIs now, TM Forum and GSMA adapters designed from day one.</p>
+      <div class="section-label">Organizations</div>
+      <h2 class="section-title">One Platform. Every Organization.</h2>
+      <p class="section-desc">Banks, telcos, e-commerce -- embed TrustLayer into your existing systems via Widget, Deep Link, or API.</p>
 
       <div class="int-grid">
         <div class="int-card">
           <div class="tag live">Live</div>
-          <h3>Safaricom Daraja</h3>
-          <p>M-Pesa payment processing, STK push, transaction status, reconciliation.</p>
+          <h3>KCB Group</h3>
+          <p>Banking: fraud reports, transaction disputes, account issues.</p>
         </div>
         <div class="int-card">
           <div class="tag live">Live</div>
-          <h3>OpenAI Realtime</h3>
-          <p>Voice-to-voice customer interaction, intent classification, natural language.</p>
+          <h3>Safaricom</h3>
+          <p>Telco: data failures, M-Pesa issues, network problems.</p>
         </div>
         <div class="int-card">
           <div class="tag live">Live</div>
-          <h3>Africa's Talking</h3>
-          <p>SMS notifications, USSD menus, voice callbacks for case updates.</p>
+          <h3>Equity Bank</h3>
+          <p>Banking: card issues, loan disputes, account security.</p>
         </div>
         <div class="int-card">
-          <div class="tag soon">Design Phase</div>
-          <h3>TM Forum Open APIs</h3>
-          <p>TMF629 Customer, TMF678 Billing, TMF638 Service, TMF656 Problem.</p>
+          <div class="tag live">Live</div>
+          <h3>Airtel Kenya</h3>
+          <p>Telco: voice/SMS failures, Airtel Money issues.</p>
         </div>
         <div class="int-card">
-          <div class="tag soon">Design Phase</div>
+          <div class="tag live">Live</div>
+          <h3>Jumia</h3>
+          <p>E-commerce: order issues, refunds, seller disputes.</p>
+        </div>
+        <div class="int-card">
+          <div class="tag soon">Coming Soon</div>
           <h3>GSMA Open Gateway</h3>
-          <p>Number verification, SIM swap, device location, quality of demand.</p>
-        </div>
-        <div class="int-card">
-          <div class="tag soon">Design Phase</div>
-          <h3>Firebase FCM</h3>
-          <p>Push notifications to agent devices for approvals and case assignments.</p>
+          <p>Number verification, SIM swap, device signals.</p>
         </div>
       </div>
     </section>
@@ -639,35 +650,41 @@
       <div class="inner">
         <div class="section-label">Architecture</div>
         <h2 class="section-title">Enterprise Adapters</h2>
-        <p class="section-desc">Mock adapters for development. Production adapters connect to real operator systems via TM Forum and GSMA standards.</p>
+        <p class="section-desc">Organization-specific adapters for each vertical. Mock adapters for development, real adapters connect to KCB, Safaricom, Equity, Airtel, Jumia systems.</p>
 
         <div class="code-block">
           <div class="code-header">
             <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-            <span class="lang">Adapter Contract</span>
+            <span class="lang">Adapter Contracts</span>
           </div>
-          <pre><code><span class="comment">// Every adapter implements this interface:</span>
+          <pre><code><span class="comment">// Every adapter implements a vertical-specific contract:</span>
 
-<span class="keyword">class</span> <span class="property">SubscriberAdapter</span>:
-    <span class="keyword">def</span> get_subscriber(id)     → Subscriber
-    <span class="keyword">def</span> get_service(id)        → Service
-    <span class="keyword">def</span> get_balance(id)        → Balance
-    <span class="keyword">def</span> get_bundle(id)         → Bundle
+<span class="keyword">class</span> <span class="property">CustomerContextAdapter</span>:
+    <span class="keyword">def</span> get_customer(customer_id) → Customer
+    <span class="keyword">def</span> get_account(customer_id) → Account
 
-<span class="keyword">class</span> <span class="property">BillingAdapter</span>:
-    <span class="keyword">def</span> get_account(id)        → Account
-    <span class="keyword">def</span> get_transactions(id)   → [Transaction]
-    <span class="keyword">def</span> get_balance(id)        → Balance
+<span class="keyword">class</span> <span class="property">ServiceContextAdapter</span>:
+    <span class="keyword">def</span> get_service(customer_id) → Service
+    <span class="keyword">def</span> get_network_state(customer_id) → NetworkState
 
-<span class="keyword">class</span> <span class="property">NetworkAdapter</span>:
-    <span class="keyword">def</span> get_device(id)         → Device
-    <span class="keyword">def</span> get_network_state(id)  → NetworkState
-    <span class="keyword">def</span> get_incidents(area)    → [Incident]
-    <span class="keyword">def</span> activate_service(id)   → Result
-    <span class="keyword">def</span> verify_service(id)     → VerificationResult
+<span class="keyword">class</span> <span class="property">BillingContextAdapter</span>:
+    <span class="keyword">def</span> get_account(customer_id) → Account
+    <span class="keyword">def</span> get_balance(customer_id) → Balance
 
-<span class="comment">// Today: MockSubscriberAdapter, MockBillingAdapter, MockNetworkAdapter</span>
-<span class="comment">// Tomorrow: SafaricomSubscriberAdapter, TMFCustomerAdapter, CAMARADeviceAdapter</span></code></pre>
+<span class="keyword">class</span> <span class="property">NetworkContextAdapter</span>:
+    <span class="keyword">def</span> get_device(customer_id) → Device
+    <span class="keyword">def</span> get_incidents(area) → [Incident]
+    <span class="keyword">def</span> activate_service(customer_id) → Result
+
+<span class="keyword">class</span> <span class="property">FraudSignalAdapter</span>:
+    <span class="keyword">def</span> get_fraud_signals(customer_id) → FraudSignals
+
+<span class="keyword">class</span> <span class="property">ActionAdapter</span>:
+    <span class="keyword">def</span> execute(action_type, params) → ActionResult
+
+<span class="comment">// AdapterRegistry: get(slug, adapter_type) → org-specific adapter</span>
+<span class="comment">// kcb → TelcoMockAdapters | safaricom → TelcoMockAdapters</span>
+<span class="comment">// jumia → EcommerceMockAdapters | equity → BankingMockAdapters</span></code></pre>
         </div>
       </div>
     </section>
@@ -803,37 +820,17 @@
             <a href="/admin/engines/">Engines</a>
           </div>
           <div class="tl-footer-column">
-            <h3>ENGINES</h3>
+            <h3>ORGANIZATIONS</h3>
             <div class="tl-orange-line"></div>
-            <a href="#">Context</a>
-            <a href="#">Diagnosis</a>
-            <a href="#">Policy</a>
-            <a href="#">Action</a>
-            <a href="#">Verification</a>
-          </div>
-          <div class="tl-footer-column">
-            <h3>INTEGRATIONS</h3>
-            <div class="tl-orange-line"></div>
-            <a href="#">Safaricom Daraja</a>
-            <a href="#">OpenAI Realtime</a>
-            <a href="#">Africa's Talking</a>
-            <a href="#">TM Forum</a>
-            <a href="#">GSMA Open Gateway</a>
+            <a href="#">KCB Group</a>
+            <a href="#">Safaricom</a>
+            <a href="#">Equity Bank</a>
+            <a href="#">Airtel Kenya</a>
+            <a href="#">Jumia</a>
           </div>
         </div>
         <div class="tl-footer-bottom">
           <p><span class="tl-copyright">&copy;</span> 2026 TrustLayer. Built in Kenya.</p>
-          <div class="tl-socials">
-            <a href="https://github.com/trustlayer" target="_blank" rel="noopener" aria-label="GitHub">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-            </a>
-            <a href="https://x.com/trustlayer" target="_blank" rel="noopener" aria-label="X (Twitter)">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-            <a href="https://linkedin.com/company/trustlayer" target="_blank" rel="noopener" aria-label="LinkedIn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-            </a>
-          </div>
         </div>
       </section>
     </footer>

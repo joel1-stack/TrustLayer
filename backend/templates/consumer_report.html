@@ -125,15 +125,12 @@
         <input type="hidden" name="problem_type" id="hidden-problem">
 
         <div class="form-group">
-          <label class="form-label">Which service?</label>
+          <label class="form-label">Which organization?</label>
           <select name="provider" class="form-select" id="provider-select">
-            <option value="">Select provider</option>
-            <option value="safaricom">Safaricom</option>
-            <option value="equity">Equity Bank</option>
-            <option value="kcb">KCB Bank</option>
-            <option value="mpesa">M-Pesa</option>
-            <option value="airtel">Airtel</option>
-            <option value="other">Other</option>
+            <option value="">Select organization</option>
+            {% for org in organizations %}
+            <option value="{{ org.slug }}">{{ org.name }}</option>
+            {% endfor %}
           </select>
         </div>
 

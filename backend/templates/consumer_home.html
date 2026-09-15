@@ -131,10 +131,10 @@
     <div class="cases-list">
       {% for case in cases %}
       <a href="/portal/consumer/case/{{ case.case_id }}/" class="case-card">
-        <div class="case-icon {{ case.category }}">{{ case.icon }}</div>
+        <div class="case-icon">{{ case.organization|default:"?" }}</div>
         <div class="case-info">
           <div class="case-title">{{ case.title }}</div>
-          <div class="case-id">{{ case.case_id }}</div>
+          <div class="case-id">{{ case.case_id }} &middot; {{ case.organization|default:"General" }}</div>
         </div>
         <div class="case-right">
           <div class="case-status {{ case.status_class }}">
