@@ -12,6 +12,7 @@ Flow:
 """
 
 import logging
+from django.utils import timezone
 from apps.state_machine.services import StateMachine
 from apps.ledger.services import LedgerService
 from apps.notifications.services import NotificationService
@@ -371,7 +372,7 @@ class Orchestrator:
                     case=case,
                     rule=rule,
                     decision='approved',
-                    reason=f'Auto-approved for {root_cause}',
+                    reason=f'Auto-approved for {diagnosis.root_cause}',
                     decided_by='system',
                 )
                 if decision.decision != 'approved':
@@ -389,7 +390,7 @@ class Orchestrator:
                 actions.append(plan)
 
         StateMachine.transition(
-            case, 'DISPUTED',
+            case, 'HELD',
             triggered_by='orchestrator',
             actor_role='system',
             channel='system',
@@ -420,7 +421,7 @@ class Orchestrator:
                     plan=plan,
                     outcome='success',
                     response_data=response,
-                    executed_at=__import__('django.utils.timezone', fromlist=['timezone']).timezone.now(),
+                    executed_at=timezone.now(),
                     duration_ms=duration,
                 )
                 plan.status = 'completed'
@@ -431,7 +432,7 @@ class Orchestrator:
                     plan=plan,
                     outcome='failed',
                     error_message=str(e),
-                    executed_at=__import__('django.utils.timezone', fromlist=['timezone']).timezone.now(),
+                    executed_at=timezone.now(),
                 )
                 plan.status = 'failed'
                 plan.save(update_fields=['status'])
@@ -440,7 +441,7 @@ class Orchestrator:
         all_success = all(r.outcome == 'success' for r in results)
         if all_success:
             StateMachine.transition(
-                case, 'HELD',
+                case, 'READY',
                 triggered_by='orchestrator',
                 actor_role='system',
                 channel='system',
@@ -449,7 +450,7 @@ class Orchestrator:
             )
         else:
             StateMachine.transition(
-                case, 'FAILED',
+                case, 'DISPUTED',
                 triggered_by='orchestrator',
                 actor_role='system',
                 channel='system',
@@ -477,7 +478,7 @@ class Orchestrator:
                 expected_value=check_data['expected'],
                 actual_value=check_data['actual'],
                 passed=check_data['expected'] == check_data['actual'],
-                checked_at=__import__('django.utils.timezone', fromlist=['timezone']).timezone.now(),
+                checked_at=timezone.now(),
             )
             if check.passed:
                 passed += 1
@@ -488,12 +489,12 @@ class Orchestrator:
             checks_total=total,
             checks_passed=passed,
             recovery_confirmed=passed == total,
-            verified_at=__import__('django.utils.timezone', fromlist=['timezone']).timezone.now(),
+            verified_at=timezone.now(),
         )
 
         if result.recovery_confirmed:
             StateMachine.transition(
-                case, 'RECONCILING',
+                case, 'SETTLING',
                 triggered_by='orchestrator',
                 actor_role='system',
                 channel='system',
@@ -502,12 +503,7 @@ class Orchestrator:
             )
             NotificationService.on_agreement_settled(case)
         else:
-            StateMachine.transition(
-                case, 'FAILED',
-                triggered_by='orchestrator',
-                actor_role='system',
-                channel='system',
-                reason='Verification failed',
-            )
+            # Verification failed — stay in READY, customer can escalate via feedback
+            pass
 
         return result

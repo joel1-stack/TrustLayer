@@ -75,6 +75,10 @@ class Case(models.Model):
     def __str__(self):
         return f"{self.case_id} [{self.status}] {self.title}"
 
+    @property
+    def agreement_id(self):
+        return self.case_id
+
 
 class CaseParty(models.Model):
     agreement = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='parties')
