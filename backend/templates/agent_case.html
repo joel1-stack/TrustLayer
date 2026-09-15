@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ case.case_id }} — Agent — TrustLayer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root { --accent: #FF5522; --accent-hover: #E04418; --text: #111111; --text-secondary: #555; --text-muted: #999; --bg: #FFFFFF; --bg-alt: #F8F8F8; --border: #EEE; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-alt); color: var(--text); min-height: 100vh; }
+
+    .topbar { background: var(--bg); padding: 16px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 10; }
+    .back-btn { font-size: 20px; color: var(--text-secondary); text-decoration: none; }
+    .back-btn:hover { color: var(--accent); }
+    .topbar-id { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); font-weight: 600; }
+
+    .main { max-width: 800px; margin: 0 auto; padding: 24px 32px; display: grid; grid-template-columns: 1fr 340px; gap: 16px; }
+
+    .card { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+    .card h3 { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 16px; }
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--text-secondary); }
+    .info-value { font-weight: 600; }
+    .info-value.mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+    .status-banner { display: flex; align-items: center; gap: 12px; padding: 20px; background: var(--bg); border-radius: 16px; border: 1px solid var(--border); grid-column: 1 / -1; }
+    .status-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .status-dot.OPEN { background: #3b82f6; }
+    .status-dot.INVESTIGATING { background: #f59e0b; }
+    .status-dot.RESOLVED { background: #10b981; }
+    .status-dot.CLOSED { background: #6b7280; }
+    .status-value { font-size: 18px; font-weight: 800; }
+
+    .tl-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .tl-item:last-child { border-bottom: none; }
+    .tl-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-top: 5px; flex-shrink: 0; }
+
+    .action-btn { display: block; width: 100%; padding: 12px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; margin-bottom: 8px; text-align: center; text-decoration: none; }
+    .action-btn.investigate { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+    .action-btn.investigate:hover { background: #FDE68A; }
+    .action-btn.resolve { background: #dcfce7; color: #166534; border: 1px solid #BBF7D0; }
+    .action-btn.resolve:hover { background: #BBF7D0; }
+    .action-btn.close { background: var(--bg-alt); color: var(--text-secondary); border: 1px solid var(--border); }
+    .action-btn.close:hover { background: var(--border); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; height: 42px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-alt);
+      padding: 0 12px; font-size: 13px; font-family: 'Inter', sans-serif; outline: none;
+    }
+    .form-textarea { height: 80px; padding: 10px 12px; resize: vertical; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+    .form-select { appearance: none; }
+
+    .msg-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .msg-item:last-child { border-bottom: none; }
+    .msg-sender { font-size: 12px; font-weight: 700; }
+    .msg-text { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+    .empty { font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+    @media (max-width: 768px) {
+      .main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="/agent/" class="back-btn">&larr;</a>
+    <div class="topbar-id">{{ case.case_id }}</div>
+  </div>
+
+  <div class="main">
+    <div class="status-banner">
+      <div class="status-dot {{ case.status }}"></div>
+      <div class="status-value">{{ case.get_status_display }}</div>
+      <div style="flex:1"></div>
+      <div style="font-size:13px;color:var(--text-muted);">{{ case.created_at|date:"M d, Y H:i" }}</div>
+    </div>
+
+    <div class="card">
+      <h3>Case Details</h3>
+      <div class="info-row"><span class="info-label">Case ID</span><span class="info-value mono">{{ case.case_id }}</span></div>
+      {% if case.txn_id %}<div class="info-row"><span class="info-label">Transaction</span><span class="info-value mono">{{ case.txn_id }}</span></div>{% endif %}
+      {% if case.amount %}<div class="info-row"><span class="info-label">Amount</span><span class="info-value">{{ case.currency }} {{ case.amount }}</span></div>{% endif %}
+      <div class="info-row"><span class="info-label">Severity</span><span class="info-value">{{ case.severity }}</span></div>
+      <div class="info-row"><span class="info-label">Customer</span><span class="info-value">{{ case.customer_name|default:"Anonymous" }}</span></div>
+      {% if case.customer_email %}<div class="info-row"><span class="info-label">Email</span><span class="info-value">{{ case.customer_email }}</span></div>{% endif %}
+      {% if case.customer_phone %}<div class="info-row"><span class="info-label">Phone</span><span class="info-value">{{ case.customer_phone }}</span></div>{% endif %}
+      <div class="info-row"><span class="info-label">Assigned</span><span class="info-value">{{ case.assigned_team }}</span></div>
+      {% if case.resolution %}
+      <div class="info-row"><span class="info-label">Resolution</span><span class="info-value">{{ case.resolution }}</span></div>
+      <div class="info-row"><span class="info-label">Resolved By</span><span class="info-value">{{ case.resolved_by }}</span></div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h3>Description</h3>
+      <p style="font-size:14px;color:var(--text-secondary);line-height:1.7;">{{ case.description }}</p>
+    </div>
+
+    <div class="card">
+      <h3>Timeline</h3>
+      {% for t in timeline %}
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div>{{ t.from_status|default:"New" }} → {{ t.to_status }} &middot; {{ t.reason }} &middot; {{ t.triggered_by }}</div>
+      </div>
+      {% empty %}
+      <p class="empty">No timeline entries.</p>
+      {% endfor %}
+    </div>
+
+    <!-- Sidebar -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="card">
+        <h3>Actions</h3>
+        {% if case.status == 'OPEN' %}
+        <form method="post" style="margin-bottom:8px;">{% csrf_token %}
+          <input type="hidden" name="action" value="investigate">
+          <button type="submit" class="action-btn investigate">Pick Up Case</button>
+        </form>
+        {% endif %}
+
+        {% if case.status == 'INVESTIGATING' or case.status == 'OPEN' %}
+        <form method="post">{% csrf_token %}
+          <input type="hidden" name="action" value="resolve">
+          <div class="form-row">
+            <select name="resolution" class="form-select">
+              <option value="CONFIRMED_FRAUD">Confirmed Fraud</option>
+              <option value="RESOLVED">Resolved</option>
+              <option value="REFUNDED">Refunded</option>
+              <option value="DISMISSED">Dismissed</option>
+            </select>
+            <input type="text" name="agent_id" class="form-input" placeholder="Agent ID">
+          </div>
+          <textarea name="note" class="form-textarea" placeholder="Resolution note..."></textarea>
+          <button type="submit" class="action-btn resolve" style="margin-top:8px;">Resolve Case</button>
+        </form>
+        {% endif %}
+
+        {% if case.status == 'RESOLVED' %}
+        <form method="post">{% csrf_token %}
+          <input type="hidden" name="action" value="close">
+          <button type="submit" class="action-btn close">Close Case</button>
+        </form>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h3>Messages</h3>
+        {% for m in messages %}
+        <div class="msg-item">
+          <div class="msg-sender">{{ m.sender }} <span style="font-weight:400;color:var(--text-muted);">({{ m.sender_type }})</span></div>
+          <div class="msg-text">{{ m.text }}</div>
+        </div>
+        {% empty %}
+        <p class="empty">No messages.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

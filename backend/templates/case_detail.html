@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ case.case_id }} — TrustLayer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root { --accent: #FF5522; --text: #111111; --text-secondary: #555; --text-muted: #999; --bg: #FFFFFF; --bg-alt: #F8F8F8; --border: #EEE; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-alt); color: var(--text); min-height: 100vh; }
+
+    .topbar { background: var(--bg); padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 10; }
+    .back-btn { font-size: 20px; color: var(--text-secondary); text-decoration: none; }
+    .back-btn:hover { color: var(--accent); }
+    .topbar-id { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); font-weight: 600; }
+    .topbar-title { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+
+    .main { max-width: 640px; margin: 0 auto; padding: 24px; }
+
+    .status-banner { display: flex; align-items: center; gap: 16px; padding: 24px; background: var(--bg); border-radius: 16px; border: 1px solid var(--border); margin-bottom: 16px; }
+    .status-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .status-dot.OPEN { background: #3b82f6; }
+    .status-dot.INVESTIGATING { background: #f59e0b; }
+    .status-dot.RESOLVED { background: #10b981; }
+    .status-dot.CLOSED { background: #6b7280; }
+    .status-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    .status-value { font-size: 20px; font-weight: 800; }
+
+    .info-card { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+    .info-card h3 { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 16px; }
+    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 14px; color: var(--text-secondary); }
+    .info-value { font-size: 14px; font-weight: 600; }
+    .info-value.mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+    .info-value.description { max-width: 60%; text-align: right; line-height: 1.5; }
+
+    .timeline-card { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+    .timeline-card h3 { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 16px; }
+    .tl-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .tl-item:last-child { border-bottom: none; }
+    .tl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 6px; flex-shrink: 0; }
+    .tl-content { flex: 1; }
+    .tl-text { font-size: 14px; }
+    .tl-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .messages-card { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+    .messages-card h3 { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 16px; }
+    .msg-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .msg-item:last-child { border-bottom: none; }
+    .msg-sender { font-size: 13px; font-weight: 700; }
+    .msg-text { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+    .msg-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    .empty { font-size: 14px; color: var(--text-muted); font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="/" class="back-btn">&larr;</a>
+    <div>
+      <div class="topbar-id">{{ case.case_id }}</div>
+      <div class="topbar-title">{{ case.description|truncatewords:8 }}</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="status-banner">
+      <div class="status-dot {{ case.status }}"></div>
+      <div>
+        <div class="status-label">Status</div>
+        <div class="status-value">{{ case.get_status_display }}</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>Case Information</h3>
+      <div class="info-row"><span class="info-label">Case ID</span><span class="info-value mono">{{ case.case_id }}</span></div>
+      {% if case.txn_id %}<div class="info-row"><span class="info-label">Transaction ID</span><span class="info-value mono">{{ case.txn_id }}</span></div>{% endif %}
+      {% if case.amount %}<div class="info-row"><span class="info-label">Amount</span><span class="info-value">{{ case.currency }} {{ case.amount }}</span></div>{% endif %}
+      <div class="info-row"><span class="info-label">Severity</span><span class="info-value">{{ case.severity }}</span></div>
+      <div class="info-row"><span class="info-label">Assigned To</span><span class="info-value">{{ case.assigned_team }}</span></div>
+      <div class="info-row"><span class="info-label">Created</span><span class="info-value">{{ case.created_at|date:"M d, Y H:i" }}</span></div>
+      {% if case.resolution %}
+      <div class="info-row"><span class="info-label">Resolution</span><span class="info-value">{{ case.resolution }}</span></div>
+      <div class="info-row"><span class="info-label">Resolved By</span><span class="info-value">{{ case.resolved_by }}</span></div>
+      {% endif %}
+    </div>
+
+    <div class="info-card">
+      <h3>Description</h3>
+      <p style="font-size:14px;color:var(--text-secondary);line-height:1.7;">{{ case.description }}</p>
+    </div>
+
+    <div class="timeline-card">
+      <h3>Timeline</h3>
+      {% for t in timeline %}
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-text">{{ t.from_status|default:"New" }} → {{ t.to_status }}</div>
+          <div class="tl-meta">{{ t.reason }} &middot; {{ t.triggered_by }} &middot; {{ t.created_at|date:"M d, H:i" }}</div>
+        </div>
+      </div>
+      {% empty %}
+      <p class="empty">No timeline entries yet.</p>
+      {% endfor %}
+    </div>
+
+    <div class="messages-card">
+      <h3>Messages</h3>
+      {% for m in messages %}
+      <div class="msg-item">
+        <div class="msg-sender">{{ m.sender }} <span style="font-weight:400;color:var(--text-muted);">({{ m.sender_type }})</span></div>
+        <div class="msg-text">{{ m.text }}</div>
+        <div class="msg-time">{{ m.created_at|date:"M d, H:i" }}</div>
+      </div>
+      {% empty %}
+      <p class="empty">No messages yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>

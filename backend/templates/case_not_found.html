@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Case Not Found — TrustLayer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root { --accent: #FF5522; --text: #111111; --text-secondary: #555; --bg: #FFFFFF; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .card { max-width: 440px; width: 100%; text-align: center; padding: 48px 32px; }
+    .icon { font-size: 48px; margin-bottom: 16px; }
+    h1 { font-size: 1.5rem; font-weight: 900; margin-bottom: 8px; }
+    p { font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; }
+    a { padding: 12px 28px; border-radius: 12px; font-size: 14px; font-weight: 700; text-decoration: none; background: var(--accent); color: #fff; }
+    a:hover { background: #E04418; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🔍</div>
+    <h1>Case not found</h1>
+    <p>No case found with ID "{{ case_id }}". Check the ID and try again.</p>
+    <a href="/track/">Track another case</a>
+  </div>
+</body>
+</html>

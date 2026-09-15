@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report a Problem — TrustLayer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #FF5522;
+      --accent-hover: #E04418;
+      --accent-light: #FFF4F0;
+      --dark: #111111;
+      --text: #111111;
+      --text-secondary: #555;
+      --text-muted: #999;
+      --bg: #FFFFFF;
+      --bg-alt: #F8F8F8;
+      --border: #EEE;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+    .topbar { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+    .back-btn { font-size: 20px; color: var(--text-secondary); text-decoration: none; }
+    .back-btn:hover { color: var(--accent); }
+    .topbar-title { font-size: 16px; font-weight: 700; }
+
+    .main { flex: 1; max-width: 560px; width: 100%; margin: 0 auto; padding: 40px 24px; }
+    .step-title { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; }
+    .step-subtitle { font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; height: 50px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-alt);
+      padding: 0 16px; font-size: 15px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s;
+    }
+    .form-textarea { height: 120px; padding: 14px 16px; resize: vertical; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); background: var(--bg); }
+    .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23999' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; }
+
+    .submit-btn {
+      width: 100%; height: 54px; border-radius: 14px; background: var(--accent); color: #fff;
+      border: none; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; margin-top: 8px;
+    }
+    .submit-btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,85,34,0.25); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="/" class="back-btn">&larr;</a>
+    <span class="topbar-title">Report a Problem</span>
+  </div>
+
+  <div class="main">
+    <h1 class="step-title">What happened?</h1>
+    <p class="step-subtitle">Describe the problem. Include as much detail as possible.</p>
+
+    <form method="post" action="/report/submit/">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label class="form-label">Your name</label>
+        <input type="text" name="customer_name" class="form-input" placeholder="Full name" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="customer_email" class="form-input" placeholder="you@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input type="tel" name="customer_phone" class="form-input" placeholder="+254...">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Transaction ID</label>
+          <input type="text" name="txn_id" class="form-input" placeholder="e.g. TXN-8839201">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount</label>
+          <input type="number" name="amount" class="form-input" placeholder="e.g. 5000" step="0.01">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Severity</label>
+        <select name="severity" class="form-select">
+          <option value="LOW">Low — Minor issue</option>
+          <option value="NORMAL" selected>Normal — Needs attention</option>
+          <option value="HIGH">High — Urgent</option>
+          <option value="CRITICAL">Critical — Emergency</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">What happened?</label>
+        <textarea name="description" class="form-textarea" placeholder="Describe the problem in your own words. What did you expect? What actually happened?" required></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn">Submit Case</button>
+    </form>
+  </div>
+</body>
+</html>

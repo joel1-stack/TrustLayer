@@ -22,32 +22,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework.authtoken',
-    'rest_framework_simplejwt',
     'drf_spectacular',
-    'django_filters',
     'corsheaders',
-    # TrustLayer Core Engines
-    'apps.organizations',
+    # TrustLayer
     'apps.agreements',
     'apps.state_machine',
-    'apps.conditions',
-    'apps.ledger',
-    'apps.settlements',
-    'apps.notifications',
-    'apps.orchestration',
-    'apps.payments',
-    # Dashboards
+    'apps.api_v1',
     'apps.admin_dashboard',
     'apps.customer_portal',
-    'apps.api_v1',
-    # New Engines
-    'apps.context_engine',
-    'apps.diagnosis_engine',
-    'apps.policy_engine',
-    'apps.action_engine',
-    'apps.verification_engine',
-    'apps.enterprise_adapters',
 ]
 
 MIDDLEWARE = [
