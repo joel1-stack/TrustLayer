@@ -37,9 +37,9 @@
 </style>
 
 <div style="max-width:1200px;margin:0 auto;">
-  <div class="section-title">⚙️ Platform Engines
+  <div class="section-title">⚙️ System of Action Engines
     <span style="font-size:13px;font-weight:400;color:#64748b;margin-left:8px;">
-      Configure how TrustLayer processes agreements, payments, and settlements
+      Configure how TrustLayer processes cases through the diagnostic and resolution pipeline
     </span>
   </div>
 
@@ -60,7 +60,7 @@
       <div class="engine-config-list">
         {% for key, val in engine.settings.items %}
         <div class="config-row">
-          <span class="config-key">{{ engine.fields|first|cut:key }}{{ key|cut:"engine_"|cut:"TRUSTLAYER_"|cut:"PLATFORM_"|title }}</span>
+          <span class="config-key">{{ key|cut:"engine_"|cut:"TRUSTLAYER_"|cut:"PLATFORM_"|title }}</span>
           <span>{{ val }}</span>
         </div>
         {% endfor %}
@@ -73,38 +73,6 @@
       <div class="engine-actions">
         <a href="/admin/engines/{{ engine.id }}/" class="btn btn-primary">Configure</a>
         <a href="/admin/engines/{{ engine.id }}/test/" class="btn btn-outline test-engine" data-engine="{{ engine.id }}">Test</a>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-
-  <div class="section-title" style="margin-top:40px;">🔌 Payment Providers
-    <span style="font-size:13px;font-weight:400;color:#64748b;margin-left:8px;">
-      Connect payment APIs for collections and payouts
-    </span>
-  </div>
-
-  <div class="provider-grid">
-    {% for provider in providers %}
-    <div class="provider-card">
-      <div class="provider-header">
-        <span class="provider-name">{{ provider.name }}</span>
-        <span class="provider-badge {% if provider.configured %}badge-configured{% else %}badge-missing{% endif %}">
-          {{ provider.configured|yesno:"Configured,Not Configured" }}
-        </span>
-      </div>
-      <div class="config-row" style="margin-bottom:8px;">
-        <span class="config-key">Adapter</span>
-        <span>{{ provider.id }}</span>
-      </div>
-      {% for key, val in provider.settings.items %}
-      <div class="config-row">
-        <span class="config-key">{{ key|cut:"PLATFORM_"|cut:"MPESA_"|title }}</span>
-        <span>{{ val|truncatechars:20 }}</span>
-      </div>
-      {% endfor %}
-      <div class="engine-actions">
-        <a href="/admin/engines/provider/{{ provider.id }}/" class="btn btn-outline" style="margin-top:8px;">Configure</a>
       </div>
     </div>
     {% endfor %}

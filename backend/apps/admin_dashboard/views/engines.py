@@ -8,113 +8,87 @@ from ..models import PlatformSettings, AuditLogEntry
 from apps.payments.adapters.registry import get_adapter, list_providers, register_adapter
 
 ENGINE_DEFINITIONS = {
-    'agreement': {
-        'name': 'Agreement Engine',
-        'icon': '📋',
-        'desc': 'Creates and manages agreements, parties, split rules. Routes money flows between buyers and sellers.',
+    'context': {
+        'name': 'Context Engine',
+        'icon': '🔗',
+        'desc': 'Assembles subscriber, billing, network, and device data from enterprise adapters into a unified case context.',
         'fields': [
-            {'key': 'engine_agreement_auto_approve', 'label': 'Auto-Approve Cases', 'type': 'bool', 'default': 'true'},
-            {'key': 'engine_agreement_max_amount', 'label': 'Max Case Amount (KES)', 'type': 'text', 'default': '1000000'},
-            {'key': 'engine_agreement_require_verification', 'label': 'Require Email Verification', 'type': 'bool', 'default': 'true'},
+            {'key': 'engine_context_timeout', 'label': 'Assembly Timeout (sec)', 'type': 'text', 'default': '30'},
+            {'key': 'engine_context_parallel', 'label': 'Parallel Fetching', 'type': 'bool', 'default': 'true'},
+            {'key': 'engine_context_cache_ttl', 'label': 'Cache TTL (sec)', 'type': 'text', 'default': '300'},
         ],
-        'test_action': 'Create and verify a test case',
-        'endpoints': ['POST /api/cases/', 'GET /api/cases/<id>/'],
+        'test_action': 'Assemble context for a test subscriber',
+        'endpoints': ['POST /api/v1/v2/cases/', 'GET /api/v1/v2/cases/<id>/'],
     },
-    'ledger': {
-        'name': 'Ledger Engine',
-        'icon': '📊',
-        'desc': 'Double-entry bookkeeping. Tracks every credit/debit per agreement and party.',
+    'diagnosis': {
+        'name': 'Diagnosis Engine',
+        'icon': '🔍',
+        'desc': 'Identifies root cause from assembled context using rule-based analysis and confidence scoring.',
         'fields': [
-            {'key': 'engine_ledger_auto_entry', 'label': 'Auto-Create Ledger Entries', 'type': 'bool', 'default': 'true'},
-            {'key': 'engine_ledger_retention_days', 'label': 'Retention Period (days)', 'type': 'text', 'default': '365'},
+            {'key': 'engine_diagnosis_confidence_threshold', 'label': 'Min Confidence Threshold', 'type': 'text', 'default': '0.7'},
+            {'key': 'engine_diagnosis_auto_escalate', 'label': 'Auto-Escalate Low Confidence', 'type': 'bool', 'default': 'true'},
         ],
-        'test_action': 'Query ledger entries for an agreement',
-        'endpoints': ['GET /api/ledger/<agreement_id>/', 'GET /internal/health/'],
+        'test_action': 'Diagnose a test case',
+        'endpoints': ['GET /api/v1/v2/cases/<id>/', 'GET /api/v1/v2/cases/<id>/timeline/'],
     },
-    'rule': {
-        'name': 'Rule Engine',
+    'policy': {
+        'name': 'Policy Engine',
         'icon': '⚖️',
-        'desc': 'Split rules, fee rules, conditions. Defines how money is divided and when.',
+        'desc': 'Authorizes actions based on rules, risk level, and operator clearance. Enforces compliance.',
         'fields': [
-            {'key': 'TRUSTLAYER_PLATFORM_FEE_PERCENT', 'label': 'Platform Fee (%)', 'type': 'text', 'default': '5.00'},
-            {'key': 'TRUSTLAYER_PLATFORM_PHONE', 'label': 'Platform Collection Phone', 'type': 'text', 'default': '+254715641339'},
-            {'key': 'engine_rule_default_split', 'label': 'Default Split Mode', 'type': 'select', 'options': ['percentage', 'fixed', 'equally'], 'default': 'percentage'},
+            {'key': 'engine_policy_auto_approve', 'label': 'Auto-Approve Low Risk', 'type': 'bool', 'default': 'true'},
+            {'key': 'engine_policy_max_risk_level', 'label': 'Max Auto-Approve Risk', 'type': 'select', 'options': ['LOW', 'MEDIUM', 'HIGH'], 'default': 'MEDIUM'},
         ],
-        'test_action': 'Calculate split for a sample agreement',
-        'endpoints': ['POST /api/rules/calculate-split/', 'GET /api/rules/'],
+        'test_action': 'Evaluate policy for a test action',
+        'endpoints': ['POST /api/v1/v2/cases/', 'GET /api/v1/v2/cases/<id>/'],
     },
-    'settlement': {
-        'name': 'Settlement Engine',
-        'icon': '💸',
-        'desc': 'Pays out parties via M-Pesa, bank transfer, or Stripe. Tracks status.',
+    'action': {
+        'name': 'Action Engine',
+        'icon': '⚡',
+        'desc': 'Executes authorized remediation across enterprise systems — reactivation, config changes, credits.',
         'fields': [
-            {'key': 'engine_settlement_retry_max', 'label': 'Max Retries on Failure', 'type': 'text', 'default': '3'},
-            {'key': 'engine_settlement_auto_settle', 'label': 'Auto-Settle When Ready', 'type': 'bool', 'default': 'true'},
-            {'key': 'engine_settlement_min_amount', 'label': 'Minimum Payout (KES)', 'type': 'text', 'default': '10'},
+            {'key': 'engine_action_retry_max', 'label': 'Max Retries on Failure', 'type': 'text', 'default': '3'},
+            {'key': 'engine_action_timeout', 'label': 'Execution Timeout (sec)', 'type': 'text', 'default': '60'},
         ],
-        'test_action': 'Trigger settlement for a READY agreement',
-        'endpoints': ['POST /api/settlements/<agreement_id>/trigger/', 'GET /api/settlements/<agreement_id>/'],
+        'test_action': 'Execute a test remediation',
+        'endpoints': ['POST /api/v1/v2/cases/', 'GET /api/v1/v2/cases/<id>/'],
     },
-    'notification': {
-        'name': 'Notification Engine',
-        'icon': '🔔',
-        'desc': 'Email, SMS, and webhook notifications for agreements, payments, and security alerts.',
+    'verification': {
+        'name': 'Verification Engine',
+        'icon': '✅',
+        'desc': 'Confirms service recovery and validates expected outcomes after action execution.',
         'fields': [
-            {'key': 'security_alert_email', 'label': 'Alert Email', 'type': 'text', 'default': 'joelkaunda15@gmail.com'},
-            {'key': 'security_alert_phone', 'label': 'Alert Phone', 'type': 'text', 'default': '+254715641339'},
-            {'key': 'engine_notification_webhook_retries', 'label': 'Webhook Retries', 'type': 'text', 'default': '3'},
+            {'key': 'engine_verification_auto_verify', 'label': 'Auto-Verify Recovery', 'type': 'bool', 'default': 'true'},
+            {'key': 'engine_verification_wait_seconds', 'label': 'Wait Before Verify (sec)', 'type': 'text', 'default': '10'},
         ],
-        'test_action': 'Send a test notification',
-        'endpoints': ['POST /api/webhooks/test/', 'POST /api/notifications/test/'],
+        'test_action': 'Verify recovery for a test case',
+        'endpoints': ['POST /api/v1/v2/cases/<id>/feedback/', 'GET /api/v1/v2/cases/<id>/'],
     },
-    'audit': {
-        'name': 'Audit Engine',
-        'icon': '📝',
-        'desc': 'Immutable SHA-256 chained audit log. Every admin action is recorded.',
+    'truth': {
+        'name': 'Truth Engine',
+        'icon': '📜',
+        'desc': 'Immutable audit trail with SHA-256 hash chains. Records every case transition and action.',
         'fields': [
-            {'key': 'engine_audit_retention_days', 'label': 'Retention Period (days)', 'type': 'text', 'default': '730'},
-            {'key': 'engine_audit_hash_algorithm', 'label': 'Hash Algorithm', 'type': 'select', 'options': ['sha256', 'sha512'], 'default': 'sha256'},
+            {'key': 'engine_truth_hash_algorithm', 'label': 'Hash Algorithm', 'type': 'select', 'options': ['sha256', 'sha512'], 'default': 'sha256'},
+            {'key': 'engine_truth_retention_days', 'label': 'Retention Period (days)', 'type': 'text', 'default': '730'},
         ],
         'test_action': 'Verify audit chain integrity',
-        'endpoints': ['GET /api/audit/', 'GET /api/audit/verify/'],
+        'endpoints': ['GET /api/v1/v2/cases/<id>/timeline/', 'GET /api/v1/v2/cases/<id>/'],
     },
-    'security': {
-        'name': 'Security Engine',
-        'icon': '🛡️',
-        'desc': 'IP whitelist, rate limiting, brute force detection, session management.',
+    'state_machine': {
+        'name': 'State Machine',
+        'icon': '🔄',
+        'desc': 'Conducts case lifecycle — CREATED through SETTLED. Enforces valid transitions.',
         'fields': [
-            {'key': 'engine_security_max_login_attempts', 'label': 'Max Login Attempts', 'type': 'text', 'default': '5'},
-            {'key': 'engine_security_lockout_minutes', 'label': 'Lockout Duration (min)', 'type': 'text', 'default': '30'},
-            {'key': 'engine_security_session_timeout', 'label': 'Session Timeout (sec)', 'type': 'text', 'default': '1800'},
-            {'key': 'engine_security_brute_force_threshold', 'label': 'Brute Force Alert Threshold/hr', 'type': 'text', 'default': '10'},
+            {'key': 'engine_state_auto_advance', 'label': 'Auto-Advance States', 'type': 'bool', 'default': 'true'},
+            {'key': 'engine_state_max_transitions', 'label': 'Max Transitions Per Case', 'type': 'text', 'default': '20'},
         ],
-        'test_action': 'Run security health check',
-        'endpoints': ['POST /api/security/check/', 'GET /api/security/log/'],
-    },
-    'orchestration': {
-        'name': 'Orchestration Engine',
-        'icon': '🎯',
-        'desc': 'State machine conductor. Moves agreements through CREATED -> SETTLED flow.',
-        'fields': [
-            {'key': 'engine_orchestration_immediate_split', 'label': 'Immediate Split (skip HELD)', 'type': 'bool', 'default': 'true'},
-            {'key': 'engine_orchestration_require_conditions', 'label': 'Require Conditions by Default', 'type': 'bool', 'default': 'false'},
-        ],
-        'test_action': 'Run full flow on test agreement',
-        'endpoints': ['GET /internal/health/', 'POST /api/orchestration/trigger/<agreement_id>/'],
+        'test_action': 'Run full lifecycle on test case',
+        'endpoints': ['GET /api/v1/v2/cases/<id>/timeline/', 'POST /api/v1/v2/cases/'],
     },
 }
 
-PROVIDER_DEFINITIONS = {p: {'name': p.replace('_', ' ').title(), 'configured': False} for p in list_providers()}
-for p in PROVIDER_DEFINITIONS:
-    if p == 'mpesa':
-        PROVIDER_DEFINITIONS[p]['configured'] = bool(getattr(settings, 'MPESA_CONSUMER_KEY', ''))
-        PROVIDER_DEFINITIONS[p]['fields'] = ['MPESA_CONSUMER_KEY', 'MPESA_CONSUMER_SECRET', 'MPESA_SHORTCODE', 'MPESA_PASSKEY', 'MPESA_ENVIRONMENT']
-    elif p == 'stripe':
-        PROVIDER_DEFINITIONS[p]['configured'] = bool(getattr(settings, 'STRIPE_API_KEY', ''))
-        PROVIDER_DEFINITIONS[p]['fields'] = ['STRIPE_API_KEY', 'STRIPE_WEBHOOK_SECRET']
-    elif p == 'bank_transfer':
-        PROVIDER_DEFINITIONS[p]['configured'] = True
-        PROVIDER_DEFINITIONS[p]['fields'] = ['PLATFORM_BANK_NAME', 'PLATFORM_BANK_ACCOUNT_NAME', 'PLATFORM_BANK_ACCOUNT_NUMBER', 'PLATFORM_BANK_CODE', 'PLATFORM_BRANCH_CODE']
+PROVIDER_DEFINITIONS = {}
 
 
 def engines_overview(request):
