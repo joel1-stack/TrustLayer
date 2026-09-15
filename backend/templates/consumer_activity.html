@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustLayer — Activity</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #FF5522; --accent-hover: #E04418; --accent-light: #FFF4F0;
+      --dark: #111111; --bg: #FFFFFF; --bg-alt: #F8F8F8; --border: #EEEEEE;
+      --text: #111111; --text-secondary: #555555; --text-muted: #999999;
+      --green: #16a34a; --yellow: #ca8a04; --blue: #2563eb;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-alt); color: var(--text); min-height: 100vh; }
+    .topnav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+    .topnav-inner { max-width: 800px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .topnav-brand { font-size: 18px; font-weight: 900; text-decoration: none; color: var(--text); }
+    .topnav-brand span { color: var(--accent); }
+    .main { max-width: 800px; margin: 0 auto; padding: 32px 24px 120px; }
+    .page-title { font-size: 22px; font-weight: 900; letter-spacing: -1px; margin-bottom: 24px; }
+    .activity-list { display: flex; flex-direction: column; gap: 2px; }
+    .activity-day { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; padding: 16px 0 8px; }
+    .activity-item { display: flex; gap: 14px; padding: 14px 16px; background: var(--bg); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
+    .activity-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .activity-dot.created { background: var(--accent); }
+    .activity-dot.updated { background: var(--blue); }
+    .activity-dot.resolved { background: var(--green); }
+    .activity-dot.diagnosis { background: var(--yellow); }
+    .activity-text { font-size: 14px; line-height: 1.5; }
+    .activity-text strong { font-weight: 700; }
+    .activity-time { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; color: var(--text-muted); }
+    .bottomnav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 8px 0 env(safe-area-inset-bottom, 8px); }
+    .bottomnav-inner { max-width: 500px; margin: 0 auto; display: flex; justify-content: space-around; }
+    .bottomnav a { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 16px; text-decoration: none; color: var(--text-muted); font-size: 11px; font-weight: 600; transition: color 0.2s; }
+    .bottomnav a.active { color: var(--accent); }
+    .bottomnav a svg { width: 22px; height: 22px; }
+    .bottomnav .report-tab { width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; margin-top: -20px; box-shadow: 0 4px 16px rgba(255,85,34,0.3); }
+    .bottomnav .report-tab svg { width: 26px; height: 26px; color: #fff; }
+  </style>
+</head>
+<body>
+  <nav class="topnav"><div class="topnav-inner"><a href="/portal/consumer/" class="topnav-brand"><span>Trust</span>Layer</a></div></nav>
+  <div class="main">
+    <h1 class="page-title">Activity</h1>
+    {% if activities %}
+    <div class="activity-list">
+      {% for day in activities %}
+      <div class="activity-day">{{ day.date }}</div>
+      {% for item in day.items %}
+      <div class="activity-item">
+        <div class="activity-dot {{ item.type }}"></div>
+        <div>
+          <div class="activity-text">{{ item.text|safe }}</div>
+          <div class="activity-time">{{ item.time }}</div>
+        </div>
+      </div>
+      {% endfor %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="icon">📊</div>
+      <h3>No activity yet</h3>
+      <p>Your case updates and actions will appear here.</p>
+    </div>
+    {% endif %}
+  </div>
+  <nav class="bottomnav">
+    <div class="bottomnav-inner">
+      <a href="/portal/consumer/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</a>
+      <a href="/portal/consumer/cases/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Cases</a>
+      <a href="/portal/consumer/report/" class="report-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></a>
+      <a href="/portal/consumer/activity/" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Activity</a>
+      <a href="/portal/consumer/profile/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+    </div>
+  </nav>
+</body>
+</html>

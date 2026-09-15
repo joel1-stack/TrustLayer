@@ -1,0 +1,225 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustLayer — Report a Problem</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #FF5522; --accent-hover: #E04418; --accent-light: #FFF4F0;
+      --dark: #111111; --bg: #FFFFFF; --bg-alt: #F8F8F8; --border: #EEEEEE;
+      --text: #111111; --text-secondary: #555555; --text-muted: #999999;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .topbar { padding: 16px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--border); }
+    .back-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; color: var(--text); transition: all 0.2s; font-size: 18px; }
+    .back-btn:hover { background: var(--bg-alt); }
+    .topbar-title { font-size: 16px; font-weight: 700; }
+    .progress-bar { height: 3px; background: var(--border); border-radius: 2px; margin: 0 24px; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s ease; }
+
+    .main { max-width: 600px; margin: 0 auto; padding: 40px 24px; }
+    .step-title { font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; }
+    .step-subtitle { font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; }
+
+    /* Category Grid */
+    .category-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+    .category-card {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 24px 16px; border: 2px solid var(--border); border-radius: 16px;
+      background: var(--bg); cursor: pointer; transition: all 0.2s; text-decoration: none; color: var(--text);
+    }
+    .category-card:hover { border-color: var(--accent); background: var(--accent-light); transform: translateY(-2px); }
+    .category-card .cat-icon { font-size: 32px; }
+    .category-card .cat-name { font-size: 14px; font-weight: 700; }
+
+    /* Problem Options */
+    .problem-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .problem-option {
+      display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+      border: 1px solid var(--border); border-radius: 14px; background: var(--bg);
+      cursor: pointer; transition: all 0.2s; text-decoration: none; color: var(--text);
+    }
+    .problem-option:hover { border-color: var(--accent); background: var(--accent-light); }
+    .problem-option .po-icon { font-size: 20px; }
+    .problem-option .po-text { font-size: 14px; font-weight: 600; }
+    .problem-option .arrow { margin-left: auto; color: var(--text-muted); }
+
+    /* Detail Form */
+    .detail-form { display: flex; flex-direction: column; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 13px; font-weight: 700; color: var(--text-secondary); }
+    .form-input, .form-select, .form-textarea {
+      height: 50px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-alt);
+      padding: 0 16px; font-size: 15px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s;
+    }
+    .form-textarea { height: 120px; padding: 14px 16px; resize: vertical; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); background: var(--bg); }
+    .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23999' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; }
+    .submit-btn {
+      height: 54px; border-radius: 14px; background: var(--accent); color: #fff;
+      border: none; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; margin-top: 8px;
+    }
+    .submit-btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,85,34,0.25); }
+
+    .hidden { display: none; }
+    @media (max-width: 480px) { .category-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="/portal/consumer/" class="back-btn">&larr;</a>
+    <span class="topbar-title">Report a Problem</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 25%"></div></div>
+
+  <div class="main">
+    <!-- STEP 1: Category -->
+    <div id="step1" class="step">
+      <h2 class="step-title">What went wrong?</h2>
+      <p class="step-subtitle">Select the category that best describes your issue.</p>
+      <div class="category-grid">
+        <a class="category-card" onclick="selectCategory('internet', 'Internet')">
+          <div class="cat-icon">📡</div>
+          <div class="cat-name">Internet</div>
+        </a>
+        <a class="category-card" onclick="selectCategory('payment', 'Payment')">
+          <div class="cat-icon">💰</div>
+          <div class="cat-name">Payment</div>
+        </a>
+        <a class="category-card" onclick="selectCategory('banking', 'Banking')">
+          <div class="cat-icon">🏦</div>
+          <div class="cat-name">Banking</div>
+        </a>
+        <a class="category-card" onclick="selectCategory('order', 'Order')">
+          <div class="cat-icon">📦</div>
+          <div class="cat-name">Order</div>
+        </a>
+        <a class="category-card" onclick="selectCategory('other', 'Other')">
+          <div class="cat-icon">🔧</div>
+          <div class="cat-name">Other</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- STEP 2: Problem Type -->
+    <div id="step2" class="step hidden">
+      <h2 class="step-title">What happened?</h2>
+      <p class="step-subtitle" id="step2-subtitle">Tell us more about your issue.</p>
+      <div class="problem-list" id="problem-list"></div>
+    </div>
+
+    <!-- STEP 3: Details -->
+    <div id="step3" class="step hidden">
+      <h2 class="step-title">Tell us more</h2>
+      <p class="step-subtitle">Provide as much detail as possible.</p>
+      <form class="detail-form" method="post" action="/portal/consumer/report/submit/">
+        {% csrf_token %}
+        <input type="hidden" name="category" id="hidden-category">
+        <input type="hidden" name="problem_type" id="hidden-problem">
+
+        <div class="form-group">
+          <label class="form-label">Which service?</label>
+          <select name="provider" class="form-select" id="provider-select">
+            <option value="">Select provider</option>
+            <option value="safaricom">Safaricom</option>
+            <option value="equity">Equity Bank</option>
+            <option value="kcb">KCB Bank</option>
+            <option value="mpesa">M-Pesa</option>
+            <option value="airtel">Airtel</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="ref-group">
+          <label class="form-label">Transaction / Reference number (optional)</label>
+          <input type="text" name="reference" class="form-input" placeholder="e.g. QWE123XYZ">
+        </div>
+
+        <div class="form-group" id="amount-group">
+          <label class="form-label">Amount (optional)</label>
+          <input type="text" name="amount" class="form-input" placeholder="e.g. KES 500">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Describe what happened</label>
+          <textarea name="description" class="form-textarea" placeholder="Tell us what happened in your own words..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Submit Case</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const problems = {
+      internet: [
+        { icon: '📶', text: 'Data not working' },
+        { icon: '🐢', text: 'Slow internet speed' },
+        { icon: '📵', text: 'No network connection' },
+        { icon: '📱', text: 'Cannot make calls' },
+        { icon: '💬', text: 'SMS not sending' },
+        { icon: '❓', text: 'Something else' },
+      ],
+      payment: [
+        { icon: '💸', text: 'Money sent but not received' },
+        { icon: '🔢', text: 'Wrong number paid' },
+        { icon: '❌', text: 'Payment failed' },
+        { icon: '🔍', text: 'I don\'t recognize a payment' },
+        { icon: '❓', text: 'Something else' },
+      ],
+      banking: [
+        { icon: '💳', text: 'Card declined' },
+        { icon: '🏦', text: 'Account issue' },
+        { icon: '💸', text: 'Transfer not received' },
+        { icon: '📋', text: 'Statement missing transaction' },
+        { icon: '❓', text: 'Something else' },
+      ],
+      order: [
+        { icon: '📦', text: 'Order not delivered' },
+        { icon: '🔄', text: 'Wrong item received' },
+        { icon: '↩️', text: 'Refund not processed' },
+        { icon: '❓', text: 'Something else' },
+      ],
+      other: [
+        { icon: '❓', text: 'Something else' },
+      ],
+    };
+
+    let currentStep = 1;
+
+    function selectCategory(cat, name) {
+      document.getElementById('hidden-category').value = cat;
+      document.getElementById('step2-subtitle').textContent = 'What happened with ' + name + '?';
+      const list = document.getElementById('problem-list');
+      list.innerHTML = '';
+      problems[cat].forEach(p => {
+        list.innerHTML += `<a class="problem-option" onclick="selectProblem('${p.text}')"><span class="po-icon">${p.icon}</span><span class="po-text">${p.text}</span><span class="arrow">&rarr;</span></a>`;
+      });
+      showStep(2);
+    }
+
+    function selectProblem(text) {
+      document.getElementById('hidden-problem').value = text;
+      showStep(3);
+    }
+
+    function showStep(n) {
+      document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
+      document.getElementById('step' + n).classList.remove('hidden');
+      document.getElementById('progress').style.width = (n * 33) + '%';
+      currentStep = n;
+    }
+
+    window.addEventListener('popstate', () => {
+      if (currentStep > 1) showStep(currentStep - 1);
+    });
+  </script>
+</body>
+</html>

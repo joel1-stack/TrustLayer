@@ -14,29 +14,19 @@
 
 <div class="stats-grid">
   <div class="stat-card fade-in">
-    <div class="label">Today Collected</div>
-    <div class="value">KES {{ collected_today|floatformat:0 }}</div>
-    <div class="sub">{{ agreements_today }} cases</div>
+    <div class="label">Active Incidents</div>
+    <div class="value">{{ active_cases }}</div>
+    <div class="sub">{{ waiting_count }} diagnosing &middot; {{ disputed_count }} escalated</div>
   </div>
   <div class="stat-card fade-in">
-    <div class="label">Active</div>
-    <div class="value">{{ active_agreements }}</div>
-    <div class="sub">{{ waiting_count }} waiting, {{ disputed_count }} disputed</div>
+    <div class="label">Avg MTTR</div>
+    <div class="value">{{ avg_mttr }}</div>
+    <div class="sub">Mean time to resolution</div>
   </div>
   <div class="stat-card fade-in">
-    <div class="label">This Month</div>
-    <div class="value">KES {{ collected_month|floatformat:0 }}</div>
-    <div class="sub">{{ agreements_month }} cases</div>
-  </div>
-  <div class="stat-card fade-in">
-    <div class="label">Platform Fees</div>
-    <div class="value">KES {{ platform_fees_today|floatformat:0 }}</div>
-    <div class="sub">KES {{ platform_fees_month|floatformat:0 }} this month</div>
-  </div>
-  <div class="stat-card fade-in">
-    <div class="label">Settled Today</div>
-    <div class="value">{{ settled_today }}</div>
-    <div class="sub">KES {{ total_settled|floatformat:0 }} all time</div>
+    <div class="label">Auto-Resolved</div>
+    <div class="value">{{ auto_resolved_rate }}</div>
+    <div class="sub">{{ auto_resolved_today }} cases today</div>
   </div>
   <div class="stat-card fade-in">
     <div class="label">Page Views</div>
@@ -71,13 +61,13 @@
     </div>
 
     <div class="card">
-      <h3>Active by Industry</h3>
-      {% for ind in industries %}
-      <div class="row">
-        <span class="key">{{ ind.metadata__industry|default:"Unspecified" }}</span>
-        <span class="val">{{ ind.count }}</span>
+      <h3>Quick Actions</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+        <a href="/admin/engines/" class="btn btn-sm" style="text-align:left;">&#9881; Configure Integrations</a>
+        <a href="/admin/customers/" class="btn btn-sm btn-ghost" style="text-align:left;">&#128273; Manage API Keys</a>
+        <a href="/admin/forensics/" class="btn btn-sm btn-ghost" style="text-align:left;">&#128269; View Forensics</a>
+        <a href="/admin/audit/" class="btn btn-sm btn-ghost" style="text-align:left;">&#128203; Audit Log</a>
       </div>
-      {% empty %}<p style="color:var(--text-muted);font-size:13px;">No cases yet</p>{% endfor %}
     </div>
   </div>
 
@@ -120,13 +110,22 @@
     <a href="/admin/cases/" class="btn btn-sm btn-ghost">View All</a>
   </div>
   <table>
-    <thead><tr><th>ID</th><th>Title</th><th>Amount</th><th>Status</th><th>Age</th></tr></thead>
+    <thead><tr><th>ID</th><th>Title</th><th>Severity</th><th>Status</th><th>Age</th></tr></thead>
     <tbody>
       {% for a in recent_agreements %}
       <tr onclick="window.location='/admin/cases/{{ a.agreement_id }}/'" style="cursor:pointer;">
         <td style="font-family:monospace;">{{ a.agreement_id }}</td>
-        <td>{{ a.title|truncatechars:30 }}</td>
-        <td>{{ a.amount|currency }}</td>
+        <td>{{ a.title|truncatechars:35 }}</td>
+        <td>
+          {% with sev=a.metadata.severity|default:"NORMAL" %}
+          <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;
+            {% if sev == 'HIGH' or sev == 'CRITICAL' %}background:#2d0a0a;color:#ff6b6b;
+            {% elif sev == 'MEDIUM' %}background:#2d1f00;color:#f59e0b;
+            {% else %}background:#0a1a2d;color:#60a5fa;{% endif %}">
+            {{ sev }}
+          </span>
+          {% endwith %}
+        </td>
         <td>{{ a.status|status_badge|safe }}</td>
         <td>{{ a.created_at|age_from_now }}</td>
       </tr>
