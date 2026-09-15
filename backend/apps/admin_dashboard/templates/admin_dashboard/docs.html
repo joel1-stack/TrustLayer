@@ -251,17 +251,17 @@
     <a href="#overview" class="active">Overview</a>
     <a href="#authentication">Authentication</a>
     <a href="#flow">How It Works</a>
-    <div class="nav-label">API Endpoints</div>
-    <a href="#cases">Cases</a>
-    <a href="#create-case">Create Case</a>
-    <a href="#case-detail">Case Detail</a>
+    <div class="nav-label">V2 API (Operational)</div>
+    <a href="#v2-create">Create Case</a>
+    <a href="#v2-status">Case Status</a>
+    <a href="#v2-timeline">Timeline</a>
+    <a href="#v2-feedback">Feedback</a>
     <div class="nav-label">Architecture</div>
     <a href="#engines">Core Engines</a>
     <a href="#integrations">Integrations</a>
     <a href="#adapters">Enterprise Adapters</a>
     <div class="nav-label">Reference</div>
     <a href="#status-codes">Status Codes</a>
-    <a href="#webhooks">Webhooks</a>
     <a href="#errors">Errors</a>
   </div>
 
@@ -269,11 +269,11 @@
     <!-- HERO -->
     <section class="docs-hero" id="overview">
       <div class="inner">
-        <div class="badge">API Reference v1.0</div>
+        <div class="badge">API Reference v2.0</div>
         <h1>TrustLayer <span class="accent">API</span></h1>
         <p>System of Action for enterprise operations. Assemble context, diagnose problems, execute authorized actions, verify outcomes, and maintain complete operational truth.</p>
         <div class="btns">
-          <a href="#cases" class="primary">Explore Endpoints</a>
+          <a href="#v2-create" class="primary">Explore Endpoints</a>
           <a href="/api/docs/schema/" class="secondary">OpenAPI Schema (JSON)</a>
         </div>
       </div>
@@ -283,15 +283,15 @@
     <section class="docs-section" id="authentication">
       <div class="section-label">Getting Started</div>
       <h2 class="section-title">Authentication</h2>
-      <p class="section-desc">All API requests require authentication via HTTP Basic Auth or token-based auth. Each request must include your API credentials.</p>
+      <p class="section-desc">The V2 API is open for testing — no authentication required. In production, API key authentication will be enforced.</p>
 
       <div class="code-block">
         <div class="code-header">
           <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
           <span class="lang">HTTP Header</span>
         </div>
-        <pre><code><span class="keyword">Authorization</span>: Bearer YOUR_API_KEY
-<span class="keyword">Content-Type</span>: application/json</code></pre>
+        <pre><code><span class="keyword">Content-Type</span>: application/json
+<span class="comment"># V2 API — no auth required for testing</span></code></pre>
       </div>
 
       <div class="code-block">
@@ -299,9 +299,9 @@
           <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
           <span class="lang">cURL</span>
         </div>
-        <pre><code><span class="keyword">curl</span> -X GET https://api.trustlayer.co.ke/api/v1/cases/ \
-  -H <span class="string">"Authorization: Bearer YOUR_API_KEY"</span> \
-  -H <span class="string">"Content-Type: application/json"</span></code></pre>
+        <pre><code><span class="keyword">curl</span> -X POST https://api.trustlayer.co.ke/api/v1/v2/cases/ \
+  -H "Content-Type: application/json" \
+  -d '{"msisdn": "+254798765432"}'</code></pre>
       </div>
     </section>
 
@@ -374,39 +374,44 @@
 
     <!-- CASES ENDPOINT -->
     <section class="docs-section" id="cases">
-      <div class="section-label">API Endpoints</div>
-      <h2 class="section-title">Cases</h2>
-      <p class="section-desc">Cases are the core resource. Each case represents one customer issue flowing through the System of Action lifecycle.</p>
+      <div class="section-label">V2 API (Operational)</div>
+      <h2 class="section-title">Operational Endpoints</h2>
+      <p class="section-desc">The V2 API exposes the full System of Action pipeline. Create a case, track its lifecycle, view diagnosis and actions, and verify resolution.</p>
 
       <div class="endpoint-list">
         <div class="endpoint">
+          <span class="method post">POST</span>
+          <span class="path">/api/v1/v2/cases/</span>
+          <span class="desc">Create a case and run full pipeline (context → diagnosis → action)</span>
+        </div>
+        <div class="endpoint">
           <span class="method get">GET</span>
-          <span class="path">/api/v1/cases/</span>
-          <span class="desc">List all cases with status, severity, and metadata</span>
+          <span class="path">/api/v1/v2/cases/{case_id}/</span>
+          <span class="desc">Get case status with context, diagnosis, actions, verification</span>
+        </div>
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/api/v1/v2/cases/{case_id}/timeline/</span>
+          <span class="desc">Get state transition history for a case</span>
         </div>
         <div class="endpoint">
           <span class="method post">POST</span>
-          <span class="path">/api/v1/cases/create/</span>
-          <span class="desc">Create a new case and begin context assembly</span>
-        </div>
-        <div class="endpoint">
-          <span class="method get">GET</span>
-          <span class="path">/api/v1/cases/{case_id}/</span>
-          <span class="desc">Get full case detail including context, diagnosis and status history</span>
+          <span class="path">/api/v1/v2/cases/{case_id}/feedback/</span>
+          <span class="desc">Customer confirms resolution outcome</span>
         </div>
       </div>
     </section>
 
     <!-- CREATE CASE -->
-    <section class="docs-section alt" id="create-case">
+    <section class="docs-section alt" id="v2-create">
       <div class="inner">
         <div class="section-label">Endpoint</div>
         <h2 class="section-title">Create a Case</h2>
-        <p class="section-desc">Open a new case for a reported service problem. The system begins context assembly immediately after creation.</p>
+        <p class="section-desc">Open a new case for a subscriber. The system assembles context, diagnoses root cause, selects an action, executes it, and verifies the outcome — all in one request.</p>
 
         <div style="margin-bottom:16px;">
           <span class="method post">POST</span>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;margin-left:12px;">/api/v1/cases/</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;margin-left:12px;">/api/v1/v2/cases/</span>
         </div>
 
         <div class="code-block">
@@ -415,19 +420,12 @@
             <span class="lang">Request Body</span>
           </div>
           <pre><code>{
-  <span class="property">"title"</span>: <span class="string">"Data service failure - Nairobi"</span>,
-  <span class="property">"intent"</span>: <span class="string">"DATA_FAILURE"</span>,
+  <span class="property">"msisdn"</span>: <span class="string">"+254798765432"</span>,
+  <span class="property">"title"</span>: <span class="string">"Mobile data not working"</span>,
   <span class="property">"channel"</span>: <span class="string">"API"</span>,
   <span class="property">"severity"</span>: <span class="string">"HIGH"</span>,
-  <span class="property">"external_id"</span>: <span class="string">"CASE-8839"</span>,
-  <span class="property">"webhook_url"</span>: <span class="string">"https://yourapp.com/webhooks/trustlayer"</span>,
-  <span class="property">"customer"</span>: {
-    <span class="property">"msisdn"</span>: <span class="string">"+254712345678"</span>,
-    <span class="property">"name"</span>: <span class="string">"John Mwangi"</span>
-  },
   <span class="property">"metadata"</span>: {
-    <span class="property">"location"</span>: <span class="string">"Nairobi"</span>,
-    <span class="property">"provider"</span>: <span class="string">"safaricom"</span>
+    <span class="property">"location"</span>: <span class="string">"Nairobi"</span>
   }
 }</code></pre>
         </div>
@@ -439,24 +437,42 @@
           </div>
           <pre><code>{
   <span class="property">"case_id"</span>: <span class="string">"c8a3f2e1-7b4d-4e9a-a1f2-3c5d6e7f8a9b"</span>,
-  <span class="property">"status"</span>: <span class="string">"CONTEXT_ASSEMBLY"</span>,
-  <span class="property">"status_code"</span>: <span class="number">10000</span>,
-  <span class="property">"message"</span>: <span class="string">"Case opened. Context assembly in progress."</span>,
-  <span class="property">"created_at"</span>: <span class="string">"2026-09-14T10:30:00Z"</span>
+  <span class="property">"status"</span>: <span class="string">"SUBSCRIBER_INACTIVE"</span>,
+  <span class="property">"title"</span>: <span class="string">"Mobile data not working"</span>,
+  <span class="property">"severity"</span>: <span class="string">"HIGH"</span>,
+  <span class="property">"created_at"</span>: <span class="string">"2026-09-14T10:30:00Z"</span>,
+  <span class="property">"context"</span>: {
+    <span class="property">"subscriber"</span>: {
+      <span class="property">"msisdn"</span>: <span class="string">"+254798765432"</span>,
+      <span class="property">"name"</span>: <span class="string">"Jane Wanjiku"</span>,
+      <span class="property">"status"</span>: <span class="string">"INACTIVE"</span>
+    },
+    <span class="property">"billing"</span>: { <span class="property">"balance"</span>: <span class="number">45.0</span>, <span class="property">"currency"</span>: <span class="string">"KES"</span> },
+    <span class="property">"network"</span>: { <span class="property">"status"</span>: <span class="string">"ACTIVE"</span> }
+  },
+  <span class="property">"diagnosis"</span>: {
+    <span class="property">"root_cause"</span>: <span class="string">"SUBSCRIBER_INACTIVE"</span>,
+    <span class="property">"confidence"</span>: <span class="string">"HIGH"</span>
+  },
+  <span class="property">"actions"</span>: [
+    { <span class="property">"action_type"</span>: <span class="string">"REACTIVATE_SUBSCRIBER"</span>, <span class="property">"status"</span>: <span class="string">"COMPLETED"</span> }
+  ],
+  <span class="property">"transitions"</span>: <span class="number">7</span>,
+  <span class="property">"resolved"</span>: <span class="keyword">true</span>
 }</code></pre>
         </div>
       </div>
     </section>
 
-    <!-- CASE DETAIL -->
-    <section class="docs-section" id="case-detail">
+    <!-- CASE STATUS -->
+    <section class="docs-section" id="v2-status">
       <div class="section-label">Endpoint</div>
-      <h2 class="section-title">Get Case Detail</h2>
-      <p class="section-desc">Retrieve full case details including context, diagnosis, status history, and current state.</p>
+      <h2 class="section-title">Case Status</h2>
+      <p class="section-desc">Get full case detail including assembled context, diagnosis result, executed actions, and verification outcome.</p>
 
       <div style="margin-bottom:16px;">
         <span class="method get">GET</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;margin-left:12px;">/api/v1/cases/{case_id}/</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;margin-left:12px;">/api/v1/v2/cases/{case_id}/</span>
       </div>
 
       <div class="code-block">
@@ -466,21 +482,91 @@
         </div>
         <pre><code>{
   <span class="property">"case_id"</span>: <span class="string">"c8a3f2e1-7b4d-4e9a-a1f2-3c5d6e7f8a9b"</span>,
-  <span class="property">"title"</span>: <span class="string">"Data service failure - Nairobi"</span>,
-  <span class="property">"intent"</span>: <span class="string">"DATA_FAILURE"</span>,
+  <span class="property">"status"</span>: <span class="string">"SETTLED"</span>,
+  <span class="property">"title"</span>: <span class="string">"Mobile data not working"</span>,
   <span class="property">"severity"</span>: <span class="string">"HIGH"</span>,
-  <span class="property">"status"</span>: <span class="string">"DIAGNOSING"</span>,
-  <span class="property">"status_code"</span>: <span class="number">13000</span>,
-  <span class="property">"customer"</span>: {
-    <span class="property">"msisdn"</span>: <span class="string">"+254712345678"</span>,
-    <span class="property">"name"</span>: <span class="string">"John Mwangi"</span>
+  <span class="property">"context"</span>: {
+    <span class="property">"subscriber"</span>: { <span class="property">"msisdn"</span>: <span class="string">"+254798765432"</span>, <span class="property">"status"</span>: <span class="string">"ACTIVE"</span> },
+    <span class="property">"billing"</span>: { <span class="property">"balance"</span>: <span class="number">120.0</span> },
+    <span class="property">"network"</span>: { <span class="property">"status"</span>: <span class="string">"ACTIVE"</span> }
   },
-  <span class="property">"diagnosis"</span>: {
-    <span class="property">"root_cause"</span>: <span class="string">"BUNDLE_EXPIRED"</span>,
-    <span class="property">"confidence"</span>: <span class="string">"HIGH"</span>
-  },
-  <span class="property">"created_at"</span>: <span class="string">"2026-09-14T10:30:00Z"</span>,
-  <span class="property">"updated_at"</span>: <span class="string">"2026-09-14T10:30:45Z"</span>
+  <span class="property">"diagnosis"</span>: { <span class="property">"root_cause"</span>: <span class="string">"SUBSCRIBER_INACTIVE"</span>, <span class="property">"confidence"</span>: <span class="string">"HIGH"</span> },
+  <span class="property">"actions"</span>: [
+    { <span class="property">"action_type"</span>: <span class="string">"REACTIVATE_SUBSCRIBER"</span>, <span class="property">"status"</span>: <span class="string">"COMPLETED"</span> }
+  ],
+  <span class="property">"transitions"</span>: <span class="number">7</span>
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- TIMELINE -->
+    <section class="docs-section alt" id="v2-timeline">
+      <div class="inner">
+        <div class="section-label">Endpoint</div>
+        <h2 class="section-title">Case Timeline</h2>
+        <p class="section-desc">View the full state transition history for a case — every step from creation through resolution.</p>
+
+        <div style="margin-bottom:16px;">
+          <span class="method get">GET</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;margin-left:12px;">/api/v1/v2/cases/{case_id}/timeline/</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+            <span class="lang">Response — 200 OK</span>
+          </div>
+          <pre><code>{
+  <span class="property">"case_id"</span>: <span class="string">"c8a3f2e1-7b4d-4e9a-a1f2-3c5d6e7f8a9b"</span>,
+  <span class="property">"transitions"</span>: [
+    { <span class="property">"from_state"</span>: <span class="string">"CREATED"</span>, <span class="property">"to_state"</span>: <span class="string">"CONFIRMED"</span>, <span class="property">"timestamp"</span>: <span class="string">"2026-09-14T10:30:00Z"</span> },
+    { <span class="property">"from_state"</span>: <span class="string">"CONFIRMED"</span>, <span class="property">"to_state"</span>: <span class="string">"SUBMITTED"</span>, <span class="property">"timestamp"</span>: <span class="string">"2026-09-14T10:30:01Z"</span> },
+    { <span class="property">"from_state"</span>: <span class="string">"SUBMITTED"</span>, <span class="property">"to_state"</span>: <span class="string">"PENDING"</span>, <span class="property">"timestamp"</span>: <span class="string">"2026-09-14T10:30:02Z"</span> },
+    { <span class="property">"from_state"</span>: <span class="string">"PENDING"</span>, <span class="property">"to_state"</span>: <span class="string">"AVAILABLE"</span>, <span class="property">"timestamp"</span>: <span class="string">"2026-09-14T10:30:03Z"</span> },
+    { <span class="property">"from_state"</span>: <span class="string">"AVAILABLE"</span>, <span class="property">"to_state"</span>: <span class="string">"RECONCILING"</span>, <span class="property">"timestamp"</span>: <span class="string">"2026-09-14T10:30:04Z"</span> },
+    { <span class="property">"from_state"</span>: <span class="string">"RECONCILING"</span>, <span class="property">"to_state"</span>: <span class="string">"HELD"</span>, <span class="property">"timestamp"</span>: <span class="string">"2026-09-14T10:30:05Z"</span> },
+    { <span class="property">"from_state"</span>: <span class="string">"HELD"</span>, <span class="property">"to_state"</span>: <span class="string">"READY"</span>, <span class="property">"timestamp"</span>: <span class="string">"2026-09-14T10:30:06Z"</span> },
+    { <span class="property">"from_state"</span>: <span class="string">"READY"</span>, <span class="property">"to_state"</span>: <span class="string">"SETTLING"</span>, <span class="property">"timestamp"</span>: <span class="string">"2026-09-14T10:30:07Z"</span> },
+    { <span class="property">"from_state"</span>: <span class="string">"SETTLING"</span>, <span class="property">"to_state"</span>: <span class="string">"SETTLED"</span>, <span class="property">"timestamp"</span>: <span class="string">"2026-09-14T10:30:08Z"</span> }
+  ],
+  <span class="property">"total"</span>: <span class="number">9</span>
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEEDBACK -->
+    <section class="docs-section" id="v2-feedback">
+      <div class="section-label">Endpoint</div>
+      <h2 class="section-title">Customer Feedback</h2>
+      <p class="section-desc">Submit customer feedback to confirm resolution or report that the issue persists.</p>
+
+      <div style="margin-bottom:16px;">
+        <span class="method post">POST</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;margin-left:12px;">/api/v1/v2/cases/{case_id}/feedback/</span>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+          <span class="lang">Request Body</span>
+        </div>
+        <pre><code>{
+  <span class="property">"resolved"</span>: <span class="keyword">true</span>,
+  <span class="property">"comment"</span>: <span class="string">"Data is working now, thank you"</span>,
+  <span class="property">"rating"</span>: <span class="number">5</span>
+}</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+          <span class="lang">Response — 200 OK</span>
+        </div>
+        <pre><code>{
+  <span class="property">"status"</span>: <span class="string">"SETTLED"</span>,
+  <span class="property">"feedback_recorded"</span>: <span class="keyword">true</span>,
+  <span class="property">"resolved"</span>: <span class="keyword">true</span>
 }</code></pre>
       </div>
     </section>

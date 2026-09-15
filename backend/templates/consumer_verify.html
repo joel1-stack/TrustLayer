@@ -61,7 +61,7 @@
       <h1 class="verify-title">Verify your phone number</h1>
       <p class="verify-subtitle">Your verified phone number helps us connect your case to the relevant service provider where supported.</p>
 
-      <form class="verify-form" method="post" action="/portal/verify/phone/">
+      <form class="verify-form" method="post" action="/portal/auth/verify/">
         {% csrf_token %}
         <div class="phone-input-group">
           <input type="text" class="phone-prefix" value="+254" readonly>
@@ -79,7 +79,7 @@
       </form>
 
       <p class="verify-note">We will send a one-time code to this number. <strong>We never share your phone number.</strong></p>
-      <a href="/portal/" class="back-link">&larr; Skip for now</a>
+      <a href="/portal/consumer/" class="back-link">&larr; Skip for now</a>
     </div>
   </div>
 

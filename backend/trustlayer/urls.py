@@ -54,8 +54,41 @@ def consumer_signin(request):
     return render(request, 'consumer_signin.html')
 
 
+def consumer_auth_email(request):
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        if email:
+            request.session['consumer_email'] = email
+            request.session['consumer_name'] = email.split('@')[0].title()
+            return redirect('/report/verify/')
+    return redirect('/report/')
+
+
+def consumer_auth_google(request):
+    request.session['consumer_email'] = 'user@gmail.com'
+    request.session['consumer_name'] = 'Google User'
+    return redirect('/report/verify/')
+
+
+def consumer_auth_linkedin(request):
+    request.session['consumer_email'] = 'user@linkedin.com'
+    request.session['consumer_name'] = 'LinkedIn User'
+    return redirect('/report/verify/')
+
+
+def consumer_verify_phone(request):
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '').strip()
+        if phone:
+            request.session['consumer_phone'] = phone
+            return redirect('/portal/consumer/')
+    return redirect('/report/verify/')
+
+
 def consumer_verify(request):
-    return render(request, 'consumer_verify.html')
+    return render(request, 'consumer_verify.html', {
+        'user_name': request.session.get('consumer_name', 'there'),
+    })
 
 
 def consumer_home(request):
@@ -85,8 +118,8 @@ def consumer_home(request):
         })
     return render(request, 'consumer_home.html', {
         'cases': case_list,
-        'user_name': 'there',
-        'user_initial': 'U',
+        'user_name': request.session.get('consumer_name', 'there'),
+        'user_initial': (request.session.get('consumer_name', 'U')[:1]).upper(),
         'time_of_day': 'morning',
     })
 
@@ -156,6 +189,10 @@ urlpatterns = [
     path('report/', consumer_signin, name='consumer-signin'),
     path('report/signin/', consumer_signin, name='consumer-signin-alt'),
     path('report/verify/', consumer_verify, name='consumer-verify'),
+    path('portal/auth/email/', consumer_auth_email, name='consumer-auth-email'),
+    path('portal/auth/google/', consumer_auth_google, name='consumer-auth-google'),
+    path('portal/auth/linkedin/', consumer_auth_linkedin, name='consumer-auth-linkedin'),
+    path('portal/auth/verify/', consumer_verify_phone, name='consumer-auth-verify'),
     path('portal/consumer/', consumer_home, name='consumer-home'),
     path('portal/consumer/report/', consumer_report, name='consumer-report'),
     path('portal/consumer/case/<str:case_id>/', consumer_case_detail, name='consumer-case'),
