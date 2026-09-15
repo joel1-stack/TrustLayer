@@ -1,41 +1,152 @@
-{% extends 'admin_dashboard/base.html' %}
-{% block login_content %}
-<div class="login-card fade-in">
-  <h1>TrustLayer</h1>
-  <p>Control Center — authorized personnel only</p>
-  {% if locked %}
-  <div class="alert-warning">Account temporarily locked. Too many failed attempts. Try again in {{ lockout_minutes }} minutes.</div>
-  {% endif %}
-  {% if error %}
-  <div class="alert-error">{{ error }}</div>
-  {% endif %}
-  <form method="post">
-    {% csrf_token %}
-    <div class="form-group">
-      <label>Username</label>
-      <input type="text" name="username" class="form-input" placeholder="Enter admin username" required autocomplete="off">
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustLayer — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #FF5522;
+      --accent-hover: #E04418;
+      --accent-light: #FFF4F0;
+      --dark: #111111;
+      --bg: #FFFFFF;
+      --bg-alt: #F8F8F8;
+      --border: #EEEEEE;
+      --text: #111111;
+      --text-secondary: #555555;
+      --text-muted: #999999;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+    .login-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px; position: relative; overflow: hidden; }
+    .login-container::before {
+      content: ''; position: absolute; top: -200px; right: -200px; width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(255,85,34,0.06) 0%, transparent 70%); border-radius: 50%; pointer-events: none;
+    }
+    .login-container::after {
+      content: ''; position: absolute; bottom: -200px; left: -200px; width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(139,92,246,0.04) 0%, transparent 70%); border-radius: 50%; pointer-events: none;
+    }
+
+    .login-card { position: relative; z-index: 1; max-width: 440px; width: 100%; text-align: center; }
+    .login-logo { font-size: 32px; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 8px; }
+    .login-logo span { color: var(--accent); }
+    .login-tagline { font-size: 14px; color: var(--text-muted); margin-bottom: 48px; }
+
+    .login-icon { width: 72px; height: 72px; background: var(--accent-light); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; font-size: 32px; }
+
+    .login-title { font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 12px; line-height: 1.15; }
+    .login-title .accent { color: var(--accent); }
+    .login-subtitle { font-size: 16px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 40px; max-width: 380px; margin-left: auto; margin-right: auto; }
+
+    .login-form { display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px; }
+    .form-group { text-align: left; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+    .login-input {
+      height: 52px; width: 100%; border-radius: 12px; border: 1px solid var(--border); padding: 0 18px;
+      font-size: 15px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s;
+      background: var(--bg-alt);
+    }
+    .login-input:focus { border-color: var(--accent); background: var(--bg); }
+    .password-wrap { position: relative; }
+    .password-toggle {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-muted);
+      padding: 4px; line-height: 1;
+    }
+    .password-toggle:hover { color: var(--accent); }
+
+    .login-submit {
+      height: 52px; border-radius: 12px; background: var(--accent); color: #fff;
+      border: none; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; width: 100%; margin-top: 4px;
+    }
+    .login-submit:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,85,34,0.25); }
+
+    .alert-error {
+      background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA;
+      border-radius: 12px; padding: 14px 18px; font-size: 14px; font-weight: 500;
+      margin-bottom: 16px; text-align: left;
+    }
+    .alert-warning {
+      background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A;
+      border-radius: 12px; padding: 14px 18px; font-size: 14px; font-weight: 500;
+      margin-bottom: 16px; text-align: left;
+    }
+
+    .login-note { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .login-note strong { color: var(--text-secondary); }
+
+    .login-footer { text-align: center; padding: 24px; border-top: 1px solid var(--border); }
+    .login-footer a { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+    .login-footer a:hover { color: var(--accent); }
+
+    @media (max-width: 480px) {
+      .login-card { padding: 0 8px; }
+      .login-title { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-logo"><span>Trust</span>Layer</div>
+      <div class="login-tagline">Control Center</div>
+
+      <div class="login-icon">🔐</div>
+
+      <h1 class="login-title">Welcome <span class="accent">back</span></h1>
+      <p class="login-subtitle">Sign in to the operations dashboard. Authorized personnel only.</p>
+
+      {% if locked %}
+      <div class="alert-warning">Account temporarily locked. Too many failed attempts. Try again in {{ lockout_minutes }} minutes.</div>
+      {% endif %}
+      {% if error %}
+      <div class="alert-error">{{ error }}</div>
+      {% endif %}
+
+      {% if not locked %}
+      <form class="login-form" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" name="username" class="login-input" placeholder="Enter admin username" required autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="password-wrap">
+            <input type="password" name="password" id="adminPW" class="login-input" placeholder="Enter admin password" required>
+            <button type="button" class="password-toggle" onclick="togglePW()" id="pwToggle" title="Show password">&#128065;</button>
+          </div>
+        </div>
+        <button type="submit" class="login-submit">Sign In</button>
+      </form>
+      {% endif %}
+
+      {% if remaining <= 3 and not locked %}
+      <p class="login-note" style="color:var(--accent);">{{ remaining }} attempt{{ remaining|pluralize }} remaining before lockout</p>
+      {% endif %}
+
+      <p class="login-note">Protected by rate limiting and account lockout. <strong>Unauthorized access is prohibited.</strong></p>
     </div>
-    <div class="form-group">
-      <label>Password</label>
-      <div class="password-wrap">
-        <input type="password" name="password" id="adminPW" class="form-input" placeholder="Enter admin password" required>
-        <button type="button" class="password-toggle" onclick="toggleAdminPW()" id="adminPWToggle" title="Show password">&#128065;</button>
-      </div>
-    </div>
-    {% if not locked %}
-    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px;">Sign In</button>
-    {% endif %}
-  </form>
-  {% if remaining <= 3 and not locked %}
-  <p style="margin-top:12px;font-size:11px;color:var(--orange);text-align:center;">{{ remaining }} attempt{{ remaining|pluralize }} remaining before lockout</p>
-  {% endif %}
-</div>
-<script>
-function toggleAdminPW() {
-  var pw = document.getElementById('adminPW');
-  var btn = document.getElementById('adminPWToggle');
-  if (pw.type === 'password') { pw.type = 'text'; btn.innerHTML = '&#128064;'; }
-  else { pw.type = 'password'; btn.innerHTML = '&#128065;'; }
-}
-</script>
-{% endblock %}
+  </div>
+
+  <div class="login-footer">
+    <a href="/">&larr; Back to TrustLayer</a>
+  </div>
+
+  <script>
+  function togglePW() {
+    var pw = document.getElementById('adminPW');
+    var btn = document.getElementById('pwToggle');
+    if (pw.type === 'password') { pw.type = 'text'; btn.innerHTML = '&#128064;'; }
+    else { pw.type = 'password'; btn.innerHTML = '&#128065;'; }
+  }
+  </script>
+</body>
+</html>
