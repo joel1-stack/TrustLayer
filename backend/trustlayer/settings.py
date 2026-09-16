@@ -1,7 +1,7 @@
 """
-Django settings for TrustLayer project.
+TrustLayer v1 — Django settings.
+One loop: report → evidence → route → investigate → resolve → verify → closed.
 """
-from decimal import Decimal
 from pathlib import Path
 import os
 
@@ -10,10 +10,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-in-production')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-# Render sets ALLOWED_HOSTS via env; fallback allows local + Docker
 _hosts = os.environ.get('ALLOWED_HOSTS', '')
 ALLOWED_HOSTS = [h.strip() for h in _hosts.split(',') if h.strip()] or ['*', 'localhost', '127.0.0.1', '0.0.0.0']
 
+# ── v1 apps ──────────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -24,12 +24,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'corsheaders',
-    # TrustLayer
+    # TrustLayer v1
+    'apps.core',
     'apps.agreements',
     'apps.state_machine',
     'apps.api_v1',
-    'apps.admin_dashboard',
-    'apps.customer_portal',
 ]
 
 MIDDLEWARE = [
@@ -42,7 +41,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Old control-center middleware is off for v1 agent workspace.
 ]
 
 ROOT_URLCONF = 'trustlayer.urls'
@@ -57,30 +55,25 @@ TEMPLATES = [{
             'django.template.context_processors.request',
             'django.contrib.auth.context_processors.auth',
             'django.contrib.messages.context_processors.messages',
-            'apps.customer_portal.context_processors.portal_verified',
         ],
     },
 }]
 
 WSGI_APPLICATION = 'trustlayer.wsgi.application'
 
-# Database — supports DATABASE_URL (Render) or individual env vars (Docker)
-import dj_database_url
-_db_url = os.environ.get('DATABASE_URL', '')
-if _db_url:
-    DATABASES = {'default': dj_database_url.config(default=_db_url, conn_max_age=600)}
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME', 'trustlayer_db'),
-            'USER': os.environ.get('DB_USER', 'joel'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'SecurePass123!'),
-            'HOST': os.environ.get('DB_HOST', 'db'),
-            'PORT': '5432',
-        }
+# ── Database ─────────────────────────────────────────────────────────────────
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'trustlayer'),
+        'USER': os.environ.get('DB_USER', 'trustlayer'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'TrustLayer2026!'),
+        'HOST': os.environ.get('DB_HOST', 'db'),
+        'PORT': '5432',
     }
+}
 
+# ── Auth ─────────────────────────────────────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -88,41 +81,35 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# ── i18n ─────────────────────────────────────────────────────────────────────
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
 
+# ── Static & Media ───────────────────────────────────────────────────────────
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# ── Django REST Framework ────────────────────────────────────────────────────
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
-    ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100,
-    'MAX_PAGINATE_BY': 200,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
+# ── drf-spectacular (API docs) ──────────────────────────────────────────────
 SPECTACULAR_SETTINGS = {
     'TITLE': 'TrustLayer API',
     'DESCRIPTION': (
@@ -185,7 +172,7 @@ SPECTACULAR_SETTINGS = {
         '| `GET /api/v1/cases/` | List all cases |\n'
         '| `GET /api/v1/cases/{id}/` | Full case detail with timeline, messages, evidence |\n'
         '| `POST /api/v1/cases/{id}/messages/` | Add message to case thread |\n'
-        '| `GET /health/` | Health check → `{"status": "ok"}` |\n\n'
+        '| `GET /health/` | Health check → `{"status": "ok", "database": "ok"}` |\n\n'
         '---\n\n'
         '### Problem Types\n\n'
         '| Value | Label |\n'
@@ -211,97 +198,24 @@ SPECTACULAR_SETTINGS = {
     'LICENSE': {'name': 'MIT'},
 }
 
+# ── CORS / CSRF ──────────────────────────────────────────────────────────────
 CORS_ALLOW_ALL_ORIGINS = True
-_ngrok = os.environ.get('TRUSTLAYER_BASE_URL', 'https://miranda-stockish-spacially.ngrok-free.dev').rstrip('/')
 CSRF_TRUSTED_ORIGINS = [
-    origin for origin in {
-        _ngrok,
-        'https://miranda-stockish-spacially.ngrok-free.dev',
-        'https://*.ngrok-free.dev',
-        'https://*.ngrok.io',
-        'http://localhost:8000',
-        'http://127.0.0.1:8000',
-    }
-    if origin
+    'https://miranda-stockish-spacially.ngrok-free.dev',
+    'https://*.ngrok-free.dev',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
 ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
-_secure = os.environ.get('DEBUG', 'True') != 'True'
-SESSION_COOKIE_SECURE = _secure
-SESSION_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = _secure
 
-_redis_url = f"redis://{os.environ.get('REDIS_HOST', 'redis_cache')}:{os.environ.get('REDIS_PORT', '6379')}"
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': os.environ.get('REDIS_URL', f'{_redis_url}/1'),
-        'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient'},
-    }
-}
-
-CELERY_BROKER_URL     = os.environ.get('CELERY_BROKER_URL') or os.environ.get('REDIS_URL', f'{_redis_url}/0')
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND') or os.environ.get('REDIS_URL', f'{_redis_url}/0')
-
-from celery.schedules import crontab
-CELERY_BEAT_SCHEDULE = {
-    'check-condition-timeouts': {
-        'task':     'apps.conditions.services.check_condition_timeouts',
-        'schedule': crontab(minute='*/5'),
-    },
-}
-
-# M-Pesa / Daraja
-MPESA_ENVIRONMENT    = os.environ.get('MPESA_ENVIRONMENT', 'sandbox')
-MPESA_CONSUMER_KEY   = os.environ.get('MPESA_CONSUMER_KEY', '')
-MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET', '')
-MPESA_SHORTCODE       = os.environ.get('MPESA_SHORTCODE', '174379')
-MPESA_PASSKEY         = os.environ.get('MPESA_PASSKEY', '')
-MPESA_CALLBACK_URL    = os.environ.get('MPESA_CALLBACK_URL', '')
-MPESA_API_KEY         = os.environ.get('MPESA_API_KEY', 'devkey')
-
-# M-Pesa B2C (Business-to-Customer — payout to sellers)
-MPESA_INITIATOR_NAME     = os.environ.get('MPESA_INITIATOR_NAME', 'testinitiator')
-MPESA_INITIATOR_PASSWORD = os.environ.get('MPESA_INITIATOR_PASSWORD', '')
-MPESA_B2C_RESULT_URL     = os.environ.get('MPESA_B2C_RESULT_URL', '')
-MPESA_B2C_TIMEOUT_URL    = os.environ.get('MPESA_B2C_TIMEOUT_URL', '')
-
-# SMS Notifications
-SMS_PROVIDER  = os.environ.get('SMS_PROVIDER', 'generic')   # 'africastalking' or 'generic'
-SMS_API_URL   = os.environ.get('SMS_API_URL', '')
-SMS_API_KEY   = os.environ.get('SMS_API_KEY', '')
-SMS_SENDER_ID = os.environ.get('SMS_SENDER_ID', 'TrustLayer')
-SMS_USERNAME  = os.environ.get('SMS_USERNAME', 'sandbox')    # Africa's Talking username
-
-# Admin
-TRUSTLAYER_ADMIN_TOKEN = os.environ.get('TRUSTLAYER_ADMIN_TOKEN', 'change-me-in-production')
-
-# Resend (Transactional Email)
-RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
-EMAIL_BACKEND = 'apps.notifications.resend_backend.ResendEmailBackend'
-DEFAULT_FROM_EMAIL = 'TrustLayer <onboarding@resend.dev>'
-
-# TrustLayer base URL (for email verification links, webhook callbacks)
-TRUSTLAYER_BASE_URL = os.environ.get('TRUSTLAYER_BASE_URL', 'https://miranda-stockish-spacially.ngrok-free.dev')
-
-# TrustLayer Platform Fee — auto-injected into every agreement as a split rule
-TRUSTLAYER_PLATFORM_FEE_PERCENT = Decimal(os.environ.get('TRUSTLAYER_PLATFORM_FEE', '5.00'))
-TRUSTLAYER_PLATFORM_PHONE = os.environ.get('TRUSTLAYER_PLATFORM_PHONE', '+254715641339')
-
-# --- Admin Dashboard Security ---
-ADMIN_ALLOWED_IPS = [
-    ip.strip() for ip in os.environ.get('ADMIN_ALLOWED_IPS', '127.0.0.1,172.*,10.*,192.168.*').split(',') if ip.strip()
-]
-ADMIN_SESSION_COOKIE_NAME = 'tl_admin_session'
-ADMIN_SESSION_EXPIRY_SECONDS = 1800
-
+# ── Sessions ─────────────────────────────────────────────────────────────────
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
-# Security headers
+# ── Security headers ─────────────────────────────────────────────────────────
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
