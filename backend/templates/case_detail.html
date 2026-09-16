@@ -25,15 +25,14 @@
     <div class="row"><span>Customer</span><strong>{{ case.customer_name|default:"—" }}</strong></div>
     <div class="row"><span>Transaction</span><strong>{{ case.txn_id }}</strong></div>
     <div class="row"><span>Amount</span><strong>{{ case.currency }} {{ case.amount }}</strong></div>
-    <div class="row"><span>Assigned</span><strong>{{ case.assigned_team }}</strong></div>
+    <div class="row"><span>Assigned team</span><strong>{{ case.assigned_team }}</strong></div>
     <div class="row"><span>Finding</span><strong>{{ case.finding|default:"—" }}</strong></div>
     <div class="row"><span>Resolution</span><strong>{{ case.resolution_label }}</strong></div>
-    <div class="row"><span>Provider action</span><strong>{{ case.provider_action|default:"—" }}</strong></div>
     <div class="row"><span>Customer verification</span><strong>{% if case.customer_verified %}Confirmed{% else %}Not confirmed{% endif %}</strong></div>
     <div class="row"><span>Status</span><strong>{{ case.get_status_display }}</strong></div>
-    <p style="margin-top:12px;"><a class="btn btn-ghost btn-sm" href="/case/{{ case.case_id }}/export/">Download record</a></p>
   </div>
   {% endif %}
+
   {% if case.status == 'VERIFYING' or case.status == 'RESOLUTION_RECORDED' %}
   <div class="card" style="margin-bottom:20px;border-color:#fdba74;">
     <strong>Action required.</strong> A resolution has been recorded.
@@ -80,9 +79,6 @@
         <div class="row"><span>Date</span><strong>{{ case.date_occurred|default:"—" }}</strong></div>
         <div class="row"><span>Priority</span><span class="badge badge-{{ case.severity|lower }}">{{ case.severity }}</span></div>
         <div class="row"><span>Team</span><strong>{{ case.assigned_team }}</strong></div>
-        {% if case.metadata.engines.classification %}
-        <div class="row"><span>Engine</span><strong>{{ case.metadata.engines.classification.case_type }}</strong></div>
-        {% endif %}
         <div class="row"><span>Customer</span><strong>{{ case.customer_name|default:"—" }}</strong></div>
         <div class="row"><span>Contact</span><strong>{{ case.contact }}</strong></div>
         {% if case.resolution %}

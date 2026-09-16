@@ -22,9 +22,6 @@
       <div><div style="font-size:12px;color:var(--text3);">TXN</div><strong>{{ case.txn_id|default:"—" }}</strong></div>
       <div><div style="font-size:12px;color:var(--text3);">AMOUNT</div><strong>{{ case.currency }} {{ case.amount }}</strong></div>
       <div><div style="font-size:12px;color:var(--text3);">TEAM</div><strong>{{ case.assigned_team }}</strong></div>
-      {% if case.metadata.engines.routing %}
-      <div><div style="font-size:12px;color:var(--text3);">ROUTE RULE</div><strong>{{ case.metadata.engines.routing.rule }}</strong></div>
-      {% endif %}
       <div><span class="badge badge-{{ case.severity|lower }}">{{ case.severity }}</span></div>
     </div>
   </div>
@@ -60,11 +57,7 @@
             <input class="form-input" name="finding" placeholder="Unauthorized / legitimate / error">
           </div>
           <div class="form-group">
-            <label class="form-label">Provider action recorded</label>
-            <input class="form-input" name="provider_action" placeholder="Refund initiated (organization system)">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Note shown to customer</label>
+            <label class="form-label">Resolution note (shown to customer)</label>
             <textarea class="form-textarea" name="resolution_note" required></textarea>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -84,7 +77,6 @@
     <div>
       <div class="card" style="margin-bottom:16px;">
         <h3>Quick actions</h3>
-        <a class="btn btn-ghost btn-full" href="/case/{{ case.case_id }}/export/">Export record</a>
         <button class="btn btn-ghost btn-full" type="button" onclick="navigator.clipboard.writeText('{{ case.case_id }}')">Copy case ID</button>
         <a class="btn btn-ghost btn-full" href="/case/{{ case.case_id }}/">Customer view</a>
       </div>

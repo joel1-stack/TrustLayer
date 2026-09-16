@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Agent dashboard — TrustLayer{% endblock %}
+{% block title %}Agent — TrustLayer{% endblock %}
 {% block extra_css %}
 .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
 .case-row { display:grid; grid-template-columns: 150px 1.4fr .8fr .7fr .9fr 90px; gap:10px; align-items:center; padding:14px; border-bottom:1px solid var(--border); }
@@ -25,12 +25,14 @@
   <form method="get" class="card" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
     <select class="form-select" name="status" style="width:auto;" onchange="this.form.submit()">
       <option value="">All statuses</option>
-      {% for s in "OPEN,EVIDENCE_COLLECTION,INVESTIGATING,ESCALATED,RESOLUTION_RECORDED,VERIFYING,RESOLVED,REOPENED,CLOSED"|make_list %}{% endfor %}
       <option value="OPEN" {% if status_filter == 'OPEN' %}selected{% endif %}>Open</option>
+      <option value="EVIDENCE_COLLECTION" {% if status_filter == 'EVIDENCE_COLLECTION' %}selected{% endif %}>Evidence collection</option>
       <option value="INVESTIGATING" {% if status_filter == 'INVESTIGATING' %}selected{% endif %}>Investigating</option>
       <option value="ESCALATED" {% if status_filter == 'ESCALATED' %}selected{% endif %}>Escalated</option>
+      <option value="RESOLUTION_RECORDED" {% if status_filter == 'RESOLUTION_RECORDED' %}selected{% endif %}>Resolution recorded</option>
       <option value="VERIFYING" {% if status_filter == 'VERIFYING' %}selected{% endif %}>Verifying</option>
       <option value="RESOLVED" {% if status_filter == 'RESOLVED' %}selected{% endif %}>Resolved</option>
+      <option value="REOPENED" {% if status_filter == 'REOPENED' %}selected{% endif %}>Reopened</option>
       <option value="CLOSED" {% if status_filter == 'CLOSED' %}selected{% endif %}>Closed</option>
     </select>
     <select class="form-select" name="priority" style="width:auto;" onchange="this.form.submit()">
@@ -44,6 +46,7 @@
       <option value="TRANSACTION_DISPUTE" {% if type_filter == 'TRANSACTION_DISPUTE' %}selected{% endif %}>Transaction dispute</option>
       <option value="PAYMENT_PROBLEM" {% if type_filter == 'PAYMENT_PROBLEM' %}selected{% endif %}>Payment</option>
       <option value="ACCOUNT_PROBLEM" {% if type_filter == 'ACCOUNT_PROBLEM' %}selected{% endif %}>Account</option>
+      <option value="OTHER" {% if type_filter == 'OTHER' %}selected{% endif %}>Other</option>
     </select>
   </form>
 
