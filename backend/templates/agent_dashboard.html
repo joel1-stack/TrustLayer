@@ -1,9 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Agent — TrustLayer{% endblock %}
 {% block extra_css %}
-.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
-.case-row { display:grid; grid-template-columns: 150px 1.4fr .8fr .7fr .9fr 90px; gap:10px; align-items:center; padding:14px; border-bottom:1px solid var(--border); }
-@media (max-width:900px){ .stats,.case-row { grid-template-columns:1fr 1fr; } }
+.stats { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:20px; }
+.case-row { display:grid; grid-template-columns:140px 1.2fr .6fr .6fr .7fr .8fr 80px; gap:10px; align-items:center; padding:14px; border-bottom:1px solid var(--border); font-size:13px; }
+.tab { padding:10px 18px; font-size:13px; font-weight:700; border-bottom:2px solid transparent; color:var(--text2); cursor:pointer; }
+.tab.active { color:var(--orange); border-bottom-color:var(--orange); }
+.tab:hover { color:var(--orange); }
+.sla-ok { color:var(--green); }
+.sla-warning { color:var(--amber); }
+.sla-breached { color:var(--red); font-weight:800; }
+.sla-resolved { color:var(--text3); }
+@media (max-width:1000px){ .stats { grid-template-columns:repeat(2,1fr); } .case-row { grid-template-columns:1fr 1fr; } }
 {% endblock %}
 {% block content %}
 <div class="page">
@@ -16,23 +23,33 @@
   </div>
 
   <div class="stats">
-    <div class="card"><div style="color:var(--text3);font-size:12px;font-weight:800;">ACTIVE</div><div style="font-size:32px;font-weight:900;">{{ stats.active_cases }}</div></div>
-    <div class="card"><div style="color:var(--text3);font-size:12px;font-weight:800;">VERIFYING</div><div style="font-size:32px;font-weight:900;">{{ stats.verifying }}</div></div>
-    <div class="card"><div style="color:var(--text3);font-size:12px;font-weight:800;">ESCALATED</div><div style="font-size:32px;font-weight:900;">{{ stats.escalated }}</div></div>
-    <div class="card"><div style="color:var(--text3);font-size:12px;font-weight:800;">RESOLVED TODAY</div><div style="font-size:32px;font-weight:900;">{{ stats.resolved_today }}</div></div>
+    <div class="card"><div style="color:var(--text3);font-size:11px;font-weight:800;">ACTIVE</div><div style="font-size:28px;font-weight:900;">{{ stats.active_cases }}</div></div>
+    <div class="card"><div style="color:var(--text3);font-size:11px;font-weight:800;">VERIFYING</div><div style="font-size:28px;font-weight:900;">{{ stats.verifying }}</div></div>
+    <div class="card"><div style="color:var(--text3);font-size:11px;font-weight:800;">ESCALATED</div><div style="font-size:28px;font-weight:900;">{{ stats.escalated }}</div></div>
+    <div class="card"><div style="color:var(--text3);font-size:11px;font-weight:800;">SLA AT RISK</div><div style="font-size:28px;font-weight:900;color:var(--amber);">{{ stats.sla_warning }}</div></div>
+    <div class="card"><div style="color:var(--text3);font-size:11px;font-weight:800;">SLA BREACHED</div><div style="font-size:28px;font-weight:900;color:var(--red);">{{ stats.sla_breached }}</div></div>
   </div>
 
+  <!-- Tabs -->
+  <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px;">
+    <a class="tab {% if not tab %}active{% endif %}" href="/agent/">All Cases</a>
+    <a class="tab {% if tab == 'my' %}active{% endif %}" href="/agent/?tab=my">My Cases</a>
+    <a class="tab {% if tab == 'unassigned' %}active{% endif %}" href="/agent/?tab=unassigned">Unassigned</a>
+    <a class="tab {% if tab == 'escalated' %}active{% endif %}" href="/agent/?tab=escalated">Escalated</a>
+    <a class="tab {% if tab == 'awaiting' %}active{% endif %}" href="/agent/?tab=awaiting">Awaiting Customer</a>
+  </div>
+
+  <!-- Filters -->
   <form method="get" class="card" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+    {% if tab %}<input type="hidden" name="tab" value="{{ tab }}">{% endif %}
     <select class="form-select" name="status" style="width:auto;" onchange="this.form.submit()">
       <option value="">All statuses</option>
       <option value="OPEN" {% if status_filter == 'OPEN' %}selected{% endif %}>Open</option>
       <option value="EVIDENCE_COLLECTION" {% if status_filter == 'EVIDENCE_COLLECTION' %}selected{% endif %}>Evidence collection</option>
       <option value="INVESTIGATING" {% if status_filter == 'INVESTIGATING' %}selected{% endif %}>Investigating</option>
       <option value="ESCALATED" {% if status_filter == 'ESCALATED' %}selected{% endif %}>Escalated</option>
-      <option value="RESOLUTION_RECORDED" {% if status_filter == 'RESOLUTION_RECORDED' %}selected{% endif %}>Resolution recorded</option>
       <option value="VERIFYING" {% if status_filter == 'VERIFYING' %}selected{% endif %}>Verifying</option>
       <option value="RESOLVED" {% if status_filter == 'RESOLVED' %}selected{% endif %}>Resolved</option>
-      <option value="REOPENED" {% if status_filter == 'REOPENED' %}selected{% endif %}>Reopened</option>
       <option value="CLOSED" {% if status_filter == 'CLOSED' %}selected{% endif %}>Closed</option>
     </select>
     <select class="form-select" name="priority" style="width:auto;" onchange="this.form.submit()">
@@ -41,25 +58,31 @@
       <option value="HIGH" {% if priority_filter == 'HIGH' %}selected{% endif %}>High</option>
       <option value="NORMAL" {% if priority_filter == 'NORMAL' %}selected{% endif %}>Normal</option>
     </select>
-    <select class="form-select" name="type" style="width:auto;" onchange="this.form.submit()">
-      <option value="">All types</option>
-      <option value="TRANSACTION_DISPUTE" {% if type_filter == 'TRANSACTION_DISPUTE' %}selected{% endif %}>Transaction dispute</option>
-      <option value="PAYMENT_PROBLEM" {% if type_filter == 'PAYMENT_PROBLEM' %}selected{% endif %}>Payment</option>
-      <option value="ACCOUNT_PROBLEM" {% if type_filter == 'ACCOUNT_PROBLEM' %}selected{% endif %}>Account</option>
-      <option value="OTHER" {% if type_filter == 'OTHER' %}selected{% endif %}>Other</option>
-    </select>
   </form>
 
+  <!-- Case table -->
   <div class="card" style="padding:0;overflow:hidden;">
+    <div class="case-row" style="background:#f8fafc;font-weight:800;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;">
+      <div>Case ID</div>
+      <div>Customer</div>
+      <div>Amount</div>
+      <div>Priority</div>
+      <div>Status</div>
+      <div>SLA</div>
+      <div>Age</div>
+    </div>
     {% if cases %}
       {% for case in cases %}
       <div class="case-row">
         <a href="/agent/case/{{ case.case_id }}/" style="color:var(--orange);font-weight:800;">{{ case.case_id }}</a>
-        <div>{{ case.customer_name|default:"—" }}<div style="font-size:12px;color:var(--text3);">{{ case.problem_label }}</div></div>
+        <div>{{ case.customer_name|default:"—" }}<div style="font-size:11px;color:var(--text3);">{{ case.problem_label }}</div></div>
         <div>{{ case.currency }} {{ case.amount }}</div>
         <span class="badge badge-{{ case.severity|lower }}">{{ case.severity }}</span>
         <span class="badge badge-{{ case.status|lower }}">{{ case.get_status_display }}</span>
-        <a class="btn btn-primary btn-sm" href="/agent/case/{{ case.case_id }}/">Open</a>
+        <div class="sla-{{ case.sla_status }}">
+          {% if case.sla_status == 'resolved' %}Done{% else %}{{ case.sla_time }}{% endif %}
+        </div>
+        <div style="color:var(--text3);">{{ case.age }}</div>
       </div>
       {% endfor %}
     {% else %}

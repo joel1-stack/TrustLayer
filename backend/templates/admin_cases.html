@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Case Management — TrustLayer{% endblock %}
+{% block extra_css %}
+.case-row { display:grid; grid-template-columns:140px 1.2fr .7fr .7fr .8fr 90px; gap:10px; align-items:center; padding:12px; border-bottom:1px solid var(--border); font-size:13px; }
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h1>Case Management</h1>
+      <p style="color:var(--text2);">{{ total }} total cases</p>
+    </div>
+    <a class="btn btn-ghost btn-sm" href="/admin-panel/">Back to dashboard</a>
+  </div>
+
+  <form method="get" class="card" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+    <select class="form-select" name="status" style="width:auto;" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      <option value="OPEN" {% if status_filter == 'OPEN' %}selected{% endif %}>Open</option>
+      <option value="INVESTIGATING" {% if status_filter == 'INVESTIGATING' %}selected{% endif %}>Investigating</option>
+      <option value="ESCALATED" {% if status_filter == 'ESCALATED' %}selected{% endif %}>Escalated</option>
+      <option value="VERIFYING" {% if status_filter == 'VERIFYING' %}selected{% endif %}>Verifying</option>
+      <option value="RESOLVED" {% if status_filter == 'RESOLVED' %}selected{% endif %}>Resolved</option>
+      <option value="CLOSED" {% if status_filter == 'CLOSED' %}selected{% endif %}>Closed</option>
+    </select>
+    <select class="form-select" name="priority" style="width:auto;" onchange="this.form.submit()">
+      <option value="">All priorities</option>
+      <option value="CRITICAL" {% if priority_filter == 'CRITICAL' %}selected{% endif %}>Critical</option>
+      <option value="HIGH" {% if priority_filter == 'HIGH' %}selected{% endif %}>High</option>
+      <option value="NORMAL" {% if priority_filter == 'NORMAL' %}selected{% endif %}>Normal</option>
+    </select>
+    <select class="form-select" name="type" style="width:auto;" onchange="this.form.submit()">
+      <option value="">All types</option>
+      <option value="TRANSACTION_DISPUTE" {% if type_filter == 'TRANSACTION_DISPUTE' %}selected{% endif %}>Transaction dispute</option>
+      <option value="PAYMENT_PROBLEM" {% if type_filter == 'PAYMENT_PROBLEM' %}selected{% endif %}>Payment</option>
+      <option value="ACCOUNT_PROBLEM" {% if type_filter == 'ACCOUNT_PROBLEM' %}selected{% endif %}>Account</option>
+    </select>
+  </form>
+
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="case-row" style="background:#f8fafc;font-weight:800;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;">
+      <div>Case ID</div><div>Customer</div><div>Amount</div><div>Priority</div><div>Status</div><div>Actions</div>
+    </div>
+    {% for case in cases %}
+    <div class="case-row">
+      <a href="/agent/case/{{ case.case_id }}/" style="color:var(--orange);font-weight:800;">{{ case.case_id }}</a>
+      <div>{{ case.customer_name|default:"—" }}<div style="font-size:11px;color:var(--text3);">{{ case.problem_label }}</div></div>
+      <div>{{ case.currency }} {{ case.amount }}</div>
+      <span class="badge badge-{{ case.severity|lower }}">{{ case.severity }}</span>
+      <span class="badge badge-{{ case.status|lower }}">{{ case.get_status_display }}</span>
+      <a class="btn btn-ghost btn-sm" href="/agent/case/{{ case.case_id }}/">Open</a>
+    </div>
+    {% empty %}
+    <div style="padding:48px;text-align:center;color:var(--text3);">No cases match.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

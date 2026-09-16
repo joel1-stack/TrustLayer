@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Notification Templates — TrustLayer{% endblock %}
+{% block content %}
+<div class="page" style="max-width:800px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <div>
+      <h1>Notification Templates</h1>
+      <p style="color:var(--text2);">Editable SMS and email templates per event.</p>
+    </div>
+    <a class="btn btn-ghost btn-sm" href="/admin-panel/">Back to dashboard</a>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h3 style="margin-bottom:16px;">Events</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:12px;font-weight:800;color:var(--text3);text-transform:uppercase;">
+      <div>Event</div><div>Channel</div><div>Template</div>
+    </div>
+    {% for template in templates %}
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px;">
+      <div><strong>{{ template.event }}</strong></div>
+      <div>{{ template.channel }}</div>
+      <div style="color:var(--text2);">{{ template.body|truncatewords:12 }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <h3 style="margin-bottom:12px;">Available variables</h3>
+    <div style="font-size:13px;line-height:1.8;">
+      <code>{case_id}</code> — Case ID (e.g. TL-9921)<br>
+      <code>{track_url}</code> — Link to track the case<br>
+      <code>{case_url}</code> — Link to case detail<br>
+      <code>{verify_url}</code> — Link to verification page
+    </div>
+  </div>
+</div>
+{% endblock %}

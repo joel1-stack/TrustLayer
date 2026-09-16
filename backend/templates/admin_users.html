@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Users & Teams — TrustLayer{% endblock %}
+{% block content %}
+<div class="page" style="max-width:800px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <div>
+      <h1>Users & Teams</h1>
+      <p style="color:var(--text2);">Manage agents, team leads, and admins.</p>
+    </div>
+    <a class="btn btn-ghost btn-sm" href="/admin-panel/">Back to dashboard</a>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h3 style="margin-bottom:16px;">Teams</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:12px;font-weight:800;color:var(--text3);text-transform:uppercase;">
+      <div>Team</div><div>Case type</div><div>Members</div>
+    </div>
+    {% for team in teams %}
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;">
+      <div><strong>{{ team.name }}</strong></div>
+      <div>{{ team.case_type }}</div>
+      <div>{{ team.member_count }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <h3 style="margin-bottom:16px;">Roles</h3>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:12px;font-weight:800;color:var(--text3);text-transform:uppercase;">
+      <div>Role</div><div>Permissions</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;">
+      <div><strong>Agent</strong></div>
+      <div>View assigned cases, add notes, message customers, record resolutions</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;">
+      <div><strong>Team Lead</strong></div>
+      <div>Agent permissions + reassign cases, view escalated cases, manage team</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;padding:12px 0;font-size:14px;">
+      <div><strong>Admin</strong></div>
+      <div>Full access: routing rules, SLA config, audit log, user management</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -71,6 +71,8 @@
     .alert { padding: 12px 14px; border-radius: 10px; margin-bottom: 16px; }
     .alert-error { background: #fee2e2; color: #991b1b; }
     .alert-success { background: #dcfce7; color: #166534; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .panel h3 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); margin-bottom: 12px; }
 
     .tl-footer { background: #0A0A0A; color: #d1d5db; margin-top: 48px; padding: 56px 40px 36px; border-radius: 32px 32px 0 0; position: relative; overflow: hidden; border-top: 2px solid rgba(255,87,34,.35); }
     .tl-footer-swoosh { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
@@ -101,6 +103,9 @@
     </div>
     <div class="tl-nav-right">
       {% if request.session.is_agent %}
+        {% if request.session.is_admin %}
+        <a href="/admin-panel/" class="btn btn-ghost btn-sm">Admin</a>
+        {% endif %}
         <a href="/agent/" class="btn btn-ghost btn-sm">Agent</a>
         <a href="/agent/logout/" class="btn btn-ghost btn-sm">Logout</a>
       {% else %}
@@ -166,6 +171,7 @@
         <h4>Operations</h4>
         <a href="/agent/login/">Agent login</a>
         <a href="/agent/">Case queue</a>
+        <a href="/admin/login/">Admin</a>
         <a href="/api/docs/">API docs</a>
       </div>
       <div>

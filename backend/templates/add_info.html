@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Add Information — {{ case.case_id }}{% endblock %}
+{% block content %}
+<div class="page" style="max-width:640px;">
+  <p style="margin-bottom:12px;"><a href="/case/{{ case.case_id }}/track/" style="color:var(--orange);">&#8592; Back to case</a></p>
+  <div class="card" style="margin-bottom:20px;border-color:#fdba74;">
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div style="font-size:20px;">&#128221;</div>
+      <div>
+        <strong>Information needed</strong>
+        <div style="font-size:13px;color:var(--text2);">The team needs more information to continue investigating your case.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h2 style="font-size:18px;font-weight:800;margin-bottom:4px;">{{ case.case_id }}</h2>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">{{ case.problem_label }} &mdash; {{ case.currency }} {{ case.amount }}</p>
+
+    {% if missing_items %}
+    <div style="margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Missing items</div>
+      {% for item in missing_items %}
+      <div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="color:var(--amber);">&#9679;</span>
+        <span>{{ item }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" action="/case/{{ case.case_id }}/add-info/submit/" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Your explanation</label>
+        <textarea class="form-textarea" name="text" placeholder="Provide the missing information..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Upload file (screenshot, PDF, document)</label>
+        <input class="form-input" type="file" name="evidence" accept="image/*,.pdf,.doc,.docx">
+      </div>
+      <button class="btn btn-primary btn-full" type="submit">Submit information</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

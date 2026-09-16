@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Case {{ case.case_id }} Created — TrustLayer{% endblock %}
+{% block content %}
+<div class="page" style="max-width:560px;text-align:center;">
+  <div class="card">
+    <div style="width:72px;height:72px;margin:0 auto 20px;border-radius:50%;background:#dcfce7;color:#166534;display:flex;align-items:center;justify-content:center;font-size:32px;">&#10003;</div>
+    <h1 style="font-size:28px;letter-spacing:-1px;margin-bottom:8px;">Case created</h1>
+    <div style="margin:20px 0;padding:16px;border:2px solid var(--orange);border-radius:12px;background:#fff8f5;">
+      <div style="font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;">Your case ID</div>
+      <div style="font-size:28px;font-weight:900;color:var(--orange);letter-spacing:1px;margin-top:4px;">{{ case.case_id }}</div>
+    </div>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:24px;">Save this number. You'll need it to track your case and verify the resolution.</p>
+
+    <div style="text-align:left;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;">
+      <div style="font-size:12px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">What happens next</div>
+      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
+        <div style="width:28px;height:28px;background:var(--orange);color:#000;border-radius:8px;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+        <div><strong>We review</strong><div style="font-size:13px;color:var(--text2);">We check your case details and evidence.</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
+        <div style="width:28px;height:28px;background:var(--orange);color:#000;border-radius:8px;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+        <div><strong>We investigate</strong><div style="font-size:13px;color:var(--text2);">An agent looks into your transaction.</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:28px;height:28px;background:var(--orange);color:#000;border-radius:8px;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+        <div><strong>We confirm with you</strong><div style="font-size:13px;color:var(--text2);">You verify the resolution. No dead ends.</div></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <a class="btn btn-primary" href="/case/{{ case.case_id }}/track/">Track my case</a>
+      <a class="btn btn-ghost" href="/">Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

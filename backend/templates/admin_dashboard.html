@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Operations Dashboard — TrustLayer{% endblock %}
+{% block extra_css %}
+.stats { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:24px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; }
+.stat-card .label { font-size:11px; font-weight:800; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; }
+.stat-card .value { font-size:28px; font-weight:900; margin-top:4px; }
+.metric-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+@media (max-width:900px){ .stats { grid-template-columns:repeat(2,1fr); } }
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <div>
+      <h1>Operations Dashboard</h1>
+      <p style="color:var(--text2);">Real-time case metrics</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <a class="btn btn-ghost btn-sm" href="/admin-panel/cases/">All cases</a>
+      <a class="btn btn-ghost btn-sm" href="/admin-panel/routing/">Routing rules</a>
+      <a class="btn btn-ghost btn-sm" href="/admin-panel/audit/">Audit log</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="label">Open</div><div class="value" style="color:var(--orange);">{{ stats.open }}</div></div>
+    <div class="stat-card"><div class="label">Investigating</div><div class="value" style="color:#3b82f6;">{{ stats.investigating }}</div></div>
+    <div class="stat-card"><div class="label">Awaiting customer</div><div class="value" style="color:var(--amber);">{{ stats.awaiting_customer }}</div></div>
+    <div class="stat-card"><div class="label">SLA at risk</div><div class="value" style="color:var(--amber);">{{ stats.sla_warning }}</div></div>
+    <div class="stat-card"><div class="label">SLA breached</div><div class="value" style="color:var(--red);">{{ stats.sla_breached }}</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <div class="panel">
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:12px;">Key metrics</h3>
+      <div class="metric-row"><span>Total cases</span><strong>{{ stats.total }}</strong></div>
+      <div class="metric-row"><span>Resolved today</span><strong>{{ stats.resolved_today }}</strong></div>
+      <div class="metric-row"><span>Verification rate</span><strong>{{ stats.verification_rate }}%</strong></div>
+      <div class="metric-row"><span>Reopen rate</span><strong>{{ stats.reopen_rate }}%</strong></div>
+      <div class="metric-row"><span>Median resolution (hours)</span><strong>{{ stats.median_resolution_hours }}</strong></div>
+    </div>
+
+    <div class="panel">
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:12px;">Team workload</h3>
+      {% for team in teams %}
+      <div class="metric-row">
+        <span>{{ team.name }}</span>
+        <strong>{{ team.count }} cases</strong>
+      </div>
+      {% empty %}
+      <p style="color:var(--text3);font-size:13px;">No teams configured.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:20px;">
+    <h3 style="font-size:14px;font-weight:800;margin-bottom:12px;">Recent cases</h3>
+    {% for case in recent_cases %}
+    <div class="metric-row">
+      <div>
+        <a href="/agent/case/{{ case.case_id }}/" style="color:var(--orange);font-weight:800;">{{ case.case_id }}</a>
+        <span style="margin-left:8px;">{{ case.problem_label }}</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="badge badge-{{ case.status|lower }}">{{ case.get_status_display }}</span>
+        <span style="color:var(--text3);font-size:12px;">{{ case.created_at|date:"d M H:i" }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

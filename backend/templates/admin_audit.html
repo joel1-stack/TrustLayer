@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Audit Log — TrustLayer{% endblock %}
+{% block extra_css %}
+.audit-row { display:grid; grid-template-columns:150px 120px 100px 1fr 100px; gap:10px; align-items:center; padding:10px 12px; border-bottom:1px solid var(--border); font-size:13px; }
+@media (max-width:900px){ .audit-row { grid-template-columns:1fr 1fr; } }
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h1>Audit Log</h1>
+      <p style="color:var(--text2);">Append-only. Immutable. {{ total }} entries.</p>
+    </div>
+    <a class="btn btn-ghost btn-sm" href="/admin-panel/">Back to dashboard</a>
+  </div>
+
+  <form method="get" class="card" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+    <input class="form-input" name="q" value="{{ query }}" placeholder="Search case ID, actor, action..." style="max-width:300px;">
+    <select class="form-select" name="action" style="width:auto;" onchange="this.form.submit()">
+      <option value="">All actions</option>
+      <option value="transition" {% if action_filter == 'transition' %}selected{% endif %}>Transitions</option>
+      <option value="evidence" {% if action_filter == 'evidence' %}selected{% endif %}>Evidence</option>
+      <option value="message" {% if action_filter == 'message' %}selected{% endif %}>Messages</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" type="submit">Search</button>
+  </form>
+
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="audit-row" style="background:#f8fafc;font-weight:800;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;">
+      <div>Time</div><div>Case</div><div>Actor</div><div>Action</div><div>Transition</div>
+    </div>
+    {% for log in logs %}
+    <div class="audit-row">
+      <div style="color:var(--text3);">{{ log.created_at|date:"d M H:i:s" }}</div>
+      <div><a href="/agent/case/{{ log.case_id }}/" style="color:var(--orange);font-weight:700;">{{ log.case_id }}</a></div>
+      <div>{{ log.actor }}</div>
+      <div>{{ log.action }}{% if log.detail %} — {{ log.detail }}{% endif %}</div>
+      <div>
+        {% if log.from_status and log.to_status %}
+        <span style="color:var(--text3);">{{ log.from_status }}</span> → <strong>{{ log.to_status }}</strong>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div style="padding:48px;text-align:center;color:var(--text3);">No audit entries found.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

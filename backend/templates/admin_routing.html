@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Routing & SLA Rules — TrustLayer{% endblock %}
+{% block content %}
+<div class="page" style="max-width:800px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <div>
+      <h1>Routing & SLA Rules</h1>
+      <p style="color:var(--text2);">Configure case routing and SLA thresholds.</p>
+    </div>
+    <a class="btn btn-ghost btn-sm" href="/admin-panel/">Back to dashboard</a>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h3 style="margin-bottom:16px;">Routing rules</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:12px;font-weight:800;color:var(--text3);text-transform:uppercase;">
+      <div>Case type</div><div>Team</div><div>First response</div><div>Resolution</div>
+    </div>
+    {% for rule in rules %}
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;">
+      <div><strong>{{ rule.case_type }}</strong></div>
+      <div>{{ rule.team }}</div>
+      <div>{{ rule.first_response_hours }}h</div>
+      <div>{{ rule.resolution_hours }}h</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <h3 style="margin-bottom:12px;">SLA thresholds</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">At 80% of deadline: agent + team lead warned. At 100%: auto-escalated.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:12px;font-weight:800;color:var(--text3);text-transform:uppercase;">
+      <div>Case type</div><div>Warning at</div><div>Breach at</div>
+    </div>
+    {% for rule in rules %}
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;">
+      <div><strong>{{ rule.case_type }}</strong></div>
+      <div>{{ rule.warning_at_percent }}%</div>
+      <div>100%</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

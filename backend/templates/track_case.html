@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Track {{ case.case_id }} — TrustLayer{% endblock %}
+{% block extra_css %}
+.timeline-item { display:flex; gap:14px; padding:12px 0; }
+.timeline-dot { width:12px; height:12px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+.timeline-dot.done { background:var(--orange); }
+.timeline-dot.pending { background:transparent; border:2px solid var(--border); }
+.timeline-line { width:2px; background:var(--border); margin-left:5px; min-height:20px; }
+{% endblock %}
+{% block content %}
+<div class="page" style="max-width:720px;">
+  <div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <div style="font-size:12px;color:var(--text3);font-weight:700;">CASE ID</div>
+      <h1>{{ case.case_id }}</h1>
+      <div style="color:var(--text2);margin-top:4px;">{{ case.problem_label }}</div>
+    </div>
+    <span class="badge badge-{{ case.status|lower }}">{{ case.get_status_display }}</span>
+  </div>
+
+  {% if case.status == 'VERIFYING' or case.status == 'RESOLUTION_RECORDED' %}
+  <div class="card" style="margin-bottom:20px;border-color:#fdba74;">
+    <strong>Action required.</strong> A resolution has been recorded.
+    <a class="btn btn-primary btn-sm" href="/case/{{ case.case_id }}/verify/" style="margin-left:12px;">Verify resolution</a>
+  </div>
+  {% endif %}
+
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:20px;">
+    <div>
+      <!-- Timeline -->
+      <div class="card" style="margin-bottom:20px;">
+        <h3 style="margin-bottom:16px;">Timeline</h3>
+        {% for t in timeline %}
+        <div class="timeline-item">
+          <div>
+            <div class="timeline-dot {% if forloop.last or t.to_status == case.status %}done{% else %}done{% endif %}"></div>
+          </div>
+          <div>
+            <strong style="font-size:14px;">{{ t.to_status|title }}</strong>
+            <div style="font-size:13px;color:var(--text2);">{{ t.reason }}</div>
+            <div style="font-size:12px;color:var(--text3);">{{ t.created_at|date:"d M — H:i" }} · {{ t.triggered_by }}</div>
+          </div>
+        </div>
+        {% empty %}
+        <p style="color:var(--text3);">No events yet.</p>
+        {% endfor %}
+
+        <!-- Show pending future steps -->
+        {% if case.status != 'CLOSED' %}
+        <div class="timeline-item">
+          <div><div class="timeline-dot pending"></div></div>
+          <div><span style="color:var(--text3);font-size:14px;">Resolution</span></div>
+        </div>
+        <div class="timeline-item">
+          <div><div class="timeline-dot pending"></div></div>
+          <div><span style="color:var(--text3);font-size:14px;">Your confirmation</span></div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Messages -->
+      <div class="card">
+        <h3 style="margin-bottom:12px;">Messages</h3>
+        {% for m in messages %}
+        <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+          <strong>{{ m.sender }}</strong>
+          <span style="color:var(--text3);font-size:12px;">{{ m.sender_type }} · {{ m.created_at|date:"d M, H:i" }}</span>
+          <div style="margin-top:4px;">{{ m.text }}</div>
+        </div>
+        {% empty %}
+        <p style="color:var(--text3);">No messages yet.</p>
+        {% endfor %}
+        <form method="post" action="/case/{{ case.case_id }}/message/" style="margin-top:12px;">
+          {% csrf_token %}
+          <textarea class="form-textarea" name="text" placeholder="Ask a question or add information..." required></textarea>
+          <button class="btn btn-primary" type="submit" style="margin-top:8px;">Send message</button>
+        </form>
+      </div>
+    </div>
+
+    <div>
+      <!-- Case summary -->
+      <div class="card" style="margin-bottom:20px;">
+        <h3 style="margin-bottom:12px;">Case summary</h3>
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;justify-content:space-between;">
+          <span style="color:var(--text2);">Transaction</span><strong>{{ case.txn_id|default:"—" }}</strong>
+        </div>
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;justify-content:space-between;">
+          <span style="color:var(--text2);">Amount</span><strong>{{ case.currency }} {{ case.amount }}</strong>
+        </div>
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;justify-content:space-between;">
+          <span style="color:var(--text2);">Date</span><strong>{{ case.date_occurred|default:"—" }}</strong>
+        </div>
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;justify-content:space-between;">
+          <span style="color:var(--text2);">Filed</span><strong>{{ case.created_at|date:"d M Y" }}</strong>
+        </div>
+        <div style="padding:8px 0;font-size:14px;">
+          <span style="color:var(--text2);">Statement</span>
+          <p style="margin-top:4px;">{{ case.description|default:"—" }}</p>
+        </div>
+      </div>
+
+      <!-- Evidence -->
+      <div class="card" style="margin-bottom:20px;">
+        <h3 style="margin-bottom:12px;">Evidence</h3>
+        {% for e in evidence %}
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;justify-content:space-between;">
+          <span>{{ e.filename|default:e.evidence_type }}</span>
+          {% if e.display_url %}<a href="{{ e.display_url }}" target="_blank" style="color:var(--orange);">View</a>{% endif %}
+        </div>
+        {% empty %}
+        <p style="color:var(--text3);">No files yet.</p>
+        {% endfor %}
+        <form method="post" action="/case/{{ case.case_id }}/evidence/" enctype="multipart/form-data" style="margin-top:12px;">
+          {% csrf_token %}
+          <input class="form-input" type="file" name="evidence" accept="image/*,.pdf" required>
+          <button class="btn btn-ghost btn-sm" type="submit" style="margin-top:8px;">Upload evidence</button>
+        </form>
+      </div>
+
+      <!-- Add info shortcut -->
+      <div class="card">
+        <a class="btn btn-ghost btn-full" href="/case/{{ case.case_id }}/add-info/">Add more information</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
