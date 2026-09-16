@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.conf import settings
 from django.conf.urls.static import static
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 from apps.agreements.models import Case, CaseTimeline, CaseMessage, CaseEvidence
 from apps.core.constants import PROBLEM_TYPES, RESOLUTION_TYPES
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
@@ -331,6 +332,23 @@ def agent_case(request, case_id):
     })
 
 
+@extend_schema(
+    summary='Health check',
+    description='Returns service health status. Use this to verify the API is running.',
+    responses={200: OpenApiResponse(description='Service is healthy', examples=[])},
+    tags=['System'],
+)
+def health_check(request):
+    from django.db import connection
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+        db = 'ok'
+    except Exception:
+        db = 'error'
+    return JsonResponse({'status': 'ok', 'database': db})
+
+
 urlpatterns = [
     path('', home, name='home'),
     path('how-it-works/', how_it_works, name='how-it-works'),
@@ -353,5 +371,5 @@ urlpatterns = [
     path('api/docs/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger'),
     path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    path('health/', lambda r: JsonResponse({'status': 'ok'})),
+    path('health/', health_check),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

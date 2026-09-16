@@ -3,6 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiResponse
 from apps.agreements.models import Case, CaseTimeline, CaseMessage, CaseEvidence
 from apps.state_machine.services import StateMachine
 
@@ -62,6 +63,20 @@ def _case_payload(case):
     }
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# LIST CASES
+# ──────────────────────────────────────────────────────────────────────────────
+@extend_schema(
+    summary='List all cases',
+    description=(
+        'Returns up to 50 cases, ordered by newest first.\n\n'
+        '**Lifecycle position:** This returns cases at any stage of the loop:\n'
+        '`OPEN → EVIDENCE_COLLECTION → INVESTIGATING → RESOLUTION_RECORDED → VERIFYING → RESOLVED → CLOSED`\n\n'
+        'Use the `status` field in each case to filter by lifecycle stage.'
+    ),
+    responses={200: OpenApiResponse(description='Array of case objects')},
+    tags=['Cases'],
+)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def list_cases_api(request):
@@ -85,6 +100,105 @@ def list_cases_api(request):
     return Response(data)
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# CREATE CASE  (Step 1 of the lifecycle)
+# ──────────────────────────────────────────────────────────────────────────────
+@extend_schema(
+    summary='Create a new case',
+    description=(
+        '**Step 1 — Report**\n\n'
+        'Creates a new case and places it in `OPEN` status. This is the entry point '
+        'of the entire lifecycle loop.\n\n'
+        '```\n'
+        '         ┌──────────┐\n'
+        '         │  CREATE  │ ← You are here\n'
+        '         │  (OPEN)  │\n'
+        '         └────┬─────┘\n'
+        '              │\n'
+        '              ▼\n'
+        '    ┌─────────────────┐\n'
+        '    │ EVIDENCE_COLLECTION │\n'
+        '    └────────┬────────┘\n'
+        '             │\n'
+        '             ▼\n'
+        '    ┌─────────────────┐\n'
+        '    │  INVESTIGATING  │\n'
+        '    └────────┬────────┘\n'
+        '             │\n'
+        '             ▼\n'
+        '    ┌─────────────────┐\n'
+        '    │ RESOLUTION_     │\n'
+        '    │ RECORDED        │\n'
+        '    └────────┬────────┘\n'
+        '             │\n'
+        '             ▼\n'
+        '    ┌─────────────────┐\n'
+        '    │   VERIFYING     │\n'
+        '    └────────┬────────┘\n'
+        '             │\n'
+        '      ┌──────┴──────┐\n'
+        '      ▼             ▼\n'
+        ' ┌──────────┐  ┌──────────┐\n'
+        ' │ RESOLVED │  │ REOPENED │\n'
+        ' └────┬─────┘  └────┬─────┘\n'
+        '      │             │\n'
+        '      ▼             └──→ INVESTIGATING\n'
+        ' ┌──────────┐\n'
+        ' │  CLOSED  │\n'
+        ' └──────────┘\n'
+        '```\n\n'
+        '**Routing:** The case is automatically assigned to a team based on `problem_type`:\n'
+        '- `TRANSACTION_DISPUTE` → FRAUD_OPERATIONS\n'
+        '- `PAYMENT_PROBLEM` → PAYMENTS_OPERATIONS\n'
+        '- `ACCOUNT_PROBLEM` → ACCOUNT_SECURITY\n'
+        '- `OTHER` → GENERAL_SUPPORT\n\n'
+        '**Priority:** Set automatically — `HIGH` if amount > 10,000, else `NORMAL`.'
+    ),
+    request={
+        'application/json': {
+            'type': 'object',
+            'required': ['description'],
+            'properties': {
+                'problem_type': {'type': 'string', 'enum': ['TRANSACTION_DISPUTE', 'PAYMENT_PROBLEM', 'ACCOUNT_PROBLEM', 'OTHER'], 'default': 'TRANSACTION_DISPUTE'},
+                'txn_id': {'type': 'string', 'description': 'Transaction reference ID', 'example': 'TXN-8839201'},
+                'amount': {'type': 'number', 'description': 'Disputed amount', 'example': 50000},
+                'currency': {'type': 'string', 'default': 'KES'},
+                'description': {'type': 'string', 'description': 'What happened — customer statement', 'example': 'I did not make this payment. Someone accessed my account.'},
+                'date_occurred': {'type': 'string', 'format': 'date', 'example': '2026-09-15'},
+                'customer_name': {'type': 'string', 'example': 'Jane Doe'},
+                'customer_email': {'type': 'string', 'example': 'jane@example.com'},
+                'customer_phone': {'type': 'string', 'example': '+254712345678'},
+                'priority': {'type': 'string', 'enum': ['LOW', 'NORMAL', 'HIGH', 'CRITICAL'], 'description': 'Auto-set if omitted'},
+            },
+        }
+    },
+    examples=[
+        OpenApiExample(
+            'Transaction dispute',
+            summary='Customer reports unauthorized mobile money transfer',
+            value={
+                'problem_type': 'TRANSACTION_DISPUTE',
+                'txn_id': 'TXN-8839201',
+                'amount': 50000,
+                'currency': 'KES',
+                'description': 'I did not make this payment. Someone accessed my account and transferred KES 50,000.',
+                'date_occurred': '2026-09-15',
+                'customer_name': 'Jane Doe',
+                'customer_email': 'jane@example.com',
+                'customer_phone': '+254712345678',
+            },
+            request_only=True,
+        ),
+    ],
+    responses={
+        201: OpenApiResponse(
+            description='Case created successfully',
+            examples=[OpenApiExample('Created', value={'case_id': 'CASE4DRUHSCT4F', 'status': 'OPEN', 'message': 'Case CASE4DRUHSCT4F created.'})],
+        ),
+        400: OpenApiResponse(description='Missing required fields'),
+    },
+    tags=['Cases'],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_case_api(request):
@@ -124,6 +238,20 @@ def create_case_api(request):
     }, status=status.HTTP_201_CREATED)
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# CASE DETAIL
+# ──────────────────────────────────────────────────────────────────────────────
+@extend_schema(
+    summary='Get case details',
+    description=(
+        'Returns the full case record including timeline, messages, and evidence.\n\n'
+        'The `timeline` array shows every state transition in chronological order.\n'
+        'The `messages` array shows all customer/agent messages.\n'
+        'The `evidence` array shows all uploaded files.'
+    ),
+    responses={200: OpenApiResponse(description='Full case object with timeline, messages, evidence')},
+    tags=['Cases'],
+)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def case_detail_api(request, case_id):
@@ -131,6 +259,34 @@ def case_detail_api(request, case_id):
     return Response(_case_payload(case))
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# ADD EVIDENCE  (Step 2 of the lifecycle)
+# ──────────────────────────────────────────────────────────────────────────────
+@extend_schema(
+    summary='Add evidence to a case',
+    description=(
+        '**Step 2 — Evidence Collection**\n\n'
+        'Attaches a file or reference to the case. If the case is in `OPEN` status, '
+        'it automatically transitions to `EVIDENCE_COLLECTION`.\n\n'
+        'Evidence can be screenshots, PDFs, bank statements, or any file that supports the case.'
+    ),
+    request={
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'evidence_type': {'type': 'string', 'enum': ['screenshot', 'document', 'audio', 'video'], 'default': 'screenshot'},
+                'url': {'type': 'string', 'description': 'URL if evidence is hosted online'},
+                'filename': {'type': 'string', 'example': 'bank_sms.png'},
+                'description': {'type': 'string', 'example': 'SMS confirmation of the transfer'},
+                'uploaded_by': {'type': 'string', 'default': 'customer'},
+            },
+        }
+    },
+    responses={
+        201: OpenApiResponse(description='Evidence added', examples=[OpenApiExample('Added', value={'status': 'evidence added'})]),
+    },
+    tags=['Evidence'],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def collect_evidence_api(request, case_id):
@@ -151,6 +307,27 @@ def collect_evidence_api(request, case_id):
     return Response({'status': 'evidence added'}, status=status.HTTP_201_CREATED)
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# START INVESTIGATION  (Step 3 of the lifecycle)
+# ──────────────────────────────────────────────────────────────────────────────
+@extend_schema(
+    summary='Start investigation',
+    description=(
+        '**Step 3 — Investigate**\n\n'
+        'Agent picks up the case and begins investigation. Transitions the case to `INVESTIGATING`.\n\n'
+        'Valid from: `OPEN`, `EVIDENCE_COLLECTION`, `REOPENED`, `ESCALATED`'
+    ),
+    request={
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'agent_id': {'type': 'string', 'description': 'Agent identifier', 'example': 'joelkaunda15'},
+            },
+        }
+    },
+    responses={200: OpenApiResponse(description='Case status after transition')},
+    tags=['Investigation'],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def start_investigation_api(request, case_id):
@@ -163,6 +340,31 @@ def start_investigation_api(request, case_id):
     return Response({'status': case.status})
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# RESOLVE CASE  (Step 4 of the lifecycle)
+# ──────────────────────────────────────────────────────────────────────────────
+@extend_schema(
+    summary='Record resolution',
+    description=(
+        '**Step 4 — Resolve**\n\n'
+        'Agent records the outcome of the investigation. Transitions to `RESOLUTION_RECORDED`.\n\n'
+        'This does NOT close the case. The customer must verify the resolution first.\n\n'
+        'Valid from: `INVESTIGATING`, `ESCALATED`, `OPEN`, `EVIDENCE_COLLECTION`, `REOPENED`'
+    ),
+    request={
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'resolution_type': {'type': 'string', 'enum': ['CONFIRMED_FRAUD', 'TRANSACTION_LEGITIMATE', 'CUSTOMER_ERROR', 'UNABLE_TO_DETERMINE', 'REFUNDED']},
+                'finding': {'type': 'string', 'description': 'Brief finding summary', 'example': 'Unauthorized device access from new IP'},
+                'note': {'type': 'string', 'description': 'Detailed resolution note shown to customer', 'example': 'Transaction was from unrecognized device in Lagos. Refund initiated.'},
+                'agent_id': {'type': 'string', 'example': 'joelkaunda15'},
+            },
+        }
+    },
+    responses={200: OpenApiResponse(description='Case moved to RESOLUTION_RECORDED')},
+    tags=['Resolution'],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def resolve_case_api(request, case_id):
@@ -188,6 +390,20 @@ def resolve_case_api(request, case_id):
     return Response({'case_id': case.case_id, 'status': case.status})
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# SEND FOR VERIFICATION  (Step 5a — system sends to customer)
+# ──────────────────────────────────────────────────────────────────────────────
+@extend_schema(
+    summary='Send to customer for verification',
+    description=(
+        '**Step 5 — Verify (system side)**\n\n'
+        'Moves the case from `RESOLUTION_RECORDED` to `VERIFYING`.\n'
+        'This notifies the customer that a resolution has been recorded and asks them to confirm.\n\n'
+        'Valid from: `RESOLUTION_RECORDED` only.'
+    ),
+    responses={200: OpenApiResponse(description='Case moved to VERIFYING')},
+    tags=['Verification'],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def verify_case_api(request, case_id):
@@ -201,6 +417,32 @@ def verify_case_api(request, case_id):
     return Response({'case_id': case.case_id, 'status': case.status})
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# CUSTOMER CONFIRMS  (Step 5b — customer responds)
+# ──────────────────────────────────────────────────────────────────────────────
+@extend_schema(
+    summary='Customer confirms or rejects resolution',
+    description=(
+        '**Step 5 — Verify (customer side)**\n\n'
+        'The customer responds to the proposed resolution:\n'
+        '- `confirmed: true` → Case moves to `RESOLVED`\n'
+        '- `confirmed: false` → Case moves to `REOPENED` and returns to investigation\n\n'
+        'This is the critical feedback loop that prevents dead-end resolutions.\n\n'
+        'Valid from: `VERIFYING` only.'
+    ),
+    request={
+        'application/json': {
+            'type': 'object',
+            'required': ['confirmed'],
+            'properties': {
+                'confirmed': {'type': 'boolean', 'description': 'true = resolved, false = still a problem'},
+                'note': {'type': 'string', 'description': 'Optional note from customer'},
+            },
+        }
+    },
+    responses={200: OpenApiResponse(description='Case moved to RESOLVED or REOPENED')},
+    tags=['Verification'],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def customer_verify_api(request, case_id):
@@ -224,6 +466,19 @@ def customer_verify_api(request, case_id):
     return Response({'case_id': case.case_id, 'status': case.status})
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# CLOSE CASE  (Step 6 — final state)
+# ──────────────────────────────────────────────────────────────────────────────
+@extend_schema(
+    summary='Close case',
+    description=(
+        '**Step 6 — Closed**\n\n'
+        'Closes the case permanently. The full record is now immutable.\n\n'
+        'Valid from: `RESOLVED` only.'
+    ),
+    responses={200: OpenApiResponse(description='Case moved to CLOSED')},
+    tags=['Resolution'],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def close_case_api(request, case_id):
@@ -234,6 +489,30 @@ def close_case_api(request, case_id):
     return Response({'case_id': case.case_id, 'status': case.status})
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# ADD MESSAGE
+# ──────────────────────────────────────────────────────────────────────────────
+@extend_schema(
+    summary='Add a message to a case',
+    description=(
+        'Adds a message to the case thread. Messages are visible to both the customer and agents.\n\n'
+        '- Customer messages: `sender_type: "customer"`\n'
+        '- Agent messages: `sender_type: "agent"`'
+    ),
+    request={
+        'application/json': {
+            'type': 'object',
+            'required': ['text'],
+            'properties': {
+                'sender': {'type': 'string', 'example': 'Jane Doe'},
+                'sender_type': {'type': 'string', 'enum': ['customer', 'agent'], 'default': 'customer'},
+                'text': {'type': 'string', 'example': 'Thank you for resolving this'},
+            },
+        }
+    },
+    responses={201: OpenApiResponse(description='Message added', examples=[OpenApiExample('Added', value={'message_id': 1})])},
+    tags=['Messages'],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def add_message_api(request, case_id):
