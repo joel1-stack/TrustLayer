@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}About — TrustLayer{% endblock %}
+{% block content %}
+<div class="page" style="max-width:680px;">
+  <div style="margin-bottom:48px;">
+    <div style="font-size:12px;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;">About</div>
+    <h1 style="font-size:clamp(1.8rem,3vw,2.4rem);font-weight:900;letter-spacing:-1px;margin-bottom:10px;">TrustLayer</h1>
+    <p style="color:var(--text2);font-size:15px;line-height:1.7;">A verification loop for customer problems. Not a bank ledger. Not a support ticket system. A loop that closes.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h2 style="font-size:16px;font-weight:800;margin-bottom:8px;">What we built</h2>
+    <p style="color:var(--text2);font-size:14px;line-height:1.7;">TrustLayer takes one customer problem, gathers the evidence around it, gets it to the right person, and produces a verified resolution. That's it.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h2 style="font-size:16px;font-weight:800;margin-bottom:8px;">What we didn't build</h2>
+    <p style="color:var(--text2);font-size:14px;line-height:1.7;">No multi-org platform. No five integration engines. No telecom adapters. No escrow. No policy engine. No diagnosis engine. Just the loop.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h2 style="font-size:16px;font-weight:800;margin-bottom:8px;">The problem</h2>
+    <p style="color:var(--text2);font-size:14px;line-height:1.7;">When a customer reports a transaction dispute, they get a ticket number and silence. No timeline. No evidence collection. No verification. The case dies in a queue.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h2 style="font-size:16px;font-weight:800;margin-bottom:8px;">The solution</h2>
+    <p style="color:var(--text2);font-size:14px;line-height:1.7;">A closed loop: report → evidence → route → investigate → resolve → verify → closed. Every step recorded. Every transition logged. Customer confirms the outcome. No dead ends.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h2 style="font-size:16px;font-weight:800;margin-bottom:8px;">Built in Kenya</h2>
+    <p style="color:var(--text2);font-size:14px;line-height:1.7;">Django, PostgreSQL, Redis. Docker. One server. Two browsers. Customer and agent. That's the whole stack.</p>
+  </div>
+
+  <div class="card" style="text-align:center;padding:40px;">
+    <h2 style="font-size:20px;font-weight:900;margin-bottom:8px;">Try it</h2>
+    <p style="color:var(--text2);margin-bottom:20px;">File a case. Watch the loop. Verify the resolution.</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <a href="/report/" class="btn btn-primary">Report a Problem</a>
+      <a href="/agent/login/" class="btn btn-ghost">Agent Login</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

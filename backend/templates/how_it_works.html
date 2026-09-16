@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}How It Works — TrustLayer{% endblock %}
+{% block content %}
+<div class="page">
+  <div style="text-align:center;margin-bottom:48px;">
+    <div style="font-size:12px;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;">How it works</div>
+    <h1 style="font-size:clamp(1.8rem,3vw,2.4rem);font-weight:900;letter-spacing:-1px;margin-bottom:10px;">The loop, end to end</h1>
+    <p style="color:var(--text2);font-size:15px;max-width:520px;margin:0 auto;line-height:1.7;">Eight steps from the first report to the closed, customer-verified record. No status page. No support ticket. A real loop.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:48px;">
+    <div class="card" style="text-align:center;">
+      <div style="width:40px;height:40px;background:var(--orange);color:#000;border-radius:10px;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">1</div>
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:6px;">Report</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Customer submits the problem. Gets a case ID instantly. No wait time.</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="width:40px;height:40px;background:var(--orange);color:#000;border-radius:10px;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">2</div>
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:6px;">Evidence</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Screenshots attached. Case moves to evidence collection automatically.</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="width:40px;height:40px;background:var(--orange);color:#000;border-radius:10px;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">3</div>
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:6px;">Route</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Assigned to the right team. Priority set automatically based on amount.</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="width:40px;height:40px;background:var(--orange);color:#000;border-radius:10px;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">4</div>
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:6px;">Investigate</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Agent reviews full case. Adds notes. Messages the customer directly.</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="width:40px;height:40px;background:var(--orange);color:#000;border-radius:10px;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">5</div>
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:6px;">Resolve</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Agent records the resolution: fraud, legitimate, error, or unable to determine.</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="width:40px;height:40px;background:var(--orange);color:#000;border-radius:10px;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">6</div>
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:6px;">Verify</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Customer confirms: resolved or reopened. One tap. No phone call needed.</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="width:40px;height:40px;background:var(--orange);color:#000;border-radius:10px;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">7</div>
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:6px;">Closed</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Full immutable record of every step and decision. Downloadable.</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="width:40px;height:40px;background:var(--orange);color:#000;border-radius:10px;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">8</div>
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:6px;">Reopened?</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">If not resolved, case returns to investigation automatically. No dead ends.</p>
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center;padding:40px;">
+    <h2 style="font-size:20px;font-weight:900;margin-bottom:8px;">Ready to try it?</h2>
+    <p style="color:var(--text2);margin-bottom:20px;">File a test case and walk through the full loop yourself.</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <a href="/report/" class="btn btn-primary">Report a Problem</a>
+      <a href="/agent/login/" class="btn btn-ghost">Agent Login</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

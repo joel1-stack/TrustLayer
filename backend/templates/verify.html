@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Verify {{ case.case_id }} — TrustLayer{% endblock %}
+{% block content %}
+<div class="page" style="max-width:680px;">
+  <div class="card" style="text-align:center;">
+    <h1>Resolution proposed</h1>
+    <p style="color:var(--text3);margin:8px 0 20px;">{{ case.case_id }}</p>
+    <div style="text-align:left;background:#f8fafc;border:1px solid var(--border);border-left:4px solid var(--orange);border-radius:12px;padding:18px;margin-bottom:24px;">
+      <div style="font-size:12px;font-weight:800;color:var(--text3);">INVESTIGATION RESULT</div>
+      <h2 style="margin:8px 0;">{{ case.resolution_label }}</h2>
+      <p>{{ case.resolution_note|default:"The organization has recorded a resolution on this case." }}</p>
+      {% if case.provider_action %}<p style="margin-top:8px;"><strong>Recorded action:</strong> {{ case.provider_action }}</p>{% endif %}
+    </div>
+    <h3 style="margin-bottom:16px;">Did this resolve your problem?</h3>
+    <form method="post" action="/case/{{ case.case_id }}/confirm/">
+      {% csrf_token %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <button class="btn btn-success" type="submit" name="confirmed" value="true">Yes, it's resolved</button>
+        <button class="btn btn-danger" type="submit" name="confirmed" value="false">No, still a problem</button>
+      </div>
+    </form>
+    <p style="margin-top:18px;"><a href="/case/{{ case.case_id }}/">Back to case</a></p>
+  </div>
+</div>
+{% endblock %}

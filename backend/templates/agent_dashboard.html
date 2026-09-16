@@ -1,93 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agent Dashboard — TrustLayer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root { --accent: #FF5522; --accent-hover: #E04418; --text: #111111; --text-secondary: #555; --text-muted: #999; --bg: #FFFFFF; --bg-alt: #F8F8F8; --border: #EEE; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-alt); color: var(--text); min-height: 100vh; }
-
-    .topbar { background: var(--bg); padding: 16px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
-    .brand { font-size: 18px; font-weight: 900; text-decoration: none; color: var(--text); }
-    .brand span { color: var(--accent); }
-    .topbar-right { display: flex; gap: 16px; align-items: center; }
-    .topbar-right a { font-size: 13px; color: var(--text-secondary); text-decoration: none; font-weight: 500; }
-    .topbar-right a:hover { color: var(--accent); }
-
-    .main { max-width: 960px; margin: 0 auto; padding: 24px 32px; }
-    h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 24px; }
-
-    .filters { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-    .filter-btn { padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.15s; }
-    .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-    .cases-list { display: flex; flex-direction: column; gap: 8px; }
-    .case-row { display: grid; grid-template-columns: 140px 1fr 120px 100px 140px; gap: 16px; align-items: center; padding: 16px 20px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; text-decoration: none; color: var(--text); transition: all 0.15s; }
-    .case-row:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(255,85,34,0.06); }
-    .case-id { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--accent); }
-    .case-desc { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .case-desc span { color: var(--text-muted); font-weight: 400; }
-    .case-severity { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .case-severity.CRITICAL { color: #dc2626; }
-    .case-severity.HIGH { color: #ea580c; }
-    .case-severity.NORMAL { color: #059669; }
-    .case-severity.LOW { color: #6b7280; }
-    .case-status { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; }
-    .dot.OPEN { background: #3b82f6; }
-    .dot.INVESTIGATING { background: #f59e0b; }
-    .dot.RESOLVED { background: #10b981; }
-    .dot.CLOSED { background: #6b7280; }
-    .case-time { font-size: 12px; color: var(--text-muted); text-align: right; }
-
-    .empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 15px; }
-
-    @media (max-width: 768px) {
-      .case-row { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .case-severity, .case-time { grid-column: span 1; }
-    }
-  </style>
-</head>
-<body>
-  <div class="topbar">
-    <a href="/" class="brand"><span>Trust</span>Layer</a>
-    <div class="topbar-right">
-      <a href="/agent/">Dashboard</a>
-      <a href="/api/docs/">API</a>
+{% extends "base.html" %}
+{% block title %}Agent dashboard — TrustLayer{% endblock %}
+{% block extra_css %}
+.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.case-row { display:grid; grid-template-columns: 150px 1.4fr .8fr .7fr .9fr 90px; gap:10px; align-items:center; padding:14px; border-bottom:1px solid var(--border); }
+@media (max-width:900px){ .stats,.case-row { grid-template-columns:1fr 1fr; } }
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h1>Case queue</h1>
+      <p style="color:var(--text2);">Signed in as {{ agent_name }}</p>
     </div>
+    <a class="btn btn-ghost" href="/agent/logout/">Sign out</a>
   </div>
 
-  <div class="main">
-    <h1>Cases</h1>
+  <div class="stats">
+    <div class="card"><div style="color:var(--text3);font-size:12px;font-weight:800;">ACTIVE</div><div style="font-size:32px;font-weight:900;">{{ stats.active_cases }}</div></div>
+    <div class="card"><div style="color:var(--text3);font-size:12px;font-weight:800;">VERIFYING</div><div style="font-size:32px;font-weight:900;">{{ stats.verifying }}</div></div>
+    <div class="card"><div style="color:var(--text3);font-size:12px;font-weight:800;">ESCALATED</div><div style="font-size:32px;font-weight:900;">{{ stats.escalated }}</div></div>
+    <div class="card"><div style="color:var(--text3);font-size:12px;font-weight:800;">RESOLVED TODAY</div><div style="font-size:32px;font-weight:900;">{{ stats.resolved_today }}</div></div>
+  </div>
 
-    <div class="filters">
-      <a href="/agent/" class="filter-btn {% if not status_filter %}active{% endif %}">All</a>
-      <a href="/agent/?status=OPEN" class="filter-btn {% if status_filter == 'OPEN' %}active{% endif %}">Open</a>
-      <a href="/agent/?status=INVESTIGATING" class="filter-btn {% if status_filter == 'INVESTIGATING' %}active{% endif %}">Investigating</a>
-      <a href="/agent/?status=RESOLVED" class="filter-btn {% if status_filter == 'RESOLVED' %}active{% endif %}">Resolved</a>
-      <a href="/agent/?status=CLOSED" class="filter-btn {% if status_filter == 'CLOSED' %}active{% endif %}">Closed</a>
-    </div>
+  <form method="get" class="card" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+    <select class="form-select" name="status" style="width:auto;" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      {% for s in "OPEN,EVIDENCE_COLLECTION,INVESTIGATING,ESCALATED,RESOLUTION_RECORDED,VERIFYING,RESOLVED,REOPENED,CLOSED"|make_list %}{% endfor %}
+      <option value="OPEN" {% if status_filter == 'OPEN' %}selected{% endif %}>Open</option>
+      <option value="INVESTIGATING" {% if status_filter == 'INVESTIGATING' %}selected{% endif %}>Investigating</option>
+      <option value="ESCALATED" {% if status_filter == 'ESCALATED' %}selected{% endif %}>Escalated</option>
+      <option value="VERIFYING" {% if status_filter == 'VERIFYING' %}selected{% endif %}>Verifying</option>
+      <option value="RESOLVED" {% if status_filter == 'RESOLVED' %}selected{% endif %}>Resolved</option>
+      <option value="CLOSED" {% if status_filter == 'CLOSED' %}selected{% endif %}>Closed</option>
+    </select>
+    <select class="form-select" name="priority" style="width:auto;" onchange="this.form.submit()">
+      <option value="">All priorities</option>
+      <option value="CRITICAL" {% if priority_filter == 'CRITICAL' %}selected{% endif %}>Critical</option>
+      <option value="HIGH" {% if priority_filter == 'HIGH' %}selected{% endif %}>High</option>
+      <option value="NORMAL" {% if priority_filter == 'NORMAL' %}selected{% endif %}>Normal</option>
+    </select>
+    <select class="form-select" name="type" style="width:auto;" onchange="this.form.submit()">
+      <option value="">All types</option>
+      <option value="TRANSACTION_DISPUTE" {% if type_filter == 'TRANSACTION_DISPUTE' %}selected{% endif %}>Transaction dispute</option>
+      <option value="PAYMENT_PROBLEM" {% if type_filter == 'PAYMENT_PROBLEM' %}selected{% endif %}>Payment</option>
+      <option value="ACCOUNT_PROBLEM" {% if type_filter == 'ACCOUNT_PROBLEM' %}selected{% endif %}>Account</option>
+    </select>
+  </form>
 
+  <div class="card" style="padding:0;overflow:hidden;">
     {% if cases %}
-    <div class="cases-list">
       {% for case in cases %}
-      <a href="/agent/case/{{ case.case_id }}/" class="case-row">
-        <div class="case-id">{{ case.case_id }}</div>
-        <div class="case-desc">{{ case.description|truncatewords:10 }} <span>&middot; {{ case.customer_name|default:"Anonymous" }}</span></div>
-        <div class="case-severity {{ case.severity }}">{{ case.severity }}</div>
-        <div class="case-status"><div class="dot {{ case.status }}"></div>{{ case.status }}</div>
-        <div class="case-time">{{ case.created_at|date:"M d, H:i" }}</div>
-      </a>
+      <div class="case-row">
+        <a href="/agent/case/{{ case.case_id }}/" style="color:var(--orange);font-weight:800;">{{ case.case_id }}</a>
+        <div>{{ case.customer_name|default:"—" }}<div style="font-size:12px;color:var(--text3);">{{ case.problem_label }}</div></div>
+        <div>{{ case.currency }} {{ case.amount }}</div>
+        <span class="badge badge-{{ case.severity|lower }}">{{ case.severity }}</span>
+        <span class="badge badge-{{ case.status|lower }}">{{ case.get_status_display }}</span>
+        <a class="btn btn-primary btn-sm" href="/agent/case/{{ case.case_id }}/">Open</a>
+      </div>
       {% endfor %}
-    </div>
     {% else %}
-    <div class="empty">No cases found.</div>
+      <div style="padding:48px;text-align:center;color:var(--text3);">No cases match this filter.</div>
     {% endif %}
   </div>
-</body>
-</html>
+</div>
+{% endblock %}

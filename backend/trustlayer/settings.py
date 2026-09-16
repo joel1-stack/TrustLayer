@@ -42,10 +42,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Admin Dashboard Security
-    'apps.admin_dashboard.middleware.IPWhitelistMiddleware',
-    'apps.admin_dashboard.middleware.AdminAuthMiddleware',
-    'apps.admin_dashboard.middleware.AdminAuditMiddleware',
+    # Old control-center middleware is off for v1 agent workspace.
 ]
 
 ROOT_URLCONF = 'trustlayer.urls'
@@ -100,6 +97,11 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
@@ -123,24 +125,30 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'TrustLayer API',
-    'DESCRIPTION': 'Conditional payment orchestration for African commerce. '
-                   'Hold money in escrow, release on conditions, split to multiple parties.',
+    'DESCRIPTION': 'Case lifecycle API: report, evidence, investigate, resolve, verify.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+_ngrok = os.environ.get('TRUSTLAYER_BASE_URL', 'https://miranda-stockish-spacially.ngrok-free.dev').rstrip('/')
 CSRF_TRUSTED_ORIGINS = [
-    'https://miranda-stockish-spacially.ngrok-free.dev',
-    'https://*.ngrok-free.dev',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
+    origin for origin in {
+        _ngrok,
+        'https://miranda-stockish-spacially.ngrok-free.dev',
+        'https://*.ngrok-free.dev',
+        'https://*.ngrok.io',
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+    }
+    if origin
 ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
-SESSION_COOKIE_SECURE = True
+_secure = os.environ.get('DEBUG', 'True') != 'True'
+SESSION_COOKIE_SECURE = _secure
 SESSION_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = _secure
 
 _redis_url = f"redis://{os.environ.get('REDIS_HOST', 'redis_cache')}:{os.environ.get('REDIS_PORT', '6379')}"
 
@@ -208,7 +216,6 @@ ADMIN_SESSION_COOKIE_NAME = 'tl_admin_session'
 ADMIN_SESSION_EXPIRY_SECONDS = 1800
 
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
@@ -218,6 +225,5 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_USE_SESSIONS = False

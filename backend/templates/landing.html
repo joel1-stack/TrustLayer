@@ -1,119 +1,318 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TrustLayer — Resolve customer problems without losing context</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --accent: #FF5522;
-      --accent-hover: #E04418;
-      --dark: #111111;
-      --text: #111111;
-      --text-secondary: #555;
-      --text-muted: #999;
-      --bg: #FFFFFF;
-      --bg-alt: #F8F8F8;
-      --border: #EEE;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+{% extends "base.html" %}
+{% load static %}
+{% block title %}TrustLayer — Report. Track. Verify.{% endblock %}
 
-    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
-    nav .inner { max-width: 960px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
-    nav .brand { font-size: 20px; font-weight: 900; color: var(--text); text-decoration: none; letter-spacing: -0.5px; }
-    nav .brand span { color: var(--accent); }
-    nav .links { display: flex; gap: 24px; align-items: center; }
-    nav .links a { font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; }
-    nav .links a:hover { color: var(--text); }
-    nav .links .cta { background: var(--accent); color: #fff; padding: 10px 24px; border-radius: 10px; font-weight: 600; }
-    nav .links .cta:hover { background: var(--accent-hover); }
+{% block extra_css %}
+/* ══ HERO — force full black, no light bleed from body ══ */
+body { background: #000 !important; }
 
-    .hero { padding: 160px 32px 80px; max-width: 960px; margin: 0 auto; text-align: center; }
-    .hero h1 { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 900; letter-spacing: -2px; line-height: 1.1; margin-bottom: 24px; }
-    .hero h1 .accent { color: var(--accent); }
-    .hero p { font-size: 18px; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px; line-height: 1.7; }
-    .hero .btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .hero .btns a { padding: 14px 32px; border-radius: 12px; font-size: 15px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
-    .hero .btns .primary { background: var(--accent); color: #fff; }
-    .hero .btns .primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,85,34,0.25); }
-    .hero .btns .secondary { background: var(--bg-alt); color: var(--text); border: 1px solid var(--border); }
-    .hero .btns .secondary:hover { background: var(--border); }
+.hero {
+  background: #000;
+  color: #fff;
+  padding: 72px 0 0;
+  position: relative;
+  overflow: hidden;
+  margin-top: -1px;
+}
 
-    .flow { padding: 80px 32px; max-width: 960px; margin: 0 auto; }
-    .flow-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
-    .flow-step { text-align: center; padding: 32px 20px; }
-    .flow-step .num { width: 40px; height: 40px; background: var(--accent); color: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; margin: 0 auto 16px; }
-    .flow-step h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-    .flow-step p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-    .flow-arrow { display: none; }
+/* Large orange radial glow — covers the right half */
+.hero-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 65% 90% at 85% 50%,
+      rgba(220,65,10,.90)   0%,
+      rgba(190,50,5,.60)    22%,
+      rgba(130,30,0,.30)    46%,
+      transparent           70%);
+  pointer-events: none;
+  z-index: 0;
+}
 
-    .section-label { font-size: 12px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; text-align: center; }
-    .section-title { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 900; text-align: center; letter-spacing: -1.5px; }
+/* SVG swoosh arcs */
+.hero-swoosh {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
 
-    .stats { padding: 60px 32px; background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .stats .inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: center; gap: 64px; flex-wrap: wrap; }
-    .stat { text-align: center; }
-    .stat .num { font-size: 2.5rem; font-weight: 900; color: var(--accent); letter-spacing: -1px; }
-    .stat .lbl { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; font-weight: 600; }
+/* Layout */
+.hero-inner {
+  position: relative; z-index: 2;
+  max-width: 1180px; margin: 0 auto;
+  padding: 0 48px;
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 24px;
+  align-items: center;
+  min-height: 460px;
+}
 
-    footer { padding: 48px 32px; text-align: center; border-top: 1px solid var(--border); }
-    footer p { font-size: 14px; color: var(--text-muted); }
-    footer span { color: var(--accent); }
+/* ── LEFT COPY ── */
+.hero-copy { padding-bottom: 56px; }
 
-    @media (max-width: 768px) {
-      .flow-steps { grid-template-columns: 1fr 1fr; }
-      .stats .inner { gap: 32px; }
-    }
-    @media (max-width: 480px) {
-      .flow-steps { grid-template-columns: 1fr; }
-    }
-  </style>
-</head>
-<body>
-  <nav>
-    <div class="inner">
-      <a href="/" class="brand"><span>Trust</span>Layer</a>
-      <div class="links">
-        <a href="/agent/">Dashboard</a>
-        <a href="/api/docs/">API</a>
-        <a href="/report/" class="cta">Report a Problem</a>
+.hero-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid rgba(255,87,34,.50);
+  background: rgba(255,87,34,.14);
+  color: #ffb090;
+  border-radius: 999px; padding: 5px 13px;
+  font-size: 11px; font-weight: 800; letter-spacing: .8px;
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.hero-chip .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #FF5722; flex-shrink: 0;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 4.4vw, 3.8rem);
+  font-weight: 900; letter-spacing: -2px;
+  line-height: 1.05; margin-bottom: 16px;
+  color: #fff !important;
+}
+.hero h1 .accent { color: #FF5722; }
+
+.hero-sub {
+  color: #94a3b8; font-size: 15px; line-height: 1.75;
+  max-width: 400px; margin-bottom: 28px;
+}
+
+.hero-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+.btn-report {
+  background: #FF5722; color: #000;
+  padding: 13px 24px; border-radius: 10px;
+  font-size: 14px; font-weight: 800;
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 24px rgba(255,87,34,.45);
+  transition: all .2s; white-space: nowrap;
+}
+.btn-report:hover { background: #E64A19; transform: translateY(-2px); }
+
+.track-box {
+  display: flex;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 10px; overflow: hidden; min-width: 230px;
+}
+.track-box input {
+  flex: 1; background: transparent; border: 0;
+  color: #fff; padding: 12px 13px; outline: none;
+  font-size: 13px;
+}
+.track-box input::placeholder { color: #4b5563; }
+.track-box button {
+  background: rgba(255,255,255,.08); border: 0;
+  border-left: 1px solid rgba(255,255,255,.10);
+  color: #fff; padding: 0 14px; cursor: pointer;
+  font-size: 16px; display: flex; align-items: center;
+}
+.track-box button:hover { background: rgba(255,87,34,.30); }
+
+/* ── RIGHT: Phone visual ── */
+.hero-visual {
+  position: relative;
+  display: flex; align-items: center; justify-content: flex-end;
+  height: 520px;
+}
+
+.phones-stage {
+  position: relative;
+  width: 560px; height: 500px;
+  animation: float 5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+.phones-photo {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  object-position: center right;
+  filter: drop-shadow(0 28px 70px rgba(0,0,0,.75));
+}
+
+.phones-glow {
+  position: absolute;
+  bottom: 20px; right: 40px; left: 20%;
+  height: 90px;
+  background: radial-gradient(ellipse 70% 100% at 55% 100%,
+    rgba(255,87,34,.55), transparent 80%);
+  filter: blur(16px);
+  pointer-events: none;
+}
+
+/* ── Wave divider ── */
+.hero-wave {
+  position: relative; z-index: 2;
+  height: 64px;
+  background:
+    radial-gradient(ellipse at 20% 0, rgba(255,87,34,.25), transparent 55%),
+    radial-gradient(ellipse at 75% 0, rgba(180,40,0,.15), transparent 50%);
+  border-bottom: 1px solid rgba(255,87,34,.15);
+}
+
+/* ════ STATS BAR ════ */
+.stats-bar {
+  background: #fff;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 28px 0;
+}
+.stats-inner {
+  max-width: 860px; margin: 0 auto;
+  display: flex; justify-content: center; gap: 60px; flex-wrap: wrap;
+}
+.stat { text-align: center; }
+.stat .num { font-size: 2.2rem; font-weight: 900; color: #FF5722; letter-spacing: -1px; line-height: 1; }
+.stat .lbl { font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-top: 5px; }
+
+/* ════ HOW IT WORKS ════ */
+.how-section { padding: 72px 0; background: #FAFAFA; }
+.section-eyebrow { text-align: center; font-size: 12px; font-weight: 800; color: #FF5722; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+.section-h2 { text-align: center; font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 10px; color: #111; }
+.section-p { text-align: center; color: #4B5563; font-size: 15px; max-width: 540px; margin: 0 auto 44px; line-height: 1.7; }
+.steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.step-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 16px; padding: 26px 20px; text-align: center; transition: border-color .2s, transform .2s; }
+.step-card:hover { border-color: #FF5722; transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,.08); }
+.step-num { width: 40px; height: 40px; background: #FF5722; color: #000; border-radius: 10px; font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+.step-card h3 { font-size: 14px; font-weight: 800; margin-bottom: 7px; color: #111; }
+.step-card p { font-size: 13px; color: #4B5563; line-height: 1.6; }
+
+/* ════ TRACK CTA ════ */
+.cta-band { background: #000; color: #fff; padding: 64px 24px; text-align: center; position: relative; overflow: hidden; }
+.cta-band-glow { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); width: 60%; height: 180px; background: radial-gradient(ellipse 70% 80% at 50% 30%, rgba(255,87,34,.20) 0%, transparent 75%); pointer-events: none; z-index: 0; }
+.cta-band-swoosh { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.cta-band > * { position: relative; z-index: 1; }
+.cta-band h2 { font-size: clamp(1.7rem, 3vw, 2.2rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 10px; color: #fff; }
+.cta-band p { color: #94a3b8; margin-bottom: 24px; }
+.cta-track-form { display: flex; gap: 10px; max-width: 440px; margin: 0 auto; flex-wrap: wrap; }
+.cta-track-form input { flex: 1; height: 50px; border-radius: 10px; border: 1px solid #374151; background: #111; color: #fff; font-size: 14px; padding: 0 16px; outline: none; min-width: 200px; }
+.cta-track-form input::placeholder { color: #4b5563; }
+.cta-track-form input:focus { border-color: #FF5722; }
+.cta-track-form button { height: 50px; padding: 0 22px; border-radius: 10px; background: #FF5722; color: #000; border: none; font-size: 14px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+.cta-track-form button:hover { background: #E64A19; }
+
+/* ════ RESPONSIVE ════ */
+@media (max-width: 960px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 20px; min-height: auto; }
+  .hero-visual { height: 320px; justify-content: center; }
+  .phones-stage { width: 420px; height: 360px; }
+  .hero-copy { padding-bottom: 0; }
+  .steps-grid { grid-template-columns: 1fr 1fr; }
+  .stats-inner { gap: 32px; }
+}
+@media (max-width: 540px) {
+  .hero { padding: 64px 0 0; }
+  .phones-stage { width: 300px; height: 250px; }
+  .steps-grid { grid-template-columns: 1fr; }
+}
+{% endblock %}
+
+{% block content %}
+
+<!-- ══════ HERO ══════ -->
+<section class="hero">
+
+  <div class="hero-glow"></div>
+
+  <svg class="hero-swoosh" viewBox="0 0 1200 520"
+       preserveAspectRatio="xMidYMid slice"
+       xmlns="http://www.w3.org/2000/svg">
+    <path d="M 830 -60 Q 1260 190 1080 570"
+          fill="none" stroke="rgba(255,100,30,.35)" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M 770 -40 Q 1160 210 960 570"
+          fill="none" stroke="rgba(255,87,34,.24)" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M 690  30 Q 1040 240 840 570"
+          fill="none" stroke="rgba(255,87,34,.16)" stroke-width="1.1" stroke-linecap="round"/>
+    <path d="M 610 430 Q 900 370 1210 510"
+          fill="none" stroke="rgba(255,100,30,.22)" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M 920 -100 Q 1360 160 1200 440"
+          fill="none" stroke="rgba(255,70,10,.13)" stroke-width="0.9" stroke-linecap="round"/>
+  </svg>
+
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="hero-chip"><span class="dot"></span>System of Action</div>
+      <h1>
+        Report a problem.<br>
+        <span class="accent">Track what<br>happens.</span><br>
+        Verify the resolution.
+      </h1>
+      <p class="hero-sub">
+        For transaction disputes, payment issues,<br>
+        and account security.
+      </p>
+      <div class="hero-actions">
+        <a href="/report/" class="btn-report">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <rect x="9" y="2" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+          Report a Problem →
+        </a>
+        <form class="track-box" method="get" action="/track/">
+          <input type="text" name="id" placeholder="Track a Case ID (e.g. CASE-9921)" autocomplete="off">
+          <button type="submit">→</button>
+        </form>
       </div>
     </div>
-  </nav>
 
-  <section class="hero">
-    <h1>Resolve customer problems<br><span class="accent">without losing context.</span></h1>
-    <p>A customer reports a problem. TrustLayer builds the case. Your team gets the evidence, context, and timeline. Resolution is verified.</p>
-    <div class="btns">
-      <a href="/report/" class="primary">Report a Problem</a>
-      <a href="/api/docs/" class="secondary">API Docs</a>
+    <div class="hero-visual">
+      <div class="phones-stage">
+        <img class="phones-photo" src="{% static 'images/hero-phones.jpg' %}" alt="TrustLayer Operations app on two phones">
+      </div>
+      <div class="phones-glow"></div>
     </div>
-  </section>
+  </div>
 
-  <section class="stats">
-    <div class="inner">
-      <div class="stat"><div class="num">{{ total_cases }}</div><div class="lbl">Cases</div></div>
-      <div class="stat"><div class="num">{{ active_cases }}</div><div class="lbl">Active</div></div>
-      <div class="stat"><div class="num">{{ resolved_today }}</div><div class="lbl">Resolved Today</div></div>
+  <div class="hero-wave"></div>
+</section>
+
+<!-- ══════ STATS ══════ -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat"><div class="num">{{ total_cases|default:0 }}</div><div class="lbl">Cases filed</div></div>
+    <div class="stat"><div class="num">{{ active_cases|default:0 }}</div><div class="lbl">Active cases</div></div>
+    <div class="stat"><div class="num">{{ resolved_today|default:0 }}</div><div class="lbl">Resolved today</div></div>
+  </div>
+</div>
+
+<!-- ══════ HOW IT WORKS ══════ -->
+<section class="how-section">
+  <div class="page">
+    <div class="section-eyebrow">How it works</div>
+    <h2 class="section-h2">The loop, end to end</h2>
+    <p class="section-p">Eight steps from the first report to the closed, customer-verified record.</p>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-num">1</div><h3>Report</h3><p>Customer submits the problem. Gets a case ID instantly.</p></div>
+      <div class="step-card"><div class="step-num">2</div><h3>Evidence</h3><p>Screenshots attached. Case moves to evidence collection.</p></div>
+      <div class="step-card"><div class="step-num">3</div><h3>Route</h3><p>Assigned to the right team. Priority set automatically.</p></div>
+      <div class="step-card"><div class="step-num">4</div><h3>Investigate</h3><p>Agent reviews full case, adds notes, messages the customer.</p></div>
+      <div class="step-card"><div class="step-num">5</div><h3>Resolve</h3><p>Agent records the resolution: fraud, legitimate, error.</p></div>
+      <div class="step-card"><div class="step-num">6</div><h3>Verify</h3><p>Customer confirms: resolved or reopened. One tap.</p></div>
+      <div class="step-card"><div class="step-num">7</div><h3>Closed</h3><p>Full immutable record of every step and decision.</p></div>
+      <div class="step-card"><div class="step-num">8</div><h3>Reopened?</h3><p>If not resolved, case returns to investigation automatically.</p></div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="flow">
-    <div class="section-label">How It Works</div>
-    <div class="section-title">One problem. One case. One resolution.</div>
-    <div class="flow-steps">
-      <div class="flow-step"><div class="num">1</div><h3>Report</h3><p>Tell us what happened. Transaction, amount, description.</p></div>
-      <div class="flow-step"><div class="num">2</div><h3>Assemble</h3><p>Bring the evidence together. Screenshots, references, context.</p></div>
-      <div class="flow-step"><div class="num">3</div><h3>Resolve</h3><p>Route the case to the right team. Investigate and act.</p></div>
-      <div class="flow-step"><div class="num">4</div><h3>Verify</h3><p>Confirm that the problem was actually resolved.</p></div>
-    </div>
-  </section>
+<!-- ══════ TRACK CTA ══════ -->
+<div class="cta-band">
+  <div class="page" style="text-align:center;padding-top:0;padding-bottom:0;">
+    <h2>Already filed a case?</h2>
+    <p>Enter your case ID to see every status change in real time.</p>
+    <form class="cta-track-form" method="get" action="/track/">
+      <input type="text" name="id" placeholder="e.g. CASE-XXXXXXXXXX" autocomplete="off" required>
+      <button type="submit">Track →</button>
+    </form>
+  </div>
+</div>
 
-  <footer>
-    <p><span>&copy;</span> 2026 TrustLayer. Built in Kenya.</p>
-  </footer>
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,187 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}TrustLayer{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --orange: #FF5722;
+      --orange-hover: #E64A19;
+      --bg: #FAFAFA;
+      --surface: #FFFFFF;
+      --border: #E5E7EB;
+      --text: #111111;
+      --text2: #4B5563;
+      --text3: #9CA3AF;
+      --green: #10B981;
+      --red: #EF4444;
+      --amber: #F59E0B;
+      --dark: #0A0A0A;
+      --radius: 12px;
+      --shadow: 0 8px 30px rgba(0,0,0,.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font-family: inherit; }
+
+    .tl-nav {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 40px; background: #fff; border-bottom: 1px solid var(--border);
+    }
+    .tl-brand { font-size: 22px; font-weight: 900; letter-spacing: -0.6px; }
+    .tl-brand span { color: var(--orange); }
+    .tl-links { display: flex; gap: 28px; align-items: center; }
+    .tl-links a { font-size: 14px; font-weight: 600; color: var(--text2); }
+    .tl-links a.active, .tl-links a:hover { color: var(--orange); }
+    .tl-nav-right { display: flex; gap: 12px; align-items: center; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer; border-radius: 10px; font-weight: 700; padding: 10px 18px; }
+    .btn-primary { background: var(--orange); color: #fff; }
+    .btn-primary:hover { background: var(--orange-hover); }
+    .btn-ghost { background: #fff; color: var(--text); border: 1px solid var(--border); }
+    .btn-full { width: 100%; }
+    .btn-sm { padding: 8px 12px; font-size: 13px; }
+    .btn-success { background: #dcfce7; color: #166534; }
+    .btn-danger { background: #fee2e2; color: #991b1b; }
+
+    .page { max-width: 1120px; margin: 0 auto; padding: 40px 24px 80px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; }
+    .badge-open, .badge-verifying, .badge-evidence_collection { background: #ffedd5; color: #c2410c; }
+    .badge-investigating { background: #dbeafe; color: #1d4ed8; }
+    .badge-resolution_recorded { background: #ede9fe; color: #6d28d9; }
+    .badge-escalated, .badge-reopened { background: #fee2e2; color: #b91c1c; }
+    .badge-resolved, .badge-closed { background: #dcfce7; color: #166534; }
+    .badge-high, .badge-critical { background: #fee2e2; color: #b91c1c; }
+    .badge-normal, .badge-low { background: #f3f4f6; color: #4b5563; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; border: 1px solid var(--border); background: #fff; border-radius: 10px;
+      padding: 12px 14px; font-size: 15px;
+    }
+    .form-textarea { min-height: 110px; resize: vertical; }
+    .form-help { font-size: 12px; color: var(--text3); margin-top: 6px; }
+    .alert { padding: 12px 14px; border-radius: 10px; margin-bottom: 16px; }
+    .alert-error { background: #fee2e2; color: #991b1b; }
+    .alert-success { background: #dcfce7; color: #166534; }
+
+    .tl-footer { background: #0A0A0A; color: #d1d5db; margin-top: 48px; padding: 56px 40px 36px; border-radius: 32px 32px 0 0; position: relative; overflow: hidden; border-top: 2px solid rgba(255,87,34,.35); }
+    .tl-footer-swoosh { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+    .tl-footer-glow { position: absolute; top: -60px; right: -5%; width: 55%; height: 260px; background: radial-gradient(ellipse 70% 80% at 75% 30%, rgba(255,87,34,.18) 0%, rgba(200,50,0,.08) 50%, transparent 80%); pointer-events: none; z-index: 0; }
+    .tl-footer-grid { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px; position: relative; z-index: 1; }
+    .tl-footer h4 { color: #fff; font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 14px; }
+    .tl-footer a { display: block; color: #9ca3af; font-size: 14px; margin-bottom: 10px; }
+    .tl-footer a:hover { color: #FF5722; }
+    .tl-copy { max-width: 1120px; margin: 28px auto 0; border-top: 1px solid rgba(255,87,34,.15); padding-top: 18px; color: #6b7280; font-size: 13px; position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .tl-copy .orange-dot { color: #FF5722; font-weight: 800; }
+
+    @media (max-width: 800px) {
+      .tl-nav { padding: 12px 16px; }
+      .tl-links { display: none; }
+      .tl-footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    {% block extra_css %}{% endblock %}
+  </style>
+</head>
+<body>
+  <nav class="tl-nav">
+    <a href="/" class="tl-brand"><span>Trust</span>Layer</a>
+    <div class="tl-links">
+      <a href="/" class="{% if nav_home %}active{% endif %}">Home</a>
+      <a href="/how-it-works/" class="{% if nav_how %}active{% endif %}">How It Works</a>
+      <a href="/features/" class="{% if nav_features %}active{% endif %}">Features</a>
+      <a href="/about/" class="{% if nav_about %}active{% endif %}">About</a>
+    </div>
+    <div class="tl-nav-right">
+      {% if request.session.is_agent %}
+        <a href="/agent/" class="btn btn-ghost btn-sm">Dashboard</a>
+        <a href="/agent/logout/" class="btn btn-ghost btn-sm">Logout</a>
+      {% else %}
+        <a href="/agent/login/" class="btn btn-ghost btn-sm">Login</a>
+      {% endif %}
+      <a href="/report/" class="btn btn-primary btn-sm">+ Report a Problem</a>
+    </div>
+  </nav>
+
+  {% if messages %}
+    <div class="page" style="padding-bottom:0;">
+      {% for msg in messages %}
+        <div class="alert {% if msg.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">{{ msg }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+
+  <footer class="tl-footer">
+
+    <!-- Orange radial glow -->
+    <div class="tl-footer-glow"></div>
+
+    <!-- Swoosh arc lines -->
+    <svg class="tl-footer-swoosh" viewBox="0 0 1200 280"
+         preserveAspectRatio="xMidYMid slice"
+         xmlns="http://www.w3.org/2000/svg">
+      <!-- top-right arcs -->
+      <path d="M 900 -40 Q 1300 80 1150 290"
+            fill="none" stroke="rgba(255,100,30,.28)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M 840 -20 Q 1200 100 1020 290"
+            fill="none" stroke="rgba(255,87,34,.18)" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M 770  10 Q 1080 120 900 290"
+            fill="none" stroke="rgba(255,87,34,.12)" stroke-width="1" stroke-linecap="round"/>
+      <!-- bottom sweep -->
+      <path d="M 0 240 Q 300 200 600 250 Q 900 300 1200 220"
+            fill="none" stroke="rgba(255,87,34,.12)" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- left subtle -->
+      <path d="M -40 60 Q 100 160 60 290"
+            fill="none" stroke="rgba(255,87,34,.08)" stroke-width="1" stroke-linecap="round"/>
+    </svg>
+
+    <div class="tl-footer-grid">
+      <div>
+        <div class="tl-brand" style="color:#fff;margin-bottom:12px;"><span>Trust</span>Layer</div>
+        <p style="font-size:14px;line-height:1.7;max-width:280px;">
+          Report a problem. Track what happens.<br>Verify the resolution.
+        </p>
+        <div style="margin-top:18px;display:flex;gap:10px;">
+          <a href="/report/" style="display:inline-block;background:#FF5722;color:#000;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:800;">
+            Report a Problem
+          </a>
+        </div>
+      </div>
+      <div>
+        <h4>Customer</h4>
+        <a href="/report/">Report a problem</a>
+        <a href="/track/">Track a case</a>
+        <a href="/how-it-works/">How it works</a>
+      </div>
+      <div>
+        <h4>Operations</h4>
+        <a href="/agent/login/">Agent login</a>
+        <a href="/agent/">Case queue</a>
+        <a href="/api/docs/">API docs</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/features/">Features</a>
+        <a href="/about/">About</a>
+        <a href="/health/">Health</a>
+      </div>
+    </div>
+
+    <div class="tl-copy">
+      <span>© 2026 <span class="orange-dot">TrustLayer</span>. Built in Kenya.</span>
+      <span style="font-size:12px;">Verification loop, not a bank ledger.</span>
+    </div>
+
+  </footer>
+</body>
+</html>
+
