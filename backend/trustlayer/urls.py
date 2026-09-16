@@ -20,8 +20,16 @@ from apps.core.constants import PROBLEM_TYPES, RESOLUTION_TYPES
 # ══════════════════════════════════════════════════════════════════════════════
 
 def home(request):
-    """A1 — Redirect to report page."""
-    return redirect('/report/')
+    """Landing page with stats, how-it-works, CTA."""
+    today = timezone.now().date()
+    total_cases = Case.objects.count()
+    active_cases = Case.objects.exclude(status__in=['RESOLVED', 'CLOSED']).count()
+    resolved_today = Case.objects.filter(status='RESOLVED', updated_at__date=today).count()
+    return render(request, 'landing.html', {
+        'total_cases': total_cases,
+        'active_cases': active_cases,
+        'resolved_today': resolved_today,
+    })
 
 
 def how_it_works(request):

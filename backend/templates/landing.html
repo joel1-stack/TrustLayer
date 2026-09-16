@@ -3,176 +3,29 @@
 {% block title %}TrustLayer — Report. Track. Verify.{% endblock %}
 
 {% block extra_css %}
-/* ══ HERO — force full black, no light bleed from body ══ */
 body { background: #000 !important; }
-
-.hero {
-  background: #000;
-  color: #fff;
-  padding: 72px 0 0;
-  position: relative;
-  overflow: hidden;
-  margin-top: -1px;
-}
-
-/* Large orange radial glow — covers the right half */
-.hero-glow {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 65% 90% at 85% 50%,
-      rgba(220,65,10,.90)   0%,
-      rgba(190,50,5,.60)    22%,
-      rgba(130,30,0,.30)    46%,
-      transparent           70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* SVG swoosh arcs */
-.hero-swoosh {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Layout */
-.hero-inner {
-  position: relative; z-index: 2;
-  max-width: 1180px; margin: 0 auto;
-  padding: 0 48px;
-  display: grid;
-  grid-template-columns: 1.1fr .9fr;
-  gap: 24px;
-  align-items: center;
-  min-height: 460px;
-}
-
-/* ── LEFT COPY ── */
-.hero-copy { padding-bottom: 56px; }
-
-.hero-chip {
-  display: inline-flex; align-items: center; gap: 8px;
-  border: 1px solid rgba(255,87,34,.50);
-  background: rgba(255,87,34,.14);
-  color: #ffb090;
-  border-radius: 999px; padding: 5px 13px;
-  font-size: 11px; font-weight: 800; letter-spacing: .8px;
-  text-transform: uppercase; margin-bottom: 20px;
-}
-.hero-chip .dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #FF5722; flex-shrink: 0;
-}
-
-.hero h1 {
-  font-size: clamp(2rem, 4.4vw, 3.8rem);
-  font-weight: 900; letter-spacing: -2px;
-  line-height: 1.05; margin-bottom: 16px;
-  color: #fff !important;
-}
+.hero { background: #000; color: #fff; padding: 80px 0 0; position: relative; overflow: hidden; }
+.hero-glow { position: absolute; inset: 0; background: radial-gradient(ellipse 65% 90% at 85% 50%, rgba(220,65,10,.90) 0%, rgba(190,50,5,.60) 22%, rgba(130,30,0,.30) 46%, transparent 70%); pointer-events: none; z-index: 0; }
+.hero-swoosh { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.hero-inner { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 0 48px; text-align: center; min-height: 420px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.hero-chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,87,34,.50); background: rgba(255,87,34,.14); color: #ffb090; border-radius: 999px; padding: 5px 13px; font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; margin-bottom: 20px; }
+.hero-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: #FF5722; flex-shrink: 0; }
+.hero h1 { font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 900; letter-spacing: -2px; line-height: 1.05; margin-bottom: 16px; color: #fff !important; }
 .hero h1 .accent { color: #FF5722; }
-
-.hero-sub {
-  color: #94a3b8; font-size: 15px; line-height: 1.75;
-  max-width: 400px; margin-bottom: 28px;
-}
-
-.hero-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-
-.btn-report {
-  background: #FF5722; color: #000;
-  padding: 13px 24px; border-radius: 10px;
-  font-size: 14px; font-weight: 800;
-  text-decoration: none;
-  display: inline-flex; align-items: center; gap: 8px;
-  box-shadow: 0 4px 24px rgba(255,87,34,.45);
-  transition: all .2s; white-space: nowrap;
-}
+.hero-sub { color: #94a3b8; font-size: 16px; line-height: 1.75; max-width: 520px; margin-bottom: 32px; }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.btn-report { background: #FF5722; color: #000; padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 24px rgba(255,87,34,.45); transition: all .2s; }
 .btn-report:hover { background: #E64A19; transform: translateY(-2px); }
+.btn-track { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.15); padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 700; text-decoration: none; transition: all .2s; }
+.btn-track:hover { background: rgba(255,255,255,.15); }
+.hero-wave { position: relative; z-index: 2; height: 64px; background: radial-gradient(ellipse at 20% 0, rgba(255,87,34,.25), transparent 55%), radial-gradient(ellipse at 75% 0, rgba(180,40,0,.15), transparent 50%); border-bottom: 1px solid rgba(255,87,34,.15); }
 
-.track-box {
-  display: flex;
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.13);
-  border-radius: 10px; overflow: hidden; min-width: 230px;
-}
-.track-box input {
-  flex: 1; background: transparent; border: 0;
-  color: #fff; padding: 12px 13px; outline: none;
-  font-size: 13px;
-}
-.track-box input::placeholder { color: #4b5563; }
-.track-box button {
-  background: rgba(255,255,255,.08); border: 0;
-  border-left: 1px solid rgba(255,255,255,.10);
-  color: #fff; padding: 0 14px; cursor: pointer;
-  font-size: 16px; display: flex; align-items: center;
-}
-.track-box button:hover { background: rgba(255,87,34,.30); }
-
-/* ── RIGHT: Phone visual ── */
-.hero-visual {
-  position: relative;
-  display: flex; align-items: center; justify-content: flex-end;
-  height: 520px;
-}
-
-.phones-stage {
-  position: relative;
-  width: 560px; height: 500px;
-  animation: float 5s ease-in-out infinite;
-  flex-shrink: 0;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-10px); }
-}
-
-.phones-photo {
-  width: 100%; height: 100%;
-  object-fit: contain;
-  object-position: center right;
-  filter: drop-shadow(0 28px 70px rgba(0,0,0,.75));
-}
-
-.phones-glow {
-  position: absolute;
-  bottom: 20px; right: 40px; left: 20%;
-  height: 90px;
-  background: radial-gradient(ellipse 70% 100% at 55% 100%,
-    rgba(255,87,34,.55), transparent 80%);
-  filter: blur(16px);
-  pointer-events: none;
-}
-
-/* ── Wave divider ── */
-.hero-wave {
-  position: relative; z-index: 2;
-  height: 64px;
-  background:
-    radial-gradient(ellipse at 20% 0, rgba(255,87,34,.25), transparent 55%),
-    radial-gradient(ellipse at 75% 0, rgba(180,40,0,.15), transparent 50%);
-  border-bottom: 1px solid rgba(255,87,34,.15);
-}
-
-/* ════ STATS BAR ════ */
-.stats-bar {
-  background: #fff;
-  border-bottom: 1px solid #E5E7EB;
-  padding: 28px 0;
-}
-.stats-inner {
-  max-width: 860px; margin: 0 auto;
-  display: flex; justify-content: center; gap: 60px; flex-wrap: wrap;
-}
+.stats-bar { background: #fff; border-bottom: 1px solid #E5E7EB; padding: 28px 0; }
+.stats-inner { max-width: 860px; margin: 0 auto; display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; }
 .stat { text-align: center; }
 .stat .num { font-size: 2.2rem; font-weight: 900; color: #FF5722; letter-spacing: -1px; line-height: 1; }
 .stat .lbl { font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-top: 5px; }
 
-/* ════ HOW IT WORKS ════ */
 .how-section { padding: 72px 0; background: #FAFAFA; }
 .section-eyebrow { text-align: center; font-size: 12px; font-weight: 800; color: #FF5722; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
 .section-h2 { text-align: center; font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 10px; color: #111; }
@@ -184,98 +37,47 @@ body { background: #000 !important; }
 .step-card h3 { font-size: 14px; font-weight: 800; margin-bottom: 7px; color: #111; }
 .step-card p { font-size: 13px; color: #4B5563; line-height: 1.6; }
 
-/* ════ TRACK CTA ════ */
 .cta-band { background: #000; color: #fff; padding: 64px 24px; text-align: center; position: relative; overflow: hidden; }
 .cta-band-glow { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); width: 60%; height: 180px; background: radial-gradient(ellipse 70% 80% at 50% 30%, rgba(255,87,34,.20) 0%, transparent 75%); pointer-events: none; z-index: 0; }
-.cta-band-swoosh { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
 .cta-band > * { position: relative; z-index: 1; }
 .cta-band h2 { font-size: clamp(1.7rem, 3vw, 2.2rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 10px; color: #fff; }
 .cta-band p { color: #94a3b8; margin-bottom: 24px; }
-.cta-track-form { display: flex; gap: 10px; max-width: 440px; margin: 0 auto; flex-wrap: wrap; }
-.cta-track-form input { flex: 1; height: 50px; border-radius: 10px; border: 1px solid #374151; background: #111; color: #fff; font-size: 14px; padding: 0 16px; outline: none; min-width: 200px; }
-.cta-track-form input::placeholder { color: #4b5563; }
-.cta-track-form input:focus { border-color: #FF5722; }
-.cta-track-form button { height: 50px; padding: 0 22px; border-radius: 10px; background: #FF5722; color: #000; border: none; font-size: 14px; font-weight: 800; cursor: pointer; white-space: nowrap; }
-.cta-track-form button:hover { background: #E64A19; }
+.cta-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
-/* ════ RESPONSIVE ════ */
-@media (max-width: 960px) {
-  .hero-inner { grid-template-columns: 1fr; gap: 20px; min-height: auto; }
-  .hero-visual { height: 320px; justify-content: center; }
-  .phones-stage { width: 420px; height: 360px; }
-  .hero-copy { padding-bottom: 0; }
-  .steps-grid { grid-template-columns: 1fr 1fr; }
-  .stats-inner { gap: 32px; }
-}
-@media (max-width: 540px) {
-  .hero { padding: 64px 0 0; }
-  .phones-stage { width: 300px; height: 250px; }
-  .steps-grid { grid-template-columns: 1fr; }
-}
+.engines-section { padding: 72px 0; background: #fff; }
+.engines-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.engine-card { background: #f8fafc; border: 1px solid #E5E7EB; border-radius: 16px; padding: 24px; transition: border-color .2s; }
+.engine-card:hover { border-color: #FF5722; }
+.engine-card h3 { font-size: 15px; font-weight: 800; margin-bottom: 6px; color: #111; }
+.engine-card p { font-size: 13px; color: #4B5563; line-height: 1.6; }
+
+@media (max-width: 960px) { .steps-grid { grid-template-columns: 1fr 1fr; } .engines-grid { grid-template-columns: 1fr; } }
+@media (max-width: 540px) { .steps-grid { grid-template-columns: 1fr; } .hero-inner { padding: 0 24px; } }
 {% endblock %}
 
 {% block content %}
 
-<!-- ══════ HERO ══════ -->
+<!-- HERO -->
 <section class="hero">
-
   <div class="hero-glow"></div>
-
-  <svg class="hero-swoosh" viewBox="0 0 1200 520"
-       preserveAspectRatio="xMidYMid slice"
-       xmlns="http://www.w3.org/2000/svg">
-    <path d="M 830 -60 Q 1260 190 1080 570"
-          fill="none" stroke="rgba(255,100,30,.35)" stroke-width="2.2" stroke-linecap="round"/>
-    <path d="M 770 -40 Q 1160 210 960 570"
-          fill="none" stroke="rgba(255,87,34,.24)" stroke-width="1.6" stroke-linecap="round"/>
-    <path d="M 690  30 Q 1040 240 840 570"
-          fill="none" stroke="rgba(255,87,34,.16)" stroke-width="1.1" stroke-linecap="round"/>
-    <path d="M 610 430 Q 900 370 1210 510"
-          fill="none" stroke="rgba(255,100,30,.22)" stroke-width="1.4" stroke-linecap="round"/>
-    <path d="M 920 -100 Q 1360 160 1200 440"
-          fill="none" stroke="rgba(255,70,10,.13)" stroke-width="0.9" stroke-linecap="round"/>
+  <svg class="hero-swoosh" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 830 -60 Q 1260 190 1080 570" fill="none" stroke="rgba(255,100,30,.35)" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M 770 -40 Q 1160 210 960 570" fill="none" stroke="rgba(255,87,34,.24)" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M 690  30 Q 1040 240 840 570" fill="none" stroke="rgba(255,87,34,.16)" stroke-width="1.1" stroke-linecap="round"/>
   </svg>
-
   <div class="hero-inner">
-    <div class="hero-copy">
-      <div class="hero-chip"><span class="dot"></span>System of Action</div>
-      <h1>
-        Report a problem.<br>
-        <span class="accent">Track what<br>happens.</span><br>
-        Verify the resolution.
-      </h1>
-      <p class="hero-sub">
-        For transaction disputes, payment issues,<br>
-        and account security.
-      </p>
-      <div class="hero-actions">
-        <a href="/report/" class="btn-report">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <rect x="9" y="2" width="13" height="13" rx="2"/>
-            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-          </svg>
-          Report a Problem →
-        </a>
-        <form class="track-box" method="get" action="/track/">
-          <input type="text" name="id" placeholder="Track a Case ID (e.g. CASE-9921)" autocomplete="off">
-          <button type="submit">→</button>
-        </form>
-      </div>
-    </div>
-
-    <div class="hero-visual">
-      <div class="phones-stage">
-        <img class="phones-photo" src="{% static 'images/hero-phones.jpg' %}" alt="TrustLayer Operations app on two phones">
-      </div>
-      <div class="phones-glow"></div>
+    <div class="hero-chip"><span class="dot"></span>Verification Loop</div>
+    <h1>Report a problem.<br><span class="accent">Track what happens.</span><br>Verify the resolution.</h1>
+    <p class="hero-sub">TrustLayer takes one customer problem, gathers the evidence, gets it to the right person, and produces a verified resolution. Not a bank ledger. Not a support ticket. A loop that closes.</p>
+    <div class="hero-actions">
+      <a href="/report/" class="btn-report">Report a Problem &rarr;</a>
+      <a href="/track/" class="btn-track">Track a Case</a>
     </div>
   </div>
-
   <div class="hero-wave"></div>
 </section>
 
-<!-- ══════ STATS ══════ -->
+<!-- STATS -->
 <div class="stats-bar">
   <div class="stats-inner">
     <div class="stat"><div class="num">{{ total_cases|default:0 }}</div><div class="lbl">Cases filed</div></div>
@@ -284,12 +86,12 @@ body { background: #000 !important; }
   </div>
 </div>
 
-<!-- ══════ HOW IT WORKS ══════ -->
+<!-- HOW IT WORKS -->
 <section class="how-section">
   <div class="page">
     <div class="section-eyebrow">How it works</div>
     <h2 class="section-h2">The loop, end to end</h2>
-    <p class="section-p">Eight steps from the first report to the closed, customer-verified record.</p>
+    <p class="section-p">Eight steps from the first report to the closed, customer-verified record. No status page. No support ticket. A real loop.</p>
     <div class="steps-grid">
       <div class="step-card"><div class="step-num">1</div><h3>Report</h3><p>Customer submits the problem. Gets a case ID instantly.</p></div>
       <div class="step-card"><div class="step-num">2</div><h3>Evidence</h3><p>Screenshots attached. Case moves to evidence collection.</p></div>
@@ -303,15 +105,49 @@ body { background: #000 !important; }
   </div>
 </section>
 
-<!-- ══════ TRACK CTA ══════ -->
+<!-- ENGINES -->
+<section class="engines-section">
+  <div class="page">
+    <div class="section-eyebrow">Under the hood</div>
+    <h2 class="section-h2">Five deterministic engines</h2>
+    <p class="section-p">No AI. No ML. Just rules, checklists, and a state machine. Every decision is auditable and explainable.</p>
+    <div class="engines-grid">
+      <div class="engine-card">
+        <h3>Evidence Engine</h3>
+        <p>Checklist per case type. Shows customer what's missing. Shows agent what's complete. Drives completeness score.</p>
+      </div>
+      <div class="engine-card">
+        <h3>Routing Engine</h3>
+        <p>Assigns team based on case type. Sets priority by amount. One lookup table, fully auditable.</p>
+      </div>
+      <div class="engine-card">
+        <h3>SLA Engine</h3>
+        <p>Per-type deadlines. Warning at 80%. Breach at 100%. Countdown on every agent screen.</p>
+      </div>
+      <div class="engine-card">
+        <h3>Notification Engine</h3>
+        <p>Event triggers SMS, email, or in-app alert. Customer and agent always informed. One-way event feed.</p>
+      </div>
+      <div class="engine-card">
+        <h3>Audit Engine</h3>
+        <p>Every action logged. Append-only. Nobody edits, nobody deletes. The product's trustworthiness.</p>
+      </div>
+      <div class="engine-card">
+        <h3>State Machine</h3>
+        <p>9 states. Clear transitions. No case gets stuck. Every move recorded. Customer closes the loop.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
 <div class="cta-band">
-  <div class="page" style="text-align:center;padding-top:0;padding-bottom:0;">
-    <h2>Already filed a case?</h2>
-    <p>Enter your case ID to see every status change in real time.</p>
-    <form class="cta-track-form" method="get" action="/track/">
-      <input type="text" name="id" placeholder="e.g. CASE-XXXXXXXXXX" autocomplete="off" required>
-      <button type="submit">Track →</button>
-    </form>
+  <div class="cta-band-glow"></div>
+  <h2>Ready to try it?</h2>
+  <p>File a test case and walk through the full loop yourself.</p>
+  <div class="cta-actions">
+    <a href="/report/" class="btn-report">Report a Problem</a>
+    <a href="/agent/login/" class="btn-track">Agent Login</a>
   </div>
 </div>
 
